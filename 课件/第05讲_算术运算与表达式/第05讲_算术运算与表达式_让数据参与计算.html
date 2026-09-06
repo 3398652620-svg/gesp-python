@@ -649,12 +649,12 @@
             print(8 // 2) # 输出 4
           </div>
           <div style="font-size: 16px; color: var(--ink-main); line-height: 1.6;">
-            <strong>就像整箱打包：</strong>只管能装满多少个<strong>完整的整数份</strong>！把零头扔掉，只保留整数部分（商的整数）！
+            <strong>就像打包分装：</strong>在我们当前学习的非负整数分组问题中，<code>//</code> 表示<strong>最多能完整分成多少组</strong>（即非负整数除法中商的整数部分）！
           </div>
         </div>
       </div>
       <div class="concept-box green step" style="margin-top: 14px; text-align: center; justify-content: center; font-size: 19px;">
-        🌟 黄金口诀：<strong>一个斜杠切出精确小数，两个斜杠只留完整整数！</strong>
+        🌟 黄金口诀：<strong>一个斜杠切出精确小数，两个斜杠算出最多能分几整组！</strong>
       </div>
     </section>
 
@@ -713,7 +713,7 @@
             17 // 5 ➔ 3
           </div>
           <div style="font-size: 15px; color: var(--ink-main); line-height: 1.5;">
-            <strong>回答：</strong>能完整分出几整份？答案是 3 份（商的整数部分）。
+            <strong>回答：</strong>最多能完整分成几整组？答案是 3 组（非负整数除法中商的整数部分）。
           </div>
         </div>
 
@@ -802,8 +802,8 @@
           <div style="display: flex; flex-direction: column; gap: 12px;">
             <div class="console-window" style="min-height: 120px; padding: 14px 18px;">
               <div style="color:#64748B; font-size:12px; display: flex; justify-content: space-between;">
-                <span>🖥️ 屏幕终端输出 (Terminal)</span>
-                <span style="color:#10B981;">● 实时执行中</span>
+                <span>🖥️ 屏幕终端输出 (Terminal 模拟预览)</span>
+                  <span style="color:#10B981;">● 实时运行中</span>
               </div>
               <div id="sandbox-term-out" style="color:#34D399; font-family: Consolas, monospace; font-size: 19px; line-height: 1.5; margin-top: 6px;">
                 4.75<br/>
@@ -814,7 +814,7 @@
 
             <div class="card" style="padding: 14px 18px; background: #FFF7ED; border-color: var(--orange-main); justify-content: center;">
               <div style="font-size: 15px; font-weight: bold; color: var(--orange-dark); line-height: 1.5;" id="sandbox-explain">
-                📦 解释：19 个物品，每 4 个装一盒，能装满 <strong>4</strong> 盒，还剩下 <strong>3</strong> 个零头！
+                📦 解释：19 个物品，每 4 个装一盒，最多能完整装满 <strong>4</strong> 盒（整除 //），还剩下 <strong>3</strong> 个零头（取余 %）！<br/><span style="font-size:12px; color:#78716C; font-weight:normal;">（注：网页终端为拟真预览，真实数值以本地 Python 环境输出为准）</span>
               </div>
             </div>
           </div>
@@ -993,25 +993,32 @@
       <div class="slide-tag tag-green">独立编程</div>
       <h2 class="slide-title">独立编程实战：装苹果装箱小助手 💻</h2>
       <div class="card-grid-2">
-        <!-- Left: Instruction -->
-        <div class="card step" style="padding: 20px; background: #FFF; border-color: var(--green-main); justify-content: center; gap: 8px;">
-          <div style="font-size: 18px; font-weight: 900; color: var(--green-dark);">🚀 真实 Python 环境任务指南：</div>
-          <div style="font-size: 14px; color: var(--ink-main); line-height: 1.55;">
+        <!-- Left: Instruction with Fading Scaffold -->
+        <div class="card step" style="padding: 18px 20px; background: #FFF; border-color: var(--green-main); justify-content: center; gap: 8px;">
+          <div style="font-size: 18px; font-weight: 900; color: var(--green-dark);">🚀 真实 Python 任务：独立完成表达式填空</div>
+          <div style="font-size: 14px; color: var(--ink-main); line-height: 1.5;">
             1. 打开 Python 编辑器，新建保存为：<strong style="color:var(--orange-dark); font-size: 15px;">calc_05.py</strong><br/>
-            2. 果园采摘了 <code>23</code> 个苹果，每 <code>5</code> 个装满一盒。请编写代码：<br/>
-            <code style="background:#F8FAFC; padding:6px 8px; border-radius:6px; display:block; margin:4px 0; font-size:13px; font-family:Consolas, monospace; line-height: 1.45;">
+            2. 果园采摘了 <code>23</code> 个苹果，每 <code>5</code> 个装满一盒。请独立补全两个核心表达式：<br/>
+            <div style="background:#F8FAFC; padding:8px 10px; border-radius:8px; margin:4px 0; font-size:13px; font-family:Consolas, monospace; line-height: 1.5; border:1px solid #E2E8F0;">
               apples = 23<br/>
               box_size = 5<br/>
-              full_boxes = apples // box_size<br/>
-              leftover = apples % box_size<br/>
+              <span style="color:#C2410C; font-weight:bold;">full_boxes = __________</span> &nbsp;<span style="color:#64748B;"># 思考：装满几整盒？</span><br/>
+              <span style="color:#C2410C; font-weight:bold;">leftover = __________</span> &nbsp;&nbsp;&nbsp;<span style="color:#64748B;"># 思考：还剩几个零头？</span><br/>
               print(full_boxes)<br/>
               print(leftover)
-            </code>
-            3. <strong>运行前先在草稿纸上独立推演预测输出</strong>；<br/>
-            4. 在终端运行验证，向老师展示推演与运行结果！
+            </div>
+            3. <strong>在草稿纸上独立推演预测输出</strong>，然后在真实终端中运行；<br/>
+            4. 运行完成后点击下方按钮，核对终端输出并向老师展示！
           </div>
-          <button class="btn btn-green" style="padding: 8px 16px; font-size: 15px; margin-top: 4px;" onclick="confirmL5Done()">✅ 我已完成推演并运行验证</button>
-          <div id="l5-done-feedback" style="font-size: 14px; font-weight: bold; color: var(--green-dark); min-height: 18px;"></div>
+          <div style="display: flex; gap: 8px; margin-top: 2px;">
+            <button class="btn btn-green" style="padding: 6px 14px; font-size: 14px; flex: 1;" onclick="confirmL5Done()">✅ 我已完成推演并运行验证</button>
+            <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 13px;" onclick="toggleL5ScaffoldHint()">💡 提示 / 进阶挑战</button>
+          </div>
+          <div id="l5-hint-box" style="display: none; font-size: 13px; color: var(--blue-dark); background: #EEF2FF; padding: 6px 10px; border-radius: 6px; border-left: 3px solid var(--blue-night);">
+            <strong>💡 填空提示：</strong>分别使用 <code>apples // box_size</code> 和 <code>apples % box_size</code>。<br/>
+            <strong>🌟 进阶挑战：</strong>不看任何骨架提示，自己从空白文件独立写出完整程序！
+          </div>
+          <div id="l5-done-feedback" style="font-size: 13px; font-weight: bold; color: var(--green-dark); min-height: 16px;"></div>
         </div>
 
         <!-- Right: Console Preview (Hidden initially) -->
@@ -1049,17 +1056,23 @@
             </div>
 
             <div>
-              <div style="font-size: 15px; font-weight: 900; color: var(--blue-night); margin-bottom: 4px;">【第二关 A：求余与特殊余数】19 % 4 与 3 % 7 的结果分别是？</div>
-              <div style="display: flex; gap: 8px; margin-bottom: 6px;">
-                <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 13px; flex: 1;" onclick="checkPassL5_2a(this, true)">3 和 3</button>
-                <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 13px; flex: 1;" onclick="checkPassL5_2a(this, false)">4 和 0</button>
-                <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 13px; flex: 1;" onclick="checkPassL5_2a(this, false)">3 和 0</button>
+              <div style="font-size: 14px; font-weight: 900; color: var(--blue-night); margin-bottom: 3px;">【第二关 A：求余与小除以大】19 % 4 与 3 % 7 的结果分别是？</div>
+              <div style="display: flex; gap: 6px; margin-bottom: 5px;">
+                <button class="btn btn-secondary" style="padding: 3px 6px; font-size: 12px; flex: 1;" onclick="checkPassL5_2a(this, true)">3 和 3</button>
+                <button class="btn btn-secondary" style="padding: 3px 6px; font-size: 12px; flex: 1;" onclick="checkPassL5_2a(this, false)">4 和 0</button>
+                <button class="btn btn-secondary" style="padding: 3px 6px; font-size: 12px; flex: 1;" onclick="checkPassL5_2a(this, false)">3 和 0</button>
               </div>
 
-              <div style="font-size: 15px; font-weight: 900; color: var(--blue-night); margin-bottom: 4px;">【第二关 B：变量表达式】单价 price=6，买 count=5 支，求总价？</div>
-              <div style="display: flex; gap: 8px;">
-                <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 13px; flex: 1;" onclick="checkPassL5_2b(this, true)">price * count</button>
-                <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 13px; flex: 1;" onclick="checkPassL5_2b(this, false)">price + count</button>
+              <div style="font-size: 14px; font-weight: 900; color: var(--blue-night); margin-bottom: 3px;">【第二关 B：变量表达式】单价 price=6，买 count=5 支，求总价？</div>
+              <div style="display: flex; gap: 6px; margin-bottom: 5px;">
+                <button class="btn btn-secondary" style="padding: 3px 6px; font-size: 12px; flex: 1;" onclick="checkPassL5_2b(this, true)">price * count</button>
+                <button class="btn btn-secondary" style="padding: 3px 6px; font-size: 12px; flex: 1;" onclick="checkPassL5_2b(this, false)">price + count</button>
+              </div>
+
+              <div style="font-size: 14px; font-weight: 900; color: var(--blue-night); margin-bottom: 3px;">【第二关 C：迁移变式】片长 135 分钟，求几小时零几分钟？</div>
+              <div style="display: flex; gap: 6px;">
+                <button class="btn btn-secondary" style="padding: 3px 6px; font-size: 12px; flex: 1;" onclick="checkPassL5_2c(this, true)">135 // 60 与 135 % 60</button>
+                <button class="btn btn-secondary" style="padding: 3px 6px; font-size: 12px; flex: 1;" onclick="checkPassL5_2c(this, false)">135 / 60 与 135 % 60</button>
               </div>
             </div>
 
@@ -1240,31 +1253,50 @@
 
   // ================= Slide 09: Divide Sandbox =================
   function updateDivideSandbox() {
-    const a = parseInt(document.getElementById('sandbox-a').value) || 0;
-    const b = parseInt(document.getElementById('sandbox-b').value) || 1;
+    const aInput = document.getElementById('sandbox-a').value.trim();
+    const bInput = document.getElementById('sandbox-b').value.trim();
 
-    document.getElementById('sb-code-a').textContent = a;
-    document.getElementById('sb-code-b').textContent = b;
+    if (aInput === '' || bInput === '') return;
+
+    const a = parseInt(aInput, 10);
+    const b = parseInt(bInput, 10);
+
+    document.getElementById('sb-code-a').textContent = isNaN(a) ? 0 : a;
+    document.getElementById('sb-code-b').textContent = isNaN(b) ? 0 : b;
 
     const termOut = document.getElementById('sandbox-term-out');
     const explain = document.getElementById('sandbox-explain');
 
-    if (b === 0) {
-      termOut.innerHTML = '<span style="color:#EF4444;">ZeroDivisionError: division by zero</span>';
-      explain.innerHTML = '⚠️ 除数不能为 0 喔！数学与 Python 中都不允许除以 0。';
+    if (isNaN(a) || isNaN(b)) {
+      termOut.innerHTML = '<span style="color:#EF4444;">ValueError: invalid input</span>';
+      explain.innerHTML = '⚠️ 请输入有效的非负整数！';
       return;
     }
 
-    const divRes = (a / b).toFixed(2).replace(/\.00$/, '.0');
+    // Accurately handle b === 0 ZeroDivisionError
+    if (b === 0) {
+      termOut.innerHTML = '<span style="color:#EF4444; font-size:16px;">ZeroDivisionError: division by zero</span>';
+      explain.innerHTML = '⚠️ <strong>ZeroDivisionError</strong>：除数不能为 0！在 Python 中除以 0 会直接触发错误终止程序。';
+      return;
+    }
+
+    // Accurate Python float display without artificial truncation (toFixed):
+    // In Python: integer division like 8/2 gives 4.0; non-integers like 19/4 gives 4.75; 1/3 gives 0.3333333333333333
+    const rawDiv = a / b;
+    let divStr = String(rawDiv);
+    if (Number.isInteger(rawDiv)) {
+      divStr = rawDiv + '.0';
+    }
+
     const floorRes = Math.floor(a / b);
     const modRes = a % b;
 
-    termOut.innerHTML = `${divRes}<br/>${floorRes}<br/>${modRes}`;
+    termOut.innerHTML = `${divStr}<br/>${floorRes}<br/>${modRes}`;
     if (typeof gsap !== 'undefined') {
       gsap.fromTo(termOut, { opacity: 0.5, y: 4 }, { opacity: 1, y: 0, duration: 0.3 });
     }
 
-    explain.innerHTML = `📦 解释：${a} 个物品，每 ${b} 个装一盒，能装满 <strong>${floorRes}</strong> 盒，还剩下 <strong>${modRes}</strong> 个零头！`;
+    explain.innerHTML = `📦 解释：${a} 个物品，每 ${b} 个装一盒，最多能完整装满 <strong>${floorRes}</strong> 盒（整除 //），还剩下 <strong>${modRes}</strong> 个零头（取余 %）！<br/><span style="font-size:12px; color:#78716C; font-weight:normal;">（注：网页终端为拟真预览，真实数值以本地 Python 环境输出为准）</span>`;
     triggerCelebration({ particleCount: 25, spread: 45, origin: { y: 0.65 } });
   }
 
@@ -1335,6 +1367,11 @@
   }
 
   // ================= Slide 14: Confirm L5 Independent Task =================
+  function toggleL5ScaffoldHint() {
+    const hintBox = document.getElementById('l5-hint-box');
+    hintBox.style.display = hintBox.style.display === 'none' ? 'block' : 'none';
+  }
+
   function confirmL5Done() {
     const fb = document.getElementById('l5-done-feedback');
     const consoleOut = document.getElementById('l5-console-out');
@@ -1344,7 +1381,28 @@
   }
 
   // ================= Slide 15: Mastery 3-Pass Quiz =================
-  let p5_1a = false, p5_1b = false, p5_2a = false, p5_2b = false, p5_3 = false;
+  let p5_1a = false, p5_1b = false, p5_2a = false, p5_2b = false, p5_2c = false, p5_3 = false;
+
+  function checkPassL5_2c(btn, isCorrect) {
+    const parent = btn.parentElement;
+    parent.querySelectorAll('.btn').forEach(b => {
+      b.style.borderColor = 'rgba(0,0,0,0.1)';
+      b.style.background = 'var(--bg-card)';
+      b.style.color = 'var(--ink-main)';
+    });
+    if (isCorrect) {
+      btn.style.borderColor = 'var(--green-main)';
+      btn.style.background = 'var(--green-soft)';
+      btn.style.color = 'var(--green-dark)';
+      p5_2c = true;
+    } else {
+      btn.style.borderColor = '#EF4444';
+      btn.style.background = '#FEE2E2';
+      btn.style.color = '#991B1B';
+      p5_2c = false;
+    }
+    checkAllPassedL5();
+  }
 
   function checkPassL5_1a(btn, isCorrect) {
     const parent = btn.parentElement;
@@ -1439,7 +1497,7 @@
 
   function checkAllPassedL5() {
     const award = document.getElementById('final-award-text5');
-    if (p5_1a && p5_1b && p5_2a && p5_2b && p5_3) {
+    if (p5_1a && p5_1b && p5_2a && p5_2b && p5_2c && p5_3) {
       award.innerHTML = "✅ <strong>太棒了！第05讲核心能力检查全部通过！</strong>";
       award.style.color = "var(--green-dark)";
       triggerCelebration({ particleCount: 90, spread: 80, origin: { y: 0.6 } });
