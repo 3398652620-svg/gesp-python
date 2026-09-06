@@ -1,0 +1,1451 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第05讲 算术运算与表达式：让数据参与计算</title>
+  <!-- GSAP Animation Engine with Fallback -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <!-- Canvas Confetti for Celebrations with Fallback -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+  <style>
+    :root {
+      --bg-paper: #FFF7ED;
+      --bg-card: #FFFFFF;
+      --ink-main: #1C1917;
+      --ink-muted: #78716C;
+      --orange-main: #F97316;
+      --orange-dark: #C2410C;
+      --orange-soft: #FFEDD5;
+      --green-main: #10B981;
+      --green-dark: #047857;
+      --green-soft: #D1FAE5;
+      --yellow-sun: #FBBF24;
+      --yellow-dark: #B45309;
+      --yellow-soft: #FEF3C7;
+      --blue-night: #4F46E5;
+      --blue-dark: #3730A3;
+      --blue-soft: #EEF2FF;
+      --purple-main: #9333EA;
+      --purple-soft: #F3E8FF;
+      --code-board: #0F172A;
+      --code-text: #E2E8F0;
+      --radius-lg: 24px;
+      --radius-md: 16px;
+      --radius-pill: 999px;
+      --shadow-soft: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.03);
+      --shadow-card: 0 20px 25px -5px rgba(249, 115, 22, 0.08), 0 8px 10px -6px rgba(249, 115, 22, 0.04);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background-color: var(--bg-paper);
+      color: var(--ink-main);
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #stage-container {
+      width: 100vw;
+      height: 100vh;
+      max-width: 177.78vh;
+      max-height: 56.25vw;
+      position: relative;
+      background: var(--bg-paper);
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 0 50px rgba(0,0,0,0.08);
+      overflow: hidden;
+      cursor: default;
+    }
+
+    header {
+      height: 64px;
+      padding: 0 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 2px solid rgba(0,0,0,0.04);
+      background: rgba(255, 247, 237, 0.95);
+      backdrop-filter: blur(10px);
+      z-index: 100;
+      flex-shrink: 0;
+    }
+
+    .brand-tag {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--orange-main);
+      background: var(--orange-soft);
+      padding: 6px 16px;
+      border-radius: var(--radius-pill);
+    }
+
+    .lesson-title-nav {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--ink-main);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .nav-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .slide-counter {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--ink-muted);
+      background: var(--bg-card);
+      padding: 6px 14px;
+      border-radius: var(--radius-pill);
+      box-shadow: var(--shadow-soft);
+      border: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .btn-nav-icon {
+      background: var(--bg-card);
+      border: 1px solid rgba(0,0,0,0.08);
+      color: var(--ink-main);
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: bold;
+      transition: all 0.2s;
+    }
+
+    .btn-nav-icon:hover {
+      background: var(--orange-main);
+      color: #fff;
+      border-color: var(--orange-main);
+      transform: scale(1.08);
+    }
+
+    .progress-bar-container {
+      height: 4px;
+      width: 100%;
+      background: rgba(0,0,0,0.05);
+      position: absolute;
+      top: 64px;
+      left: 0;
+      z-index: 101;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 6.25%;
+      background: linear-gradient(90deg, var(--orange-main), var(--yellow-sun));
+      transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    main {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+    }
+
+    .slide {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      padding: 32px 64px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 0.35s ease, transform 0.35s ease;
+      overflow-y: auto;
+    }
+
+    .slide.active {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transform: translateX(0);
+    }
+
+    .slide.prev {
+      transform: translateX(-40px);
+    }
+
+    .slide.next {
+      transform: translateX(40px);
+    }
+
+    /* Step-Reveal Progressive System */
+    .step {
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+      pointer-events: none;
+    }
+
+    .step.revealed {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    .slide-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 15px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 6px 16px;
+      border-radius: var(--radius-pill);
+      margin-bottom: 12px;
+      width: fit-content;
+    }
+
+    .tag-orange { background: var(--orange-soft); color: var(--orange-dark); }
+    .tag-green { background: var(--green-soft); color: var(--green-dark); }
+    .tag-blue { background: var(--blue-soft); color: var(--blue-dark); }
+    .tag-purple { background: var(--purple-soft); color: var(--purple-main); }
+
+    .slide-title {
+      font-size: 34px;
+      font-weight: 900;
+      color: var(--ink-main);
+      margin-bottom: 20px;
+      line-height: 1.25;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .card-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 28px;
+      width: 100%;
+      height: calc(100% - 90px);
+      align-items: center;
+    }
+
+    .card-grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 20px;
+      width: 100%;
+    }
+
+    .card-grid-4 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      gap: 16px;
+      width: 100%;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      padding: 26px;
+      box-shadow: var(--shadow-card);
+      border: 1px solid rgba(0,0,0,0.05);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .card-hover:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 20px 25px -5px rgba(249, 115, 22, 0.12);
+      transition: all 0.25s ease;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 14px 28px;
+      border-radius: var(--radius-pill);
+      font-size: 18px;
+      font-weight: 800;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      text-decoration: none;
+      outline: none;
+    }
+
+    .btn:active { transform: scale(0.96); }
+    .btn-primary { background: var(--orange-main); color: #FFF; box-shadow: 0 8px 18px rgba(249, 115, 22, 0.3); }
+    .btn-primary:hover { background: var(--orange-dark); transform: translateY(-2px); }
+    .btn-green { background: var(--green-main); color: #FFF; box-shadow: 0 8px 18px rgba(16, 185, 129, 0.3); }
+    .btn-green:hover { background: var(--green-dark); transform: translateY(-2px); }
+    .btn-blue { background: var(--blue-night); color: #FFF; box-shadow: 0 8px 18px rgba(79, 70, 229, 0.3); }
+    .btn-blue:hover { background: var(--blue-dark); transform: translateY(-2px); }
+    .btn-secondary { background: var(--bg-card); color: var(--ink-main); border: 2px solid rgba(0,0,0,0.1); }
+    .btn-secondary:hover { background: #FAFAFA; border-color: var(--orange-main); color: var(--orange-main); }
+
+    /* Code Window */
+    .code-window {
+      background: var(--code-board);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: 0 16px 36px rgba(15, 23, 42, 0.25);
+      border: 1px solid rgba(255,255,255,0.1);
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+    }
+
+    .code-header {
+      background: #1E293B;
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .code-body {
+      padding: 20px;
+      font-family: "Consolas", "Courier New", monospace;
+      font-size: 20px;
+      line-height: 1.8;
+      color: var(--code-text);
+      flex: 1;
+      overflow: auto;
+    }
+
+    .code-line {
+      display: flex;
+      align-items: center;
+      padding: 4px 10px;
+      border-radius: 8px;
+      transition: background 0.2s, border 0.2s;
+    }
+
+    .code-line.active-line {
+      background: rgba(249, 115, 22, 0.25);
+      border-left: 4px solid var(--orange-main);
+    }
+
+    .line-num {
+      width: 32px;
+      color: #64748B;
+      user-select: none;
+      font-size: 16px;
+    }
+
+    .syntax-fn { color: #38BDF8; font-weight: bold; }
+    .syntax-var { color: #F472B6; font-weight: bold; }
+    .syntax-str { color: #34D399; }
+    .syntax-num { color: #F59E0B; font-weight: bold; }
+    .syntax-op { color: #F87171; font-weight: bold; }
+    .syntax-punct { color: #F8FAFC; }
+    .syntax-err { color: #EF4444; font-weight: bold; }
+
+    /* Simulated Real Terminal Window */
+    .console-window {
+      background: #020617;
+      border-radius: var(--radius-lg);
+      padding: 14px 20px;
+      font-family: "Consolas", monospace;
+      font-size: 18px;
+      color: #38BDF8;
+      border: 1px solid #1E293B;
+      min-height: 90px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      box-shadow: 0 8px 24px rgba(2, 6, 23, 0.4);
+    }
+
+    .concept-box {
+      background: linear-gradient(135deg, #FFF7ED 0%, #FFEDD5 100%);
+      border: 2px solid var(--orange-main);
+      border-radius: var(--radius-lg);
+      padding: 18px 26px;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--orange-dark);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .concept-box.green {
+      background: linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%);
+      border-color: var(--green-main);
+      color: var(--green-dark);
+    }
+
+    .concept-box.blue {
+      background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);
+      border-color: var(--blue-night);
+      color: var(--blue-dark);
+    }
+
+    .concept-box.purple {
+      background: linear-gradient(135deg, #FAF5FF 0%, #F3E8FF 100%);
+      border-color: var(--purple-main);
+      color: #6B21A8;
+    }
+
+    /* Interactive Table */
+    .trace-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #FFF;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      box-shadow: var(--shadow-soft);
+      font-size: 16px;
+    }
+
+    .trace-table th {
+      background: #F1F5F9;
+      color: #334155;
+      font-weight: 800;
+      padding: 10px 14px;
+      text-align: center;
+      border-bottom: 2px solid #E2E8F0;
+    }
+
+    .trace-table td {
+      padding: 10px 14px;
+      text-align: center;
+      border-bottom: 1px solid #F1F5F9;
+      font-family: Consolas, monospace;
+      font-size: 16px;
+      color: #0F172A;
+      transition: background 0.3s;
+    }
+
+    .trace-table tr.active-row td {
+      background: #FEF3C7;
+      font-weight: bold;
+    }
+
+    footer {
+      height: 60px;
+      padding: 0 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(255, 247, 237, 0.95);
+      border-top: 2px solid rgba(0,0,0,0.04);
+      z-index: 100;
+      flex-shrink: 0;
+    }
+
+    .shortcut-hint {
+      font-size: 15px;
+      color: var(--ink-muted);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .key-badge {
+      background: var(--bg-card);
+      border: 1px solid #D6D3D1;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-family: monospace;
+      font-size: 13px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+  </style>
+</head>
+<body>
+
+<div id="stage-container">
+  <!-- Header Navigation -->
+  <header>
+    <div class="brand-tag">
+      <span>➕➖✖️➗</span>
+      <span>GESP Python 启航</span>
+    </div>
+    <div class="lesson-title-nav">
+      <span>第05讲</span>
+      <span style="color:var(--ink-muted);">|</span>
+      <span>算术运算与表达式：让数据参与计算</span>
+    </div>
+    <div class="nav-controls">
+      <div class="slide-counter" id="slide-counter">01 / 16</div>
+      <button class="btn-nav-icon" id="btn-prev" title="上一步 / 上一幕 (←)">❮</button>
+      <button class="btn-nav-icon" id="btn-next" title="下一步 / 下一幕 (→/空格/点击空白)">❯</button>
+      <button class="btn-nav-icon" id="btn-fullscreen" title="全屏切换 (F)">⛶</button>
+    </div>
+  </header>
+
+  <!-- Top Progress Bar -->
+  <div class="progress-bar-container">
+    <div class="progress-bar-fill" id="progress-fill"></div>
+  </div>
+
+  <!-- Slides Viewport -->
+  <main id="slides-viewport">
+
+    <!-- ================= 01 封面 ================= -->
+    <section class="slide active" data-slide="1">
+      <div style="text-align: center; max-width: 960px; margin: 0 auto;">
+        <div class="slide-tag tag-orange step revealed" style="margin: 0 auto 18px;">第一阶段 · 程序、数据与状态</div>
+        <h1 class="step revealed" style="font-size: 44px; font-weight: 900; line-height: 1.25; margin-bottom: 20px; color: var(--ink-main);">
+          算术运算与表达式<br/>
+          <span style="color: var(--orange-main);">让数据参与计算 ➕➖✖️➗</span>
+        </h1>
+        <p class="step revealed" style="font-size: 22px; color: var(--ink-muted); margin-bottom: 36px;">
+          掌握 + - * / // % 六大运算，用 Python 表达式解决生活实际问题！
+        </p>
+        <div class="step revealed" style="display: flex; justify-content: center; gap: 20px;">
+          <button class="btn btn-primary" style="font-size: 20px; padding: 16px 36px;" onclick="goToSlide(2)">开启第05讲探索 🚀 (或按空格键)</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 02 承前启后 ================= -->
+    <section class="slide" data-slide="2">
+      <div class="slide-tag tag-blue">承前启后</div>
+      <h2 class="slide-title">程序不仅能记住数据，还能加工数据！⚙️</h2>
+      <div class="card-grid-2">
+        <div class="card card-hover step" style="justify-content: center; padding: 30px;">
+          <div style="font-size: 36px; margin-bottom: 12px;">🏷️ 回顾第04讲</div>
+          <div style="font-size: 18px; color: var(--ink-main); line-height: 1.65;">
+            我们学过了 <code>x = x + 1</code>。<br/>
+            我们已经知道：<strong>赋值号 <code>=</code> 的右边会先进行计算，算出新结果后再存回左边的变量里！</strong>
+          </div>
+        </div>
+
+        <div class="concept-box orange step" style="flex-direction: column; justify-content: center; text-align: center; padding: 30px;">
+          <div style="font-size: 46px; margin-bottom: 12px;">🚀 数据计算的真正力量</div>
+          <div style="font-size: 20px; color: var(--orange-dark); line-height: 1.6;">
+            在真实程序中，数据绝不止能“加1”！<br/>
+            超市收银算总价、分配物品算整包与余数、倒计时时间换算……<br/>
+            <strong>计算机用算术运算把静态数据加工成我们需要的答案！</strong>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 03 什么是表达式 ================= -->
+    <section class="slide" data-slide="3">
+      <div class="slide-tag tag-purple">核心概念</div>
+      <h2 class="slide-title">把数据与运算符连起来：表达式（Expression）💡</h2>
+      <div style="max-width: 960px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; gap: 18px;">
+        <div class="card step" style="padding: 24px; text-align: center; background: #FFF;">
+          <div style="font-size: 20px; font-weight: bold; color: var(--ink-muted); margin-bottom: 12px;">观察这个经典结构：</div>
+          <div style="font-size: 36px; font-family: Consolas, monospace; font-weight: 900; display: flex; justify-content: center; align-items: center; gap: 16px;">
+            <span style="background:#EEF2FF; color:var(--blue-night); padding:6px 18px; border-radius:12px; border:2px solid #C7D2FE;">8</span>
+            <span style="color:#F43F5E;">*</span>
+            <span style="background:#EEF2FF; color:var(--blue-night); padding:6px 18px; border-radius:12px; border:2px solid #C7D2FE;">3</span>
+            <span style="color:var(--ink-muted); font-size:28px;">➔ 算出结果 ➔</span>
+            <span style="background:#DCFCE7; color:var(--green-dark); padding:6px 20px; border-radius:12px; border:2px solid #86EFAC;">24</span>
+          </div>
+        </div>
+
+        <div class="card-grid-2" style="height: auto;">
+          <div class="card step" style="padding: 22px; gap: 10px;">
+            <div style="font-size: 18px; font-weight: 900; color: var(--purple-main);">🧱 什么是表达式？</div>
+            <div style="font-size: 16px; line-height: 1.6; color: var(--ink-main);">
+              把<strong>数据（数字或变量）</strong>与<strong>运算符（加减乘除等）</strong>组合在一起，能够产生一个计算结果的代码片段，就叫做<strong>表达式</strong>！
+            </div>
+          </div>
+          <div class="card step" style="padding: 22px; gap: 10px; background: #FFF7ED; border-color: var(--orange-main);">
+            <div style="font-size: 18px; font-weight: 900; color: var(--orange-dark);">🎯 表达式的核心特征</div>
+            <div style="font-size: 16px; line-height: 1.6; color: var(--ink-main);">
+              每一个合法的算术表达式，最终都会<strong>求值（Evaluate）计算出一个具体的结果</strong>，这个结果可以被 <code>print()</code> 打印，也可以赋给变量保存！
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 04 基础四则运算与键盘符号 ================= -->
+    <section class="slide" data-slide="4">
+      <div class="slide-tag tag-orange">基础符号</div>
+      <h2 class="slide-title">四则运算进电脑：注意键盘符号转换！⌨️</h2>
+      <div class="card-grid-4">
+        <div class="card step" style="text-align: center; padding: 20px; gap: 10px;">
+          <div style="font-size: 38px; color: var(--orange-main); font-weight: 900;">+</div>
+          <div style="font-size: 18px; font-weight: 900;">加法</div>
+          <div style="font-family: Consolas, monospace; font-size: 16px; background: #F8FAFC; padding: 6px; border-radius: 8px;">12 + 5 ➔ 17</div>
+          <div style="font-size: 13px; color: var(--ink-muted);">和数学完全一样</div>
+        </div>
+
+        <div class="card step" style="text-align: center; padding: 20px; gap: 10px;">
+          <div style="font-size: 38px; color: var(--orange-main); font-weight: 900;">-</div>
+          <div style="font-size: 18px; font-weight: 900;">减法</div>
+          <div style="font-family: Consolas, monospace; font-size: 16px; background: #F8FAFC; padding: 6px; border-radius: 8px;">20 - 8 ➔ 12</div>
+          <div style="font-size: 13px; color: var(--ink-muted);">和数学完全一样</div>
+        </div>
+
+        <div class="card step" style="text-align: center; padding: 20px; gap: 10px; border-color: #EF4444; background: #FFF5F5;">
+          <div style="font-size: 38px; color: #EF4444; font-weight: 900;">*</div>
+          <div style="font-size: 18px; font-weight: 900; color: #991B1B;">乘法 (星号)</div>
+          <div style="font-family: Consolas, monospace; font-size: 16px; background: #FFF; padding: 6px; border-radius: 8px; color: #DC2626;">6 * 7 ➔ 42</div>
+          <div style="font-size: 13px; color: #991B1B; font-weight: bold;">⚠️ 键盘没有 ×，必须写星号 *</div>
+        </div>
+
+        <div class="card step" style="text-align: center; padding: 20px; gap: 10px; border-color: #3B82F6; background: #EFF6FF;">
+          <div style="font-size: 38px; color: #3B82F6; font-weight: 900;">/</div>
+          <div style="font-size: 18px; font-weight: 900; color: #1E40AF;">普通除法 (斜杠)</div>
+          <div style="font-family: Consolas, monospace; font-size: 16px; background: #FFF; padding: 6px; border-radius: 8px; color: #2563EB;">15 / 3 ➔ 5.0</div>
+          <div style="font-size: 13px; color: #1E40AF; font-weight: bold;">⚠️ 键盘没有 ÷，必须写斜杠 /</div>
+        </div>
+      </div>
+      <div class="concept-box blue step" style="margin-top: 16px; font-size: 18px; justify-content: center; text-align: center;">
+        💡 细心发现：注意到了吗？<strong>普通除法 <code>/</code> 算出来的结果总是带小数点的（浮点数 5.0）！</strong>
+      </div>
+    </section>
+
+    <!-- ================= 05 认知冲突：/ vs // ================= -->
+    <section class="slide" data-slide="5">
+      <div class="slide-tag tag-blue">核心辨析</div>
+      <h2 class="slide-title">一个斜杠 vs 两个斜杠：/ 与 // 的关键区别 🔍</h2>
+      <div class="card-grid-2">
+        <div class="card step" style="padding: 24px; gap: 12px; background: #EFF6FF; border-color: #3B82F6;">
+          <div style="font-size: 22px; font-weight: 900; color: #1E40AF;">🍰 一个斜杠 /：普通除法（激光手术刀）</div>
+          <div style="background: #0F172A; padding: 12px 16px; border-radius: 10px; font-family: Consolas, monospace; font-size: 20px; color: #38BDF8;">
+            print(7 / 2) &nbsp;# 输出 3.5<br/>
+            print(8 / 2) &nbsp;# 输出 4.0
+          </div>
+          <div style="font-size: 16px; color: var(--ink-main); line-height: 1.6;">
+            <strong>就像分蛋糕：</strong>每一块都切得无比精确！即使能整除，结果也始终是一个<strong>带小数点的浮点数</strong>！
+          </div>
+        </div>
+
+        <div class="card step" style="padding: 24px; gap: 12px; background: #F0FDF4; border-color: var(--green-main);">
+          <div style="font-size: 22px; font-weight: 900; color: var(--green-dark);">📦 两个斜杠 //：整除（快递装箱员）</div>
+          <div style="background: #0F172A; padding: 12px 16px; border-radius: 10px; font-family: Consolas, monospace; font-size: 20px; color: #34D399;">
+            print(7 // 2) # 输出 3<br/>
+            print(8 // 2) # 输出 4
+          </div>
+          <div style="font-size: 16px; color: var(--ink-main); line-height: 1.6;">
+            <strong>就像整箱打包：</strong>只管能装满多少个<strong>完整的整数份</strong>！把零头扔掉，只保留整数部分（商的整数）！
+          </div>
+        </div>
+      </div>
+      <div class="concept-box green step" style="margin-top: 14px; text-align: center; justify-content: center; font-size: 19px;">
+        🌟 黄金口诀：<strong>一个斜杠切出精确小数，两个斜杠只留完整整数！</strong>
+      </div>
+    </section>
+
+    <!-- ================= 06 神秘符号 % 不是百分比 ================= -->
+    <section class="slide" data-slide="6">
+      <div class="slide-tag tag-purple">余数奥秘</div>
+      <h2 class="slide-title">别被外表骗了！% 在 Python 里是“取余数” 🎁</h2>
+      <div class="card-grid-2">
+        <div class="card step" style="justify-content: center; gap: 16px; padding: 26px;">
+          <div style="font-size: 22px; font-weight: 900; color: var(--purple-main);">🍪 生活情境：17 块饼干，每 5 块装一盒</div>
+          <div style="font-size: 17px; line-height: 1.7; color: var(--ink-main);">
+            • 能够装满几整盒？➔ <strong>3 盒</strong>（这是商！）<br/>
+            • 装完 3 盒后，盒子里装不下、还剩下几块？➔ <strong>2 块</strong>（这是余数！）
+          </div>
+          <div style="background: #FAF5FF; border: 1px solid #E9D5FF; padding: 12px 16px; border-radius: 12px; font-size: 15px; color: #6B21A8;">
+            在数学里我们写：<code>17 ÷ 5 = 3 …… 2</code><br/>
+            在 Python 里我们用两个符号分别算出来！
+          </div>
+        </div>
+
+        <div class="code-window step">
+          <div class="code-header"><span style="color:#94A3B8; font-size:14px;">cookies.py</span></div>
+          <div class="code-body" style="font-size: 19px;">
+            <div class="code-line"><span class="line-num">1</span><span class="syntax-fn">print</span><span class="syntax-punct">(</span><span class="syntax-num">17</span> <span class="syntax-op">//</span> <span class="syntax-num">5</span><span class="syntax-punct">)</span> &nbsp;<span style="color:#64748B;"># 整除：装满 3 盒</span></div>
+            <div class="code-line"><span class="line-num">2</span><span class="syntax-fn">print</span><span class="syntax-punct">(</span><span class="syntax-num">17</span> <span class="syntax-op">%</span> <span class="syntax-num">5</span><span class="syntax-punct">)</span> &nbsp;&nbsp;<span style="color:#64748B;"># 取余：还剩 2 块</span></div>
+          </div>
+          <div class="console-window" style="border-radius: 0 0 20px 20px; min-height: 70px;">
+            <div style="color:#64748B; font-size:12px;">&gt;_ 终端输出：</div>
+            <div style="color:#34D399; font-size:18px;">3<br/>2</div>
+          </div>
+        </div>
+      </div>
+      <div class="concept-box purple step" style="margin-top: 14px; text-align: center; justify-content: center; font-size: 19px;">
+        💡 核心辨析：<strong>% 在算术表达式中绝不是打折或百分比，它是专门帮我们找余数的“余数探长”！</strong>
+      </div>
+    </section>
+
+    <!-- ================= 07 同一数据大对比 ================= -->
+    <section class="slide" data-slide="7">
+      <div class="slide-tag tag-orange">三法同堂</div>
+      <h2 class="slide-title">同一组数据大比拼：17 与 5 的三种答案 📊</h2>
+      <div class="card-grid-3">
+        <div class="card step" style="padding: 22px; gap: 12px; background: #EFF6FF; border-color: #3B82F6;">
+          <div style="font-size: 20px; font-weight: 900; color: #1E40AF;">① 普通除法 /</div>
+          <div style="background: #0F172A; padding: 10px 14px; border-radius: 10px; font-family: Consolas, monospace; font-size: 20px; color: #38BDF8;">
+            17 / 5 ➔ 3.4
+          </div>
+          <div style="font-size: 15px; color: var(--ink-main); line-height: 1.5;">
+            <strong>回答：</strong>每个人精确分多少？答案是 3.4 份（带小数）。
+          </div>
+        </div>
+
+        <div class="card step" style="padding: 22px; gap: 12px; background: #F0FDF4; border-color: var(--green-main);">
+          <div style="font-size: 20px; font-weight: 900; color: var(--green-dark);">② 整除 //</div>
+          <div style="background: #0F172A; padding: 10px 14px; border-radius: 10px; font-family: Consolas, monospace; font-size: 20px; color: #34D399;">
+            17 // 5 ➔ 3
+          </div>
+          <div style="font-size: 15px; color: var(--ink-main); line-height: 1.5;">
+            <strong>回答：</strong>能完整分出几整份？答案是 3 份（商的整数部分）。
+          </div>
+        </div>
+
+        <div class="card step" style="padding: 22px; gap: 12px; background: #FAF5FF; border-color: var(--purple-main);">
+          <div style="font-size: 20px; font-weight: 900; color: #6B21A8;">③ 取余 %</div>
+          <div style="background: #0F172A; padding: 10px 14px; border-radius: 10px; font-family: Consolas, monospace; font-size: 20px; color: #C084FC;">
+            17 % 5 ➔ 2
+          </div>
+          <div style="font-size: 15px; color: var(--ink-main); line-height: 1.5;">
+            <strong>回答：</strong>分完后还剩下几个零头？答案是剩下的 2 个。
+          </div>
+        </div>
+      </div>
+      <div class="concept-box green step" style="margin-top: 16px; font-size: 18px; justify-content: center; text-align: center;">
+        🧐 小思考：如果刚好整除呢？例如 <code>15 // 5 ➔ 3</code>，而 <code>15 % 5 ➔ 0</code>（余数为 0 表示刚好分完，没有零头）！
+      </div>
+    </section>
+
+    <!-- ================= 08 小除以大：3 // 5 和 3 % 5 ================= -->
+    <section class="slide" data-slide="8">
+      <div class="slide-tag tag-blue">特殊场景</div>
+      <h2 class="slide-title">逆向思维：只有 3 颗糖，每 5 颗装一盒？🍬</h2>
+      <div class="card-grid-2">
+        <div class="card step" style="padding: 26px; justify-content: center; gap: 16px;">
+          <div style="font-size: 22px; font-weight: 900; color: var(--orange-dark);">🤔 很多同学在这里容易卡壳：</div>
+          <div style="font-size: 17px; line-height: 1.7; color: var(--ink-main);">
+            被除数比除数还小，怎么除？<br/>
+            • <strong>问：</strong>手里只有 3 颗糖，要求装满 5 颗才能装一盒，你能装几盒？<br/>
+            ➔ 连一盒都凑不齐！所以整除只能装 <strong>0</strong> 盒！<br/>
+            • <strong>问：</strong>装完 0 盒后，手里还剩下几颗糖？<br/>
+            ➔ 那 3 颗糖一颗都没动，原封不动剩下 <strong>3</strong> 颗！
+          </div>
+        </div>
+
+        <div class="code-window step">
+          <div class="code-header"><span style="color:#94A3B8; font-size:14px;">small_divide.py</span></div>
+          <div class="code-body" style="font-size: 20px;">
+            <div class="code-line"><span class="line-num">1</span><span class="syntax-fn">print</span><span class="syntax-punct">(</span><span class="syntax-num">3</span> <span class="syntax-op">//</span> <span class="syntax-num">5</span><span class="syntax-punct">)</span> &nbsp;<span style="color:#64748B;"># 能装满 0 盒</span></div>
+            <div class="code-line"><span class="line-num">2</span><span class="syntax-fn">print</span><span class="syntax-punct">(</span><span class="syntax-num">3</span> <span class="syntax-op">%</span> <span class="syntax-num">5</span><span class="syntax-punct">)</span> &nbsp;&nbsp;<span style="color:#64748B;"># 还剩下 3 颗</span></div>
+          </div>
+          <div class="console-window" style="border-radius: 0 0 20px 20px; min-height: 75px;">
+            <div style="color:#64748B; font-size:12px;">&gt;_ 终端输出：</div>
+            <div style="color:#34D399; font-size:18px;">0<br/>3</div>
+          </div>
+        </div>
+      </div>
+      <div class="concept-box blue step" style="margin-top: 14px; text-align: center; justify-content: center; font-size: 19px;">
+        🌟 规律总结：<strong>当被除数小于除数时，整除结果必然是 0，余数就是它自己！</strong>
+      </div>
+    </section>
+
+    <!-- ================= 09 互动实验 01 除法三兄弟沙盘 ================= -->
+    <section class="slide" data-slide="9">
+      <div class="slide-tag tag-green">交互实验 01</div>
+      <h2 class="slide-title">🧪 互动沙盘：亲自动手调配 a 和 b 的除法结果 🎛️</h2>
+      <div style="max-width: 980px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; gap: 14px;">
+        <div style="display: grid; grid-template-columns: 1.1fr 1fr; gap: 20px; align-items: stretch;">
+          <!-- Left: Control & Code -->
+          <div class="card" style="padding: 20px; gap: 14px; background: #FFF;">
+            <div style="font-size: 17px; font-weight: 900; color: var(--ink-main);">⚙️ 设置被除数 a 和除数 b：</div>
+            <div style="display: flex; gap: 16px; align-items: center;">
+              <div style="flex: 1;">
+                <label style="font-size: 14px; color: var(--ink-muted); font-weight: bold;">被除数 a：</label>
+                <input type="number" id="sandbox-a" value="19" min="1" max="99" style="width: 100%; padding: 8px 12px; font-size: 18px; font-weight: bold; border-radius: 8px; border: 2px solid #CBD5E1; font-family: Consolas, monospace;" onchange="updateDivideSandbox()">
+              </div>
+              <div style="flex: 1;">
+                <label style="font-size: 14px; color: var(--ink-muted); font-weight: bold;">除数 b：</label>
+                <input type="number" id="sandbox-b" value="4" min="1" max="99" style="width: 100%; padding: 8px 12px; font-size: 18px; font-weight: bold; border-radius: 8px; border: 2px solid #CBD5E1; font-family: Consolas, monospace;" onchange="updateDivideSandbox()">
+              </div>
+            </div>
+            
+            <div style="display: flex; gap: 10px;">
+              <button class="btn btn-primary" style="padding: 8px 16px; font-size: 15px; flex: 1;" onclick="updateDivideSandbox()">▶️ 计算并打印输出</button>
+            </div>
+
+            <div style="background: #F8FAFC; padding: 10px 14px; border-radius: 10px; font-family: Consolas, monospace; font-size: 15px; line-height: 1.6; color: #334155;">
+              a = <span id="sb-code-a">19</span><br/>
+              b = <span id="sb-code-b">4</span><br/>
+              print(a / b) &nbsp;&nbsp;<span style="color:#64748B;"># 普通除法</span><br/>
+              print(a // b) &nbsp;<span style="color:#64748B;"># 整除</span><br/>
+              print(a % b) &nbsp;&nbsp;<span style="color:#64748B;"># 取余</span>
+            </div>
+          </div>
+
+          <!-- Right: Simulated Terminal Output & Visual Explanation -->
+          <div style="display: flex; flex-direction: column; gap: 12px;">
+            <div class="console-window" style="min-height: 120px; padding: 14px 18px;">
+              <div style="color:#64748B; font-size:12px; display: flex; justify-content: space-between;">
+                <span>🖥️ 屏幕终端输出 (Terminal)</span>
+                <span style="color:#10B981;">● 实时执行中</span>
+              </div>
+              <div id="sandbox-term-out" style="color:#34D399; font-family: Consolas, monospace; font-size: 19px; line-height: 1.5; margin-top: 6px;">
+                4.75<br/>
+                4<br/>
+                3
+              </div>
+            </div>
+
+            <div class="card" style="padding: 14px 18px; background: #FFF7ED; border-color: var(--orange-main); justify-content: center;">
+              <div style="font-size: 15px; font-weight: bold; color: var(--orange-dark); line-height: 1.5;" id="sandbox-explain">
+                📦 解释：19 个物品，每 4 个装一盒，能装满 <strong>4</strong> 盒，还剩下 <strong>3</strong> 个零头！
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 10 从数字到变量表达式 ================= -->
+    <section class="slide" data-slide="10">
+      <div class="slide-tag tag-blue">变量建模</div>
+      <h2 class="slide-title">从数字到变量：让程序拥有通用计算能力 🏷️</h2>
+      <div class="card-grid-2">
+        <div class="card step" style="padding: 24px; gap: 12px; background: #FFF; border-color: #CBD5E1;">
+          <div style="font-size: 19px; font-weight: 900; color: #64748B;">❌ 数字直接写死（不够灵活）</div>
+          <div style="background: #0F172A; padding: 12px 16px; border-radius: 10px; font-family: Consolas, monospace; font-size: 18px; color: #E2E8F0;">
+            total = 12 * 4<br/>
+            print(total)
+          </div>
+          <div style="font-size: 15px; color: var(--ink-muted); line-height: 1.5;">
+            如果商品单价变了、购买数量变了，必须重新修改代码里的数字！
+          </div>
+        </div>
+
+        <div class="card step" style="padding: 24px; gap: 12px; background: #F0FDF4; border-color: var(--green-main);">
+          <div style="font-size: 19px; font-weight: 900; color: var(--green-dark);">✅ 变量通用表达式（专业写法）</div>
+          <div style="background: #0F172A; padding: 12px 16px; border-radius: 10px; font-family: Consolas, monospace; font-size: 18px; color: #34D399;">
+            price = 12<br/>
+            count = 4<br/>
+            total = price * count<br/>
+            print(total)
+          </div>
+          <div style="font-size: 15px; color: var(--green-dark); line-height: 1.5;">
+            无论数量和价格怎么变，<code>price * count</code> 这个关系永远成立！
+          </div>
+        </div>
+      </div>
+      <div class="concept-box green step" style="margin-top: 14px; text-align: center; justify-content: center; font-size: 19px;">
+        🌟 核心认知：<strong>变量参与表达式时，Python 会自动读取该变量在当前时刻保存的数值代入计算！</strong>
+      </div>
+    </section>
+
+    <!-- ================= 11 生活数量关系翻译 ================= -->
+    <section class="slide" data-slide="11">
+      <div class="slide-tag tag-purple">关系建模</div>
+      <h2 class="slide-title">小小数学家：把生活数量关系翻译成代码 📝</h2>
+      <div style="max-width: 960px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; gap: 16px;">
+        <div class="card step" style="background: #FFF; padding: 20px; border-left: 6px solid var(--orange-main);">
+          <div style="font-size: 19px; font-weight: 900; color: var(--ink-main); margin-bottom: 6px;">🛒 生活情境：文具店买铅笔</div>
+          <div style="font-size: 16px; color: #475569; line-height: 1.6;">
+            铅笔单价 <code>price = 3</code> 元，小明买了 <code>count = 5</code> 支，小明付给老板 <code>pay = 20</code> 元。请计算应付总价和应找零钱！
+          </div>
+        </div>
+
+        <div class="card-grid-2" style="height: auto;">
+          <div class="code-window step">
+            <div class="code-header"><span style="color:#94A3B8; font-size:14px;">shop.py</span></div>
+            <div class="code-body" style="font-size: 18px;">
+              <div class="code-line"><span class="line-num">1</span><span class="syntax-var">price</span> <span class="syntax-op">=</span> <span class="syntax-num">3</span></div>
+              <div class="code-line"><span class="line-num">2</span><span class="syntax-var">count</span> <span class="syntax-op">=</span> <span class="syntax-num">5</span></div>
+              <div class="code-line"><span class="line-num">3</span><span class="syntax-var">pay</span> <span class="syntax-op">=</span> <span class="syntax-num">20</span></div>
+              <div class="code-line"><span class="line-num">4</span><span class="syntax-var">total</span> <span class="syntax-op">=</span> <span class="syntax-var">price</span> <span class="syntax-op">*</span> <span class="syntax-var">count</span> &nbsp;<span style="color:#64748B;"># 算出 15</span></div>
+              <div class="code-line"><span class="line-num">5</span><span class="syntax-var">change</span> <span class="syntax-op">=</span> <span class="syntax-var">pay</span> <span class="syntax-op">-</span> <span class="syntax-var">total</span> &nbsp;&nbsp;&nbsp;<span style="color:#64748B;"># 算出 5</span></div>
+              <div class="code-line"><span class="line-num">6</span><span class="syntax-fn">print</span><span class="syntax-punct">(</span><span class="syntax-var">total</span><span class="syntax-punct">)</span></div>
+              <div class="code-line"><span class="line-num">7</span><span class="syntax-fn">print</span><span class="syntax-punct">(</span><span class="syntax-var">change</span><span class="syntax-punct">)</span></div>
+            </div>
+          </div>
+
+          <div class="card step" style="justify-content: center; gap: 14px; padding: 22px; background: #FFF;">
+            <div style="font-size: 18px; font-weight: 900; color: var(--blue-night);">🎯 数量关系翻译三步法：</div>
+            <div style="font-size: 16px; line-height: 1.65; color: var(--ink-main);">
+              <strong>① 找出已知数据：</strong>单价 <code>price</code>、数量 <code>count</code>、付款 <code>pay</code><br/>
+              <strong>② 确定计算关系：</strong><br/>
+              • 总价 = 单价 × 数量 ➔ <code>price * count</code><br/>
+              • 找零 = 付款 - 总价 ➔ <code>pay - total</code><br/>
+              <strong>③ 赋值并输出：</strong>把计算出的结果交给新变量并打印！
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 12 易错辨析 ================= -->
+    <section class="slide" data-slide="12">
+      <div class="slide-tag tag-orange">易错辨析</div>
+      <h2 class="slide-title">侦探眼：排查算术运算四大易混陷阱 🔍</h2>
+      <div class="card-grid-2">
+        <div class="card step" style="padding: 20px; gap: 8px; background: #FFF5F5; border-color: #EF4444;">
+          <div style="font-size: 17px; font-weight: 900; color: #991B1B;">⚠️ 陷阱 1：把乘法写成字母 x 或 ×</div>
+          <div style="font-size: 15px; color: #7F1D1D; line-height: 1.5;">
+            <code>a = 3 x 4</code> 会直接导致语法报错（SyntaxError）！计算机中的乘号只能是星号 <code>*</code>！
+          </div>
+        </div>
+
+        <div class="card step" style="padding: 20px; gap: 8px; background: #EFF6FF; border-color: #3B82F6;">
+          <div style="font-size: 17px; font-weight: 900; color: #1E40AF;">⚠️ 陷阱 2：以为 8 / 2 得到整数 4</div>
+          <div style="font-size: 15px; color: #1E3A8A; line-height: 1.5;">
+            <code>print(8 / 2)</code> 输出的是 <code>4.0</code>！普通除法只要一出手，结果必然带小数！想要整数 4 请用 <code>8 // 2</code>！
+          </div>
+        </div>
+
+        <div class="card step" style="padding: 20px; gap: 8px; background: #FAF5FF; border-color: #9333EA;">
+          <div style="font-size: 17px; font-weight: 900; color: #6B21A8;">⚠️ 陷阱 3：以为 % 是百分比打折</div>
+          <div style="font-size: 15px; color: #581C87; line-height: 1.5;">
+            在 Python 中 <code>100 % 10</code> 不是打十折，而是算余数！<code>100 % 10 = 0</code>！
+          </div>
+        </div>
+
+        <div class="card step" style="padding: 20px; gap: 8px; background: #FEF3C7; border-color: #F59E0B;">
+          <div style="font-size: 17px; font-weight: 900; color: #B45309;">⚠️ 陷阱 4：看见 a = a * 2 以为是等式</div>
+          <div style="font-size: 15px; color: #78350F; line-height: 1.5;">
+            永远牢记右算左赋：先算出右边 <code>a * 2</code> 的结果，再更新覆盖给左边的 <code>a</code>！
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 13 互动推演 02 表达式单步求值 ================= -->
+    <section class="slide" data-slide="13">
+      <div class="slide-tag tag-green">推演模拟 02</div>
+      <h2 class="slide-title">单步求值模拟器：观察变量如何代入计算 🎬</h2>
+      <div style="max-width: 980px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; gap: 14px;">
+        <div style="display: grid; grid-template-columns: 1.1fr 1fr; gap: 20px; align-items: stretch;">
+          <!-- Left: Code Window -->
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            <div class="code-window">
+              <div class="code-header"><span style="color:#94A3B8; font-size:14px;">💻 eval_demo.py</span></div>
+              <div class="code-body" style="font-size: 17px; padding: 12px 18px;">
+                <div class="code-line active-line" id="eval-line-1"><span class="line-num">1</span><span class="syntax-var">a</span> <span class="syntax-op">=</span> <span class="syntax-num">8</span></div>
+                <div class="code-line" id="eval-line-2"><span class="line-num">2</span><span class="syntax-var">b</span> <span class="syntax-op">=</span> <span class="syntax-num">3</span></div>
+                <div class="code-line" id="eval-line-3"><span class="line-num">3</span><span class="syntax-var">c</span> <span class="syntax-op">=</span> <span class="syntax-var">a</span> <span class="syntax-op">//</span> <span class="syntax-var">b</span></div>
+                <div class="code-line" id="eval-line-4"><span class="line-num">4</span><span class="syntax-var">d</span> <span class="syntax-op">=</span> <span class="syntax-var">a</span> <span class="syntax-op">%</span> <span class="syntax-var">b</span></div>
+                <div class="code-line" id="eval-line-5"><span class="line-num">5</span><span class="syntax-fn">print</span><span class="syntax-punct">(</span><span class="syntax-var">c</span><span class="syntax-punct">)</span></div>
+                <div class="code-line" id="eval-line-6"><span class="line-num">6</span><span class="syntax-fn">print</span><span class="syntax-punct">(</span><span class="syntax-var">d</span><span class="syntax-punct">)</span></div>
+              </div>
+            </div>
+
+            <!-- Terminal Output -->
+            <div class="console-window" style="min-height: 80px; padding: 10px 16px; justify-content: center;">
+              <div style="color:#64748B; font-size:12px; display: flex; justify-content: space-between;">
+                <span>🖥️ 屏幕终端输出 (Terminal)</span>
+                <span id="eval-term-status" style="color:#10B981;">● 运行就绪</span>
+              </div>
+              <div id="eval-term-out" style="color:#34D399; font-family: Consolas, monospace; font-size: 18px; font-weight: bold; margin-top: 2px;">
+                <span style="color:#475569; font-size:13px; font-weight: normal;">(执行第 1~4 行计算，等待 print 输出...)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Interactive Control & Status -->
+          <div class="card" style="padding: 18px; justify-content: space-between; background: #FFF;">
+            <div>
+              <div style="font-size: 16px; font-weight: 900; color: var(--ink-main); margin-bottom: 8px;">🧠 变量当前值状态：</div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                <div style="background:#F1F5F9; padding:8px 12px; border-radius:8px; font-family:Consolas, monospace; font-size:16px;">a = <strong id="val-a" style="color:var(--orange-dark);">8</strong></div>
+                <div style="background:#F1F5F9; padding:8px 12px; border-radius:8px; font-family:Consolas, monospace; font-size:16px;">b = <strong id="val-b" style="color:var(--blue-night);">未赋值</strong></div>
+                <div style="background:#F1F5F9; padding:8px 12px; border-radius:8px; font-family:Consolas, monospace; font-size:16px;">c = <strong id="val-c" style="color:var(--green-dark);">未赋值</strong></div>
+                <div style="background:#F1F5F9; padding:8px 12px; border-radius:8px; font-family:Consolas, monospace; font-size:16px;">d = <strong id="val-d" style="color:var(--purple-main);">未赋值</strong></div>
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 8px; margin: 8px 0;">
+              <button class="btn btn-primary" id="btn-eval-step" style="padding: 8px 14px; font-size: 14px; flex: 1;" onclick="stepEvalSim()">▶️ 执行下一步 (第 2 行)</button>
+              <button class="btn btn-secondary" style="padding: 8px 12px; font-size: 13px;" onclick="resetEvalSim()">🔄 重置</button>
+            </div>
+
+            <div id="eval-feedback" style="font-size: 13px; font-weight: bold; color: var(--green-dark); min-height: 44px; background: #F0FDF4; padding: 8px 10px; border-radius: 10px; border-left: 4px solid var(--green-main); line-height: 1.5;">
+              📍 执行第 1 行：a 赋值为 8。
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 14 真实 Python 独立编程 ================= -->
+    <section class="slide" data-slide="14">
+      <div class="slide-tag tag-green">独立编程</div>
+      <h2 class="slide-title">独立编程实战：装苹果装箱小助手 💻</h2>
+      <div class="card-grid-2">
+        <!-- Left: Instruction -->
+        <div class="card step" style="padding: 20px; background: #FFF; border-color: var(--green-main); justify-content: center; gap: 8px;">
+          <div style="font-size: 18px; font-weight: 900; color: var(--green-dark);">🚀 真实 Python 环境任务指南：</div>
+          <div style="font-size: 14px; color: var(--ink-main); line-height: 1.55;">
+            1. 打开 Python 编辑器，新建保存为：<strong style="color:var(--orange-dark); font-size: 15px;">calc_05.py</strong><br/>
+            2. 果园采摘了 <code>23</code> 个苹果，每 <code>5</code> 个装满一盒。请编写代码：<br/>
+            <code style="background:#F8FAFC; padding:6px 8px; border-radius:6px; display:block; margin:4px 0; font-size:13px; font-family:Consolas, monospace; line-height: 1.45;">
+              apples = 23<br/>
+              box_size = 5<br/>
+              full_boxes = apples // box_size<br/>
+              leftover = apples % box_size<br/>
+              print(full_boxes)<br/>
+              print(leftover)
+            </code>
+            3. <strong>运行前先在草稿纸上独立推演预测输出</strong>；<br/>
+            4. 在终端运行验证，向老师展示推演与运行结果！
+          </div>
+          <button class="btn btn-green" style="padding: 8px 16px; font-size: 15px; margin-top: 4px;" onclick="confirmL5Done()">✅ 我已完成推演并运行验证</button>
+          <div id="l5-done-feedback" style="font-size: 14px; font-weight: bold; color: var(--green-dark); min-height: 18px;"></div>
+        </div>
+
+        <!-- Right: Console Preview (Hidden initially) -->
+        <div class="card step" style="padding: 20px; background: #020617; border-color: #1E293B; justify-content: center;">
+          <div style="color: #94A3B8; font-size: 14px; margin-bottom: 8px;">&gt; 终端核对区域：</div>
+          <div id="l5-console-out" style="color: #FBBF24; font-family: Consolas, monospace; font-size: 16px; line-height: 1.6;">
+            ⏳ 请先在真实 Python 中编写、预测并运行！<br/>
+            完成后点击左侧按钮核对终端输出结果。
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 15 课尾能力大通关 ================= -->
+    <section class="slide" data-slide="15">
+      <div class="slide-tag tag-green">能力大通关</div>
+      <h2 class="slide-title">本讲能力三关大挑战 🏆</h2>
+      <div style="width: 100%;">
+        <div class="card-grid-2" style="align-items: stretch;">
+          <div class="card step" style="gap: 12px; padding: 20px; justify-content: space-between;">
+            <div>
+              <div style="font-size: 15px; font-weight: 900; color: var(--orange-dark); margin-bottom: 4px;">【第一关 A：普通除法结果】print(10 / 2) 的输出是？</div>
+              <div style="display: flex; gap: 8px; margin-bottom: 6px;">
+                <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 13px; flex: 1;" onclick="checkPassL5_1a(this, true)">5.0 (浮点数)</button>
+                <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 13px; flex: 1;" onclick="checkPassL5_1a(this, false)">5 (整数)</button>
+                <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 13px; flex: 1;" onclick="checkPassL5_1a(this, false)">2</button>
+              </div>
+
+              <div style="font-size: 15px; font-weight: 900; color: var(--orange-dark); margin-bottom: 4px;">【第一关 B：整除选择】14 块饼干每 4 块装一包，求装满几整包用？</div>
+              <div style="display: flex; gap: 8px;">
+                <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 13px; flex: 1;" onclick="checkPassL5_1b(this, true)">14 // 4</button>
+                <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 13px; flex: 1;" onclick="checkPassL5_1b(this, false)">14 / 4</button>
+                <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 13px; flex: 1;" onclick="checkPassL5_1b(this, false)">14 % 4</button>
+              </div>
+            </div>
+
+            <div>
+              <div style="font-size: 15px; font-weight: 900; color: var(--blue-night); margin-bottom: 4px;">【第二关 A：求余与特殊余数】19 % 4 与 3 % 7 的结果分别是？</div>
+              <div style="display: flex; gap: 8px; margin-bottom: 6px;">
+                <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 13px; flex: 1;" onclick="checkPassL5_2a(this, true)">3 和 3</button>
+                <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 13px; flex: 1;" onclick="checkPassL5_2a(this, false)">4 和 0</button>
+                <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 13px; flex: 1;" onclick="checkPassL5_2a(this, false)">3 和 0</button>
+              </div>
+
+              <div style="font-size: 15px; font-weight: 900; color: var(--blue-night); margin-bottom: 4px;">【第二关 B：变量表达式】单价 price=6，买 count=5 支，求总价？</div>
+              <div style="display: flex; gap: 8px;">
+                <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 13px; flex: 1;" onclick="checkPassL5_2b(this, true)">price * count</button>
+                <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 13px; flex: 1;" onclick="checkPassL5_2b(this, false)">price + count</button>
+              </div>
+            </div>
+
+            <div>
+              <div style="font-size: 15px; font-weight: 900; color: var(--green-dark); margin-bottom: 4px;">【第三关：独立编程】</div>
+              <button class="btn btn-green" style="padding: 8px 14px; font-size: 14px; width: 100%;" onclick="checkPassL5_3(this)">✅ 我已独立推演并运行 calc_05.py！</button>
+            </div>
+          </div>
+
+          <div class="card step" style="text-align: center; justify-content: center; align-items: center; padding: 32px;">
+            <div style="font-size: 64px; color: var(--yellow-sun); margin-bottom: 12px;">🏅⭐️⭐️⭐️</div>
+            <div style="font-size: 22px; font-weight: 900; color: var(--orange-dark); line-height: 1.4;" id="final-award-text5">
+              完成左侧三关挑战<br/>达成第05讲核心能力目标！
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 16 能力收束与下节预告 ================= -->
+    <section class="slide" data-slide="16">
+      <div class="slide-tag tag-orange">圆满收束</div>
+      <h2 class="slide-title">恭喜你！达成第05讲全部目标 🎉</h2>
+      <div class="card-grid-2">
+        <div class="card step" style="justify-content: center; gap: 16px; background: var(--orange-soft); border-color: var(--orange-main); padding: 32px;">
+          <div style="font-size: 24px; font-weight: 900; color: var(--orange-dark);">🎖️ 本讲能力收束：</div>
+          <div style="font-size: 19px; color: var(--ink-main); line-height: 1.65;">
+            熟练掌握 <code>+ - * / // %</code> 六大算术运算；深刻辨析普通除法、整除与取余的三种不同价值；学会把生活中的数量关系建模成通用的 Python 变量表达式！
+          </div>
+        </div>
+        <div class="card step" style="justify-content: center; gap: 16px; background: var(--blue-soft); border-color: var(--blue-night); padding: 32px;">
+          <div style="font-size: 24px; font-weight: 900; color: var(--blue-night);">🔮 下一讲预告与悬念：</div>
+          <div style="font-size: 19px; color: var(--ink-main); line-height: 1.65;">
+            如果我们在一个表达式中同时写了加减乘除：<br/>
+            <code>2 + 3 * 4</code> 到底先算谁？如果有小括号和乘方又该怎么算？<br/>
+            <strong>第06讲《复杂表达式与运算顺序：谁先谁后有讲究》见！</strong>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer Navigation -->
+  <footer>
+    <div class="shortcut-hint">
+      <span>💡 操作提示：</span>
+      <span>点击空白 / <span class="key-badge">空格</span> / <span class="key-badge">→</span> 逐步展示与前进</span>
+      <span><span class="key-badge">←</span> 回退</span>
+      <span><span class="key-badge">F</span> 全屏</span>
+    </div>
+    <div style="display: flex; gap: 12px;">
+      <button class="btn btn-secondary" style="padding: 8px 18px; font-size: 15px;" onclick="prevStep()">❮ 上一步</button>
+      <button class="btn btn-primary" style="padding: 8px 24px; font-size: 15px;" onclick="advanceStep()">下一步 ❯</button>
+    </div>
+  </footer>
+</div>
+
+<script>
+  let currentSlide = 1;
+  const totalSlides = 16;
+  const slides = document.querySelectorAll('.slide');
+  const slideCounter = document.getElementById('slide-counter');
+  const progressFill = document.getElementById('progress-fill');
+
+  function triggerCelebration(opts = { particleCount: 50, spread: 70, origin: { y: 0.65 } }) {
+    if (typeof confetti === 'function') {
+      try { confetti(opts); } catch(e) {}
+    }
+  }
+
+  // Core Progressive Step-by-Step Reveal System
+  function advanceStep() {
+    const activeSlide = document.querySelector('.slide.active');
+    if (!activeSlide) return;
+
+    const nextHiddenStep = activeSlide.querySelector('.step:not(.revealed)');
+    if (nextHiddenStep) {
+      nextHiddenStep.classList.add('revealed');
+      if (typeof gsap !== 'undefined') {
+        gsap.fromTo(nextHiddenStep, 
+          { opacity: 0, y: 16, scale: 0.98 }, 
+          { opacity: 1, y: 0, scale: 1, duration: 0.35, ease: "power2.out" }
+        );
+      }
+    } else {
+      if (currentSlide < totalSlides) {
+        goToSlide(currentSlide + 1);
+      }
+    }
+  }
+
+  function prevStep() {
+    const activeSlide = document.querySelector('.slide.active');
+    if (!activeSlide) return;
+
+    const revealedSteps = activeSlide.querySelectorAll('.step.revealed');
+    if (revealedSteps.length > 1) {
+      const lastRevealed = revealedSteps[revealedSteps.length - 1];
+      lastRevealed.classList.remove('revealed');
+    } else {
+      if (currentSlide > 1) {
+        goToSlide(currentSlide - 1);
+      }
+    }
+  }
+
+  function goToSlide(newIndex) {
+    if (newIndex < 1 || newIndex > totalSlides) return;
+    
+    const isMovingBackward = newIndex < currentSlide;
+
+    slides.forEach((s, idx) => {
+      s.classList.remove('active', 'prev', 'next');
+      const allSteps = s.querySelectorAll('.step');
+      
+      if (idx + 1 === newIndex) {
+        s.classList.add('active');
+        if (isMovingBackward) {
+          allSteps.forEach(st => st.classList.add('revealed'));
+        } else {
+          allSteps.forEach((st, sIdx) => {
+            if (sIdx === 0 || st.classList.contains('always-revealed')) {
+              st.classList.add('revealed');
+            } else {
+              st.classList.remove('revealed');
+            }
+          });
+        }
+      } else if (idx + 1 < newIndex) {
+        s.classList.add('prev');
+        allSteps.forEach(st => st.classList.add('revealed'));
+      } else {
+        s.classList.add('next');
+        allSteps.forEach(st => st.classList.remove('revealed'));
+      }
+    });
+
+    currentSlide = newIndex;
+    slideCounter.textContent = `${String(currentSlide).padStart(2, '0')} / ${totalSlides}`;
+    progressFill.style.width = `${(currentSlide / totalSlides) * 100}%`;
+  }
+
+  // Global click listener with interactive component filter
+  document.getElementById('stage-container').addEventListener('click', (e) => {
+    if (e.target.closest('button, input, textarea, select, .drag-chip, .drop-zone, .option-card, header, footer, .no-advance, table, .console-window')) {
+      return;
+    }
+    advanceStep();
+  });
+
+  // Keyboard navigation
+  window.addEventListener('keydown', (e) => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown' || e.key === 'Enter') {
+      e.preventDefault();
+      advanceStep();
+    } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+      e.preventDefault();
+      prevStep();
+    } else if (e.key === 'f' || e.key === 'F') {
+      toggleFullscreen();
+    }
+  });
+
+  document.getElementById('btn-prev').addEventListener('click', (e) => { e.stopPropagation(); prevStep(); });
+  document.getElementById('btn-next').addEventListener('click', (e) => { e.stopPropagation(); advanceStep(); });
+  document.getElementById('btn-fullscreen').addEventListener('click', (e) => { e.stopPropagation(); toggleFullscreen(); });
+
+  function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(() => {});
+    } else {
+      document.exitFullscreen().catch(() => {});
+    }
+  }
+
+  // ================= Slide 09: Divide Sandbox =================
+  function updateDivideSandbox() {
+    const a = parseInt(document.getElementById('sandbox-a').value) || 0;
+    const b = parseInt(document.getElementById('sandbox-b').value) || 1;
+
+    document.getElementById('sb-code-a').textContent = a;
+    document.getElementById('sb-code-b').textContent = b;
+
+    const termOut = document.getElementById('sandbox-term-out');
+    const explain = document.getElementById('sandbox-explain');
+
+    if (b === 0) {
+      termOut.innerHTML = '<span style="color:#EF4444;">ZeroDivisionError: division by zero</span>';
+      explain.innerHTML = '⚠️ 除数不能为 0 喔！数学与 Python 中都不允许除以 0。';
+      return;
+    }
+
+    const divRes = (a / b).toFixed(2).replace(/\.00$/, '.0');
+    const floorRes = Math.floor(a / b);
+    const modRes = a % b;
+
+    termOut.innerHTML = `${divRes}<br/>${floorRes}<br/>${modRes}`;
+    if (typeof gsap !== 'undefined') {
+      gsap.fromTo(termOut, { opacity: 0.5, y: 4 }, { opacity: 1, y: 0, duration: 0.3 });
+    }
+
+    explain.innerHTML = `📦 解释：${a} 个物品，每 ${b} 个装一盒，能装满 <strong>${floorRes}</strong> 盒，还剩下 <strong>${modRes}</strong> 个零头！`;
+    triggerCelebration({ particleCount: 25, spread: 45, origin: { y: 0.65 } });
+  }
+
+  // ================= Slide 13: Eval Stepper Simulator =================
+  let evalStep = 1;
+  function stepEvalSim() {
+    evalStep++;
+    const line = document.getElementById(`eval-line-${evalStep}`);
+    const btn = document.getElementById('btn-eval-step');
+    const fb = document.getElementById('eval-feedback');
+    const termOut = document.getElementById('eval-term-out');
+
+    for (let i = 1; i <= 6; i++) {
+      const l = document.getElementById(`eval-line-${i}`);
+      if (l) l.classList.remove('active-line');
+    }
+    if (line) line.classList.add('active-line');
+
+    if (evalStep === 2) {
+      document.getElementById('val-b').textContent = "3";
+      fb.innerHTML = "📍 执行第 2 行：b 赋值为 3。";
+      btn.textContent = "▶️ 执行下一步 (第 3 行 c = a // b)";
+    } else if (evalStep === 3) {
+      document.getElementById('val-c').textContent = "2";
+      fb.innerHTML = "👉 执行第 3 行：读取 a=8, b=3，计算 8 // 3 = 2，赋给 c！";
+      btn.textContent = "▶️ 执行下一步 (第 4 行 d = a % b)";
+      triggerCelebration({ particleCount: 20, spread: 40, origin: { y: 0.65 } });
+    } else if (evalStep === 4) {
+      document.getElementById('val-d').textContent = "2";
+      fb.innerHTML = "👉 执行第 4 行：读取 a=8, b=3，计算 8 % 3 = 2，赋给 d！";
+      btn.textContent = "▶️ 执行下一步 (第 5 行 print(c))";
+    } else if (evalStep === 5) {
+      termOut.innerHTML = '<span style="color:#34D399;">2</span>';
+      fb.innerHTML = "✨ 执行第 5 行：将 c 的当前值 2 打印输出到终端屏幕！";
+      btn.textContent = "▶️ 执行下一步 (第 6 行 print(d))";
+    } else if (evalStep === 6) {
+      termOut.innerHTML = '<span style="color:#34D399;">2<br/>2</span>';
+      fb.innerHTML = "🎉 执行第 6 行：将 d 的当前值 2 打印输出到终端屏幕！推演全部完成！";
+      btn.textContent = "✅ 全部推演完成";
+      btn.classList.remove('btn-primary');
+      btn.classList.add('btn-green');
+      triggerCelebration({ particleCount: 45, spread: 65, origin: { y: 0.65 } });
+    }
+  }
+
+  function resetEvalSim() {
+    evalStep = 1;
+    for (let i = 1; i <= 6; i++) {
+      const l = document.getElementById(`eval-line-${i}`);
+      if (l) {
+        if (i === 1) l.classList.add('active-line');
+        else l.classList.remove('active-line');
+      }
+    }
+    document.getElementById('val-a').textContent = "8";
+    document.getElementById('val-b').textContent = "未赋值";
+    document.getElementById('val-c').textContent = "未赋值";
+    document.getElementById('val-d').textContent = "未赋值";
+
+    const btn = document.getElementById('btn-eval-step');
+    btn.textContent = "▶️ 执行下一步 (第 2 行)";
+    btn.classList.add('btn-primary');
+    btn.classList.remove('btn-green');
+
+    document.getElementById('eval-term-out').innerHTML = '<span style="color:#475569; font-size:13px; font-weight: normal;">(执行第 1~4 行计算，等待 print 输出...)</span>';
+    const fb = document.getElementById('eval-feedback');
+    fb.innerHTML = "📍 执行第 1 行：a 赋值为 8。";
+  }
+
+  // ================= Slide 14: Confirm L5 Independent Task =================
+  function confirmL5Done() {
+    const fb = document.getElementById('l5-done-feedback');
+    const consoleOut = document.getElementById('l5-console-out');
+    consoleOut.innerHTML = '<span style="color:#34D399; font-size:22px; font-weight:bold;">4<br/>3</span>';
+    fb.innerHTML = "🎉 独立推演完成！对照终端输出，你的预测正确了吗？请妥善保存 calc_05.py！";
+    triggerCelebration({ particleCount: 60, spread: 70, origin: { y: 0.65 } });
+  }
+
+  // ================= Slide 15: Mastery 3-Pass Quiz =================
+  let p5_1a = false, p5_1b = false, p5_2a = false, p5_2b = false, p5_3 = false;
+
+  function checkPassL5_1a(btn, isCorrect) {
+    const parent = btn.parentElement;
+    parent.querySelectorAll('.btn').forEach(b => {
+      b.style.borderColor = 'rgba(0,0,0,0.1)';
+      b.style.background = 'var(--bg-card)';
+      b.style.color = 'var(--ink-main)';
+    });
+    if (isCorrect) {
+      btn.style.borderColor = 'var(--green-main)';
+      btn.style.background = 'var(--green-soft)';
+      btn.style.color = 'var(--green-dark)';
+      p5_1a = true;
+    } else {
+      btn.style.borderColor = '#EF4444';
+      btn.style.background = '#FEE2E2';
+      btn.style.color = '#991B1B';
+      p5_1a = false;
+    }
+    checkAllPassedL5();
+  }
+
+  function checkPassL5_1b(btn, isCorrect) {
+    const parent = btn.parentElement;
+    parent.querySelectorAll('.btn').forEach(b => {
+      b.style.borderColor = 'rgba(0,0,0,0.1)';
+      b.style.background = 'var(--bg-card)';
+      b.style.color = 'var(--ink-main)';
+    });
+    if (isCorrect) {
+      btn.style.borderColor = 'var(--green-main)';
+      btn.style.background = 'var(--green-soft)';
+      btn.style.color = 'var(--green-dark)';
+      p5_1b = true;
+    } else {
+      btn.style.borderColor = '#EF4444';
+      btn.style.background = '#FEE2E2';
+      btn.style.color = '#991B1B';
+      p5_1b = false;
+    }
+    checkAllPassedL5();
+  }
+
+  function checkPassL5_2a(btn, isCorrect) {
+    const parent = btn.parentElement;
+    parent.querySelectorAll('.btn').forEach(b => {
+      b.style.borderColor = 'rgba(0,0,0,0.1)';
+      b.style.background = 'var(--bg-card)';
+      b.style.color = 'var(--ink-main)';
+    });
+    if (isCorrect) {
+      btn.style.borderColor = 'var(--green-main)';
+      btn.style.background = 'var(--green-soft)';
+      btn.style.color = 'var(--green-dark)';
+      p5_2a = true;
+    } else {
+      btn.style.borderColor = '#EF4444';
+      btn.style.background = '#FEE2E2';
+      btn.style.color = '#991B1B';
+      p5_2a = false;
+    }
+    checkAllPassedL5();
+  }
+
+  function checkPassL5_2b(btn, isCorrect) {
+    const parent = btn.parentElement;
+    parent.querySelectorAll('.btn').forEach(b => {
+      b.style.borderColor = 'rgba(0,0,0,0.1)';
+      b.style.background = 'var(--bg-card)';
+      b.style.color = 'var(--ink-main)';
+    });
+    if (isCorrect) {
+      btn.style.borderColor = 'var(--green-main)';
+      btn.style.background = 'var(--green-soft)';
+      btn.style.color = 'var(--green-dark)';
+      p5_2b = true;
+    } else {
+      btn.style.borderColor = '#EF4444';
+      btn.style.background = '#FEE2E2';
+      btn.style.color = '#991B1B';
+      p5_2b = false;
+    }
+    checkAllPassedL5();
+  }
+
+  function checkPassL5_3(btn) {
+    btn.style.background = 'var(--green-dark)';
+    btn.textContent = '✅ 已在真实 Python 中运行并展示算术计算程序！';
+    p5_3 = true;
+    checkAllPassedL5();
+  }
+
+  function checkAllPassedL5() {
+    const award = document.getElementById('final-award-text5');
+    if (p5_1a && p5_1b && p5_2a && p5_2b && p5_3) {
+      award.innerHTML = "✅ <strong>太棒了！第05讲核心能力检查全部通过！</strong>";
+      award.style.color = "var(--green-dark)";
+      triggerCelebration({ particleCount: 90, spread: 80, origin: { y: 0.6 } });
+    }
+  }
+</script>
+
+</body>
+</html>
