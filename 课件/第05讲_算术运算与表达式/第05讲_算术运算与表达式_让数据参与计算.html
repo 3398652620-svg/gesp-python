@@ -659,37 +659,82 @@
       </div>
     </section>
 
-    <!-- ================= 06 神秘符号 % 不是百分比 ================= -->
+        <!-- ================= 06 神秘符号 % 不是百分比 ================= -->
     <section class="slide" data-slide="6">
-      <div class="slide-tag tag-purple">余数奥秘</div>
-      <h2 class="slide-title">别被外表骗了！% 在 Python 里是“取余数” 🎁</h2>
-      <div class="card-grid-2">
-        <div class="card step" style="justify-content: center; gap: 16px; padding: 26px;">
-          <div style="font-size: 24px; font-weight: 900; color: var(--purple-main);">🍪 生活情境：17 块饼干，每 5 块装一盒</div>
-          <div style="font-size: 19px; line-height: 1.7; color: var(--ink-main);">
-            • 能够装满几整盒？➔ <strong>3 盒</strong>（这是商！）<br/>
-            • 装完 3 盒后，盒子里装不下、还剩下几块？➔ <strong>2 块</strong>（这是余数！）
+      <div class="slide-tag tag-purple">情境探索 · 余数奥秘</div>
+      <h2 class="slide-title">🍪 烘焙工坊打包记：装完整盒后，桌上剩下的零头怎么办？🎁</h2>
+      
+      <!-- Scenario Hook Card -->
+      <div class="card step" style="background: linear-gradient(135deg, #FAF5FF 0%, #F3E8FF 100%); border-left: 6px solid var(--purple-main); padding: 14px 20px; margin-bottom: 12px; gap: 6px;">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <div style="font-size: 21px; font-weight: 900; color: #6B21A8;">
+            🍪 生活情境：小熊烘焙坊烤好了 17 块香脆曲奇，每 5 块装一盒！
           </div>
-          <div style="background: #FAF5FF; border: 1px solid #E9D5FF; padding: 12px 16px; border-radius: 12px; font-size: 18px; color: #6B21A8; line-height: 1.6;">
-            在数学里我们写：<code>17 ÷ 5 = 3 …… 2</code><br/>
-            在 Python 里我们用两个符号分别算出来！
+          <span style="background: var(--purple-main); color: #FFF; font-size: 16px; font-weight: 800; padding: 3px 10px; border-radius: 20px;">生活悬念</span>
+        </div>
+        <div style="font-size: 18px; color: #581C87; line-height: 1.5;">
+          • 工厂打包机装满了 <strong>3 个完整礼盒</strong>（15 块饼干），贴好封条运上货车。<br/>
+          • 可是案板上还孤零零剩下了 <strong>2 块散装饼干</strong>！拿大盒子装不满，怎么办？<br/>
+          🤔 <strong>思维冲突：</strong>数学作业本上写 <code>17 ÷ 5 = 3 …… 2</code>，但<strong>电脑键盘上根本没有“……”这个符号</strong>！Python 怎么帮我们单独算出那“剩下的 2 块零头”？
+        </div>
+      </div>
+
+      <div class="card-grid-2" style="height: auto; gap: 16px;">
+        <!-- Left: Visual Packaging Analysis -->
+        <div class="card step" style="padding: 18px; gap: 12px; background: #FFF; border-color: #E9D5FF; justify-content: space-between;">
+          <div style="font-size: 20px; font-weight: 900; color: #6B21A8;">
+            📦 饼干打包图解：整盒 vs 零头
+          </div>
+          
+          <!-- Packed Boxes -->
+          <div style="background: #F0FDF4; border: 1px solid #86EFAC; padding: 12px; border-radius: 10px;">
+            <div style="font-size: 16px; font-weight: bold; color: #166534; margin-bottom: 6px; display: flex; justify-content: space-between;">
+              <span>① 能够装满几整盒？（商）</span>
+              <span style="font-family: Consolas, monospace; font-size: 18px; color: #15803D;">17 // 5 ➔ 3 盒</span>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <span style="background: #FFF; border: 1px solid #86EFAC; padding: 4px 8px; border-radius: 6px; font-size: 16px; font-weight: bold; color: #166534;">🎁 盒1 (5块)</span>
+              <span style="background: #FFF; border: 1px solid #86EFAC; padding: 4px 8px; border-radius: 6px; font-size: 16px; font-weight: bold; color: #166534;">🎁 盒2 (5块)</span>
+              <span style="background: #FFF; border: 1px solid #86EFAC; padding: 4px 8px; border-radius: 6px; font-size: 16px; font-weight: bold; color: #166534;">🎁 盒3 (5块)</span>
+            </div>
+          </div>
+
+          <!-- Leftover Cookies -->
+          <div style="background: #FAF5FF; border: 1px solid #D8B4FE; padding: 12px; border-radius: 10px;">
+            <div style="font-size: 16px; font-weight: bold; color: #6B21A8; margin-bottom: 6px; display: flex; justify-content: space-between;">
+              <span>② 装不下、剩下的零头？（余数）</span>
+              <span style="font-family: Consolas, monospace; font-size: 18px; color: #7E22CE;">17 % 5 ➔ 2 块</span>
+            </div>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <span style="background: #FFF; border: 1px solid #D8B4FE; padding: 4px 12px; border-radius: 6px; font-size: 16px; font-weight: bold; color: #7E22CE;">🍪 🍪 孤单散装 2 块（装不满一整盒）</span>
+            </div>
+          </div>
+
+          <div style="font-size: 16px; color: #6B21A8; line-height: 1.5; background: #F5F3FF; padding: 8px 12px; border-radius: 8px;">
+            ⚠️ <strong>辟谣专栏：</strong>平时在商场看到 <code>50% OFF</code> 是打折百分比，而在 Python 算术里，<code>%</code> 是专抓余数的“<strong>零头探长</strong>”！
           </div>
         </div>
 
+        <!-- Right: Code and Console -->
         <div class="code-window step">
           <div class="code-header"><span style="color:#94A3B8; font-size:16px;">cookies.py</span></div>
-          <div class="code-body" style="font-size: 22px;">
-            <div class="code-line"><span class="line-num">1</span><span class="syntax-fn">print</span><span class="syntax-punct">(</span><span class="syntax-num">17</span> <span class="syntax-op">//</span> <span class="syntax-num">5</span><span class="syntax-punct">)</span> &nbsp;<span style="color:#64748B;"># 整除：装满 3 盒</span></div>
-            <div class="code-line"><span class="line-num">2</span><span class="syntax-fn">print</span><span class="syntax-punct">(</span><span class="syntax-num">17</span> <span class="syntax-op">%</span> <span class="syntax-num">5</span><span class="syntax-punct">)</span> &nbsp;&nbsp;<span style="color:#64748B;"># 取余：还剩 2 块</span></div>
+          <div class="code-body" style="font-size: 21px; padding: 14px 18px;">
+            <div class="code-line"><span class="line-num">1</span><span style="color:#64748B;"># 17块饼干，每5块装一盒</span></div>
+            <div class="code-line"><span class="line-num">2</span><span class="syntax-fn">print</span><span class="syntax-punct">(</span><span class="syntax-num">17</span> <span class="syntax-op">//</span> <span class="syntax-num">5</span><span class="syntax-punct">)</span> &nbsp;<span style="color:#34D399; font-weight:bold;"># 整除：装满 3 盒（商）</span></div>
+            <div class="code-line"><span class="line-num">3</span><span class="syntax-fn">print</span><span class="syntax-punct">(</span><span class="syntax-num">17</span> <span class="syntax-op">%</span> <span class="syntax-num">5</span><span class="syntax-punct">)</span> &nbsp;&nbsp;<span style="color:#C084FC; font-weight:bold;"># 取余：剩下 2 块（余数）</span></div>
           </div>
-          <div class="console-window" style="border-radius: 0 0 20px 20px; min-height: 70px;">
-            <div style="color:#64748B; font-size:16px;">&gt;_ 终端输出：</div>
-            <div style="color:#34D399; font-size:22px; font-weight:bold;">3<br/>2</div>
+          <div class="console-window" style="border-radius: 0 0 20px 20px; min-height: 75px; padding: 10px 18px;">
+            <div style="color:#64748B; font-size: 16px;">&gt;_ 终端输出：</div>
+            <div style="color:#34D399; font-size:22px; font-weight:bold;">
+              3 <span style="color:#64748B; font-size:16px; font-weight:normal;">(整盒运走)</span><br/>
+              2 <span style="color:#64748B; font-size:16px; font-weight:normal;">(剩下零头)</span>
+            </div>
           </div>
         </div>
       </div>
-      <div class="concept-box purple step" style="margin-top: 14px; text-align: center; justify-content: center; font-size: 21px;">
-        💡 核心辨析：<strong>% 在算术表达式中绝不是打折或百分比，它是专门帮我们找余数的“余数探长”！</strong>
+
+      <div class="concept-box purple step" style="margin-top: 12px; text-align: center; justify-content: center; font-size: 20px; padding: 12px 20px;">
+        💡 黄金搭档口诀：<strong><code>//</code> 算整盒（商），<code>%</code> 抓零头（余数）！两兄弟合力分工，所有数据安排得明明白白！</strong>
       </div>
     </section>
 
@@ -823,37 +868,82 @@
       </div>
     </section>
 
-    <!-- ================= 10 从数字到变量表达式 ================= -->
+        <!-- ================= 10 变量建模 ================= -->
     <section class="slide" data-slide="10">
-      <div class="slide-tag tag-blue">变量建模</div>
-      <h2 class="slide-title">从数字到变量：让程序拥有通用计算能力 🏷️</h2>
-      <div class="card-grid-2">
-        <div class="card step" style="padding: 24px; gap: 12px; background: #FFF; border-color: #CBD5E1;">
-          <div style="font-size: 22px; font-weight: 900; color: #64748B;">❌ 数字直接写死（不够灵活）</div>
-          <div style="background: #0F172A; padding: 12px 16px; border-radius: 10px; font-family: Consolas, monospace; font-size: 22px; line-height: 1.6; color: #E2E8F0;">
-            total = 12 * 4<br/>
-            print(total)
+      <div class="slide-tag tag-blue">变量建模 · 思维跃迁</div>
+      <h2 class="slide-title">🏪 文具店收银危机：从固定数字到通用变量建模 🏷️</h2>
+      
+      <!-- Top Scenario Banner -->
+      <div class="card step" style="background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%); border-left: 6px solid #3B82F6; padding: 14px 20px; margin-bottom: 12px; gap: 6px;">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <div style="font-size: 21px; font-weight: 900; color: #1E40AF;">
+            📢 突发警报：放学了！文具店收银台前排起长龙！
           </div>
-          <div style="font-size: 18px; color: var(--ink-muted); line-height: 1.6;">
-            如果商品单价变了、购买数量变了，必须重新修改代码里的数字！
+          <span style="background: #3B82F6; color: #FFF; font-size: 16px; font-weight: 800; padding: 3px 10px; border-radius: 20px;">真实痛点</span>
+        </div>
+        <div style="font-size: 18px; color: #1E3A8A; line-height: 1.5;">
+          • <strong>顾客小明：</strong>“买 4 支 12 元钢笔！” ➔ • <strong>顾客小红：</strong>“买 6 本 8 元草稿本！” ➔ • <strong>顾客小刚：</strong>“买 10 盒 15 元彩笔！”<br/>
+          🤔 <strong>扎心发问：</strong>每来一个新顾客，难道程序员都要打开代码、手动修改里面的数字并重新运行吗？！
+        </div>
+      </div>
+
+      <!-- Customer Interactive Selector -->
+      <div class="step" style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px; background: #FFF; padding: 10px 16px; border-radius: 12px; border: 1px solid #E2E8F0;">
+        <span style="font-size: 17px; font-weight: 900; color: var(--ink-main); white-space: nowrap;">👉 切换排队顾客：</span>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+          <button class="btn btn-primary customer-btn" id="cust-btn-1" style="padding: 6px 14px; font-size: 16px;" onclick="switchShopCustomer(1)">👨‍🎓 顾客A：钢笔 (12元 × 4支)</button>
+          <button class="btn btn-secondary customer-btn" id="cust-btn-2" style="padding: 6px 14px; font-size: 16px;" onclick="switchShopCustomer(2)">👧 顾客B：草稿本 (8元 × 6本)</button>
+          <button class="btn btn-secondary customer-btn" id="cust-btn-3" style="padding: 6px 14px; font-size: 16px;" onclick="switchShopCustomer(3)">👦 顾客C：水彩笔 (15元 × 10盒)</button>
+        </div>
+      </div>
+
+      <div class="card-grid-2" style="height: auto; gap: 16px;">
+        <!-- Left: Hardcoded -->
+        <div class="card step" style="padding: 18px; gap: 10px; background: #FFF; border-color: #CBD5E1;">
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <div style="font-size: 21px; font-weight: 900; color: #EF4444;">❌ 数字写死（硬编码 · 一次性筷子）</div>
+            <span id="hardcode-status-badge" style="background: #FEE2E2; color: #991B1B; font-size: 16px; font-weight: bold; padding: 2px 8px; border-radius: 6px;">只能算顾客A</span>
+          </div>
+          <div class="code-window" style="box-shadow: none;">
+            <div class="code-body" style="font-size: 20px; padding: 12px 16px; line-height: 1.5;">
+              <div class="code-line"><span class="line-num">1</span><span style="color:#64748B;"># 数字焊死在代码里</span></div>
+              <div class="code-line"><span class="line-num">2</span><span class="syntax-var">total</span> <span class="syntax-op">=</span> <span class="syntax-num">12</span> <span class="syntax-op">*</span> <span class="syntax-num">4</span></div>
+              <div class="code-line"><span class="line-num">3</span><span class="syntax-fn">print</span><span class="syntax-punct">(</span><span class="syntax-var">total</span><span class="syntax-punct">)</span> &nbsp;<span style="color:#34D399; font-weight:bold;"># 输出 48</span></div>
+            </div>
+          </div>
+          <div id="hardcode-tip" style="font-size: 16px; color: #991B1B; background: #FFF5F5; padding: 8px 12px; border-radius: 8px; line-height: 1.5;">
+            ⚠️ <strong>致命缺陷：</strong>当顾客换成买草稿本的小红时，代码不会自动变化！必须停下程序手动修改数字，收银台直接崩溃！
           </div>
         </div>
 
-        <div class="card step" style="padding: 24px; gap: 12px; background: #F0FDF4; border-color: var(--green-main);">
-          <div style="font-size: 22px; font-weight: 900; color: var(--green-dark);">✅ 变量通用表达式（专业写法）</div>
-          <div style="background: #0F172A; padding: 12px 16px; border-radius: 10px; font-family: Consolas, monospace; font-size: 22px; line-height: 1.6; color: #34D399;">
-            price = 12<br/>
-            count = 4<br/>
-            total = price * count<br/>
-            print(total)
+        <!-- Right: Variable Modeling -->
+        <div class="card step" style="padding: 18px; gap: 10px; background: #F0FDF4; border-color: var(--green-main);">
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <div style="font-size: 21px; font-weight: 900; color: var(--green-dark);">✅ 变量建模（通用自动化神器）</div>
+            <span id="model-status-badge" style="background: #DCFCE7; color: #166534; font-size: 16px; font-weight: bold; padding: 2px 8px; border-radius: 6px;">公式万能通用</span>
           </div>
-          <div style="font-size: 18px; color: var(--green-dark); line-height: 1.6;">
-            无论数量和价格怎么变，<code>price * count</code> 这个关系永远成立！
+          <div class="code-window" style="box-shadow: none;">
+            <div class="code-body" id="model-code-body" style="font-size: 20px; padding: 12px 16px; line-height: 1.5;">
+              <div class="code-line"><span class="line-num">1</span><span class="syntax-var">price</span> <span class="syntax-op">=</span> <span class="syntax-num" id="live-price-val">12</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#64748B;"># 当前单价</span></div>
+              <div class="code-line"><span class="line-num">2</span><span class="syntax-var">count</span> <span class="syntax-op">=</span> <span class="syntax-num" id="live-count-val">4</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#64748B;"># 当前数量</span></div>
+              <div class="code-line"><span class="line-num">3</span><span class="syntax-var">total</span> <span class="syntax-op">=</span> <span class="syntax-var">price</span> <span class="syntax-op">*</span> <span class="syntax-var">count</span> &nbsp;<span style="color:#10B981; font-weight:bold;"># 通用计算公式！</span></div>
+              <div class="code-line"><span class="line-num">4</span><span class="syntax-fn">print</span><span class="syntax-punct">(</span><span class="syntax-var">total</span><span class="syntax-punct">)</span></div>
+            </div>
+            <div class="console-window" style="border-radius: 0; min-height: 48px; padding: 6px 14px; font-size: 18px;">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="color:#94A3B8; font-size: 16px;">&gt;_ 终端输出：</span>
+                <span id="live-total-out" style="color:#34D399; font-size:22px; font-weight:bold;">48</span>
+              </div>
+            </div>
+          </div>
+          <div id="model-tip" style="font-size: 16px; color: var(--green-dark); background: #DCFCE7; padding: 8px 12px; border-radius: 8px; line-height: 1.5;">
+            ✨ <strong>变量威力：</strong>公式 <code>price * count</code> <strong>一字未改</strong>！换上新顾客的数据，变量自动代入计算出正确总价！
           </div>
         </div>
       </div>
-      <div class="concept-box green step" style="margin-top: 14px; text-align: center; justify-content: center; font-size: 21px;">
-        🌟 核心认知：<strong>变量参与表达式时，Python 会自动读取该变量在当前时刻保存的数值代入计算！</strong>
+
+      <div class="concept-box green step" style="margin-top: 12px; text-align: center; justify-content: center; font-size: 20px; padding: 12px 20px;">
+        🌟 核心认知跃迁：<strong>数字是具体写死的数据，变量是通用的计算插座！用变量构建表达式，程序才拥有解决万千问题的通用能力！</strong>
       </div>
     </section>
 
@@ -1509,6 +1599,55 @@
       triggerCelebration({ particleCount: 90, spread: 80, origin: { y: 0.6 } });
     }
   }
+
+  function switchShopCustomer(id) {
+    const custs = {
+      1: { name: "顾客A (钢笔)", price: 12, count: 4, total: 48 },
+      2: { name: "顾客B (草稿本)", price: 8, count: 6, total: 48 },
+      3: { name: "顾客C (水彩笔)", price: 15, count: 10, total: 150 }
+    };
+    
+    [1, 2, 3].forEach(n => {
+      const btn = document.getElementById(`cust-btn-${n}`);
+      if (btn) {
+        if (n === id) {
+          btn.classList.add('btn-primary');
+          btn.classList.remove('btn-secondary');
+        } else {
+          btn.classList.remove('btn-primary');
+          btn.classList.add('btn-secondary');
+        }
+      }
+    });
+
+    const c = custs[id];
+    document.getElementById('live-price-val').textContent = c.price;
+    document.getElementById('live-count-val').textContent = c.count;
+    document.getElementById('live-total-out').textContent = c.total;
+
+    const hardBadge = document.getElementById('hardcode-status-badge');
+    const hardTip = document.getElementById('hardcode-tip');
+    if (id === 1) {
+      hardBadge.textContent = "只能算顾客A";
+      hardBadge.style.background = "#FEE2E2";
+      hardBadge.style.color = "#991B1B";
+      hardTip.innerHTML = "⚠️ <strong>致命缺陷：</strong>当顾客换成买草稿本的小红时，代码不会自动变化！必须停下程序手动修改数字，收银台直接崩溃！";
+    } else if (id === 2) {
+      hardBadge.textContent = "代码已失控";
+      hardBadge.style.background = "#FEF3C7";
+      hardBadge.style.color = "#92400E";
+      hardTip.innerHTML = "⚠️ <strong>隐蔽陷阱：</strong>虽然 8×6 碰巧也是 48，但代码里死写的 12 和 4 根本不是草稿本的单价与数量！";
+    } else {
+      hardBadge.textContent = "严重账目错误！";
+      hardBadge.style.background = "#EF4444";
+      hardBadge.style.color = "#FFF";
+      hardTip.innerHTML = "🚨 <strong>大祸临头：</strong>水彩笔应收 150 元！但写死的代码依然算成 48 元！少收了 102 元，老板要开除你了！";
+    }
+
+    const modelTip = document.getElementById('model-tip');
+    modelTip.innerHTML = `✨ <strong>变量威力：</strong>公式 <code>price * count</code> <strong>一字未改</strong>！Python 自动读取 <code>${c.price} * ${c.count}</code> 瞬间算出 <strong>${c.total}</strong> 元！`;
+  }
+
 </script>
 
 </body>
