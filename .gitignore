@@ -1,0 +1,17 @@
+# OS generated files
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+
+# Python
+__pycache__/
+*.pyc
+
+# Local test & scratch
+scratch/
+test_script*.js

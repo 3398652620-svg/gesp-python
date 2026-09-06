@@ -1,0 +1,1464 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第02讲 输出与基本数据：让程序表达信息</title>
+  <!-- GSAP Animation Engine with Fallback Support -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <!-- Canvas Confetti for Celebrations with Fallback -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+  <style>
+    :root {
+      --bg-paper: #FFF7ED;
+      --bg-card: #FFFFFF;
+      --ink-main: #1C1917;
+      --ink-muted: #78716C;
+      --orange-main: #F97316;
+      --orange-dark: #C2410C;
+      --orange-soft: #FFEDD5;
+      --green-main: #10B981;
+      --green-dark: #047857;
+      --green-soft: #D1FAE5;
+      --yellow-sun: #FBBF24;
+      --yellow-dark: #B45309;
+      --yellow-soft: #FEF3C7;
+      --blue-night: #4F46E5;
+      --blue-dark: #3730A3;
+      --blue-soft: #EEF2FF;
+      --purple-main: #9333EA;
+      --purple-soft: #F3E8FF;
+      --code-board: #0F172A;
+      --code-text: #E2E8F0;
+      --radius-lg: 24px;
+      --radius-md: 16px;
+      --radius-pill: 999px;
+      --shadow-soft: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.03);
+      --shadow-card: 0 20px 25px -5px rgba(249, 115, 22, 0.08), 0 8px 10px -6px rgba(249, 115, 22, 0.04);
+      --shadow-drag: 0 20px 30px rgba(0, 0, 0, 0.15);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background-color: var(--bg-paper);
+      color: var(--ink-main);
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #stage-container {
+      width: 100vw;
+      height: 100vh;
+      max-width: 177.78vh;
+      max-height: 56.25vw;
+      position: relative;
+      background: var(--bg-paper);
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 0 50px rgba(0,0,0,0.08);
+      overflow: hidden;
+      cursor: default;
+    }
+
+    header {
+      height: 64px;
+      padding: 0 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 2px solid rgba(0,0,0,0.04);
+      background: rgba(255, 247, 237, 0.95);
+      backdrop-filter: blur(10px);
+      z-index: 100;
+      flex-shrink: 0;
+    }
+
+    .brand-tag {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--orange-main);
+      background: var(--orange-soft);
+      padding: 6px 16px;
+      border-radius: var(--radius-pill);
+    }
+
+    .lesson-title-nav {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--ink-main);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .nav-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .slide-counter {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--ink-muted);
+      background: var(--bg-card);
+      padding: 6px 14px;
+      border-radius: var(--radius-pill);
+      box-shadow: var(--shadow-soft);
+      border: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .btn-nav-icon {
+      background: var(--bg-card);
+      border: 1px solid rgba(0,0,0,0.08);
+      color: var(--ink-main);
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: bold;
+      transition: all 0.2s;
+    }
+
+    .btn-nav-icon:hover {
+      background: var(--orange-main);
+      color: #fff;
+      border-color: var(--orange-main);
+      transform: scale(1.08);
+    }
+
+    .progress-bar-container {
+      height: 4px;
+      width: 100%;
+      background: rgba(0,0,0,0.05);
+      position: absolute;
+      top: 64px;
+      left: 0;
+      z-index: 101;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 6.25%;
+      background: linear-gradient(90deg, var(--orange-main), var(--yellow-sun));
+      transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    main {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+    }
+
+    .slide {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      padding: 32px 64px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 0.35s ease, transform 0.35s ease;
+      overflow-y: auto;
+    }
+
+    .slide.active {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transform: translateX(0);
+    }
+
+    .slide.prev {
+      transform: translateX(-40px);
+    }
+
+    .slide.next {
+      transform: translateX(40px);
+    }
+
+    /* Step-Reveal Progressive Disclosure System */
+    .step {
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+      pointer-events: none;
+    }
+
+    .step.revealed {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    .slide-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 15px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 6px 16px;
+      border-radius: var(--radius-pill);
+      margin-bottom: 12px;
+      width: fit-content;
+    }
+
+    .tag-orange { background: var(--orange-soft); color: var(--orange-dark); }
+    .tag-green { background: var(--green-soft); color: var(--green-dark); }
+    .tag-blue { background: var(--blue-soft); color: var(--blue-dark); }
+    .tag-purple { background: var(--purple-soft); color: var(--purple-main); }
+
+    .slide-title {
+      font-size: 34px;
+      font-weight: 900;
+      color: var(--ink-main);
+      margin-bottom: 20px;
+      line-height: 1.25;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .card-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 28px;
+      width: 100%;
+      height: calc(100% - 90px);
+      align-items: center;
+    }
+
+    .card-grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 24px;
+      width: 100%;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      box-shadow: var(--shadow-card);
+      border: 1px solid rgba(0,0,0,0.05);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .card-hover:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 20px 25px -5px rgba(249, 115, 22, 0.12);
+      transition: all 0.25s ease;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 14px 28px;
+      border-radius: var(--radius-pill);
+      font-size: 18px;
+      font-weight: 800;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      text-decoration: none;
+      outline: none;
+    }
+
+    .btn:active { transform: scale(0.96); }
+    .btn-primary { background: var(--orange-main); color: #FFF; box-shadow: 0 8px 18px rgba(249, 115, 22, 0.3); }
+    .btn-primary:hover { background: var(--orange-dark); transform: translateY(-2px); }
+    .btn-green { background: var(--green-main); color: #FFF; box-shadow: 0 8px 18px rgba(16, 185, 129, 0.3); }
+    .btn-green:hover { background: var(--green-dark); transform: translateY(-2px); }
+    .btn-blue { background: var(--blue-night); color: #FFF; box-shadow: 0 8px 18px rgba(79, 70, 229, 0.3); }
+    .btn-blue:hover { background: var(--blue-dark); transform: translateY(-2px); }
+    .btn-secondary { background: var(--bg-card); color: var(--ink-main); border: 2px solid rgba(0,0,0,0.1); }
+    .btn-secondary:hover { background: #FAFAFA; border-color: var(--orange-main); color: var(--orange-main); }
+
+    /* Code Window */
+    .code-window {
+      background: var(--code-board);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: 0 16px 36px rgba(15, 23, 42, 0.25);
+      border: 1px solid rgba(255,255,255,0.1);
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+    }
+
+    .code-header {
+      background: #1E293B;
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .code-body {
+      padding: 24px;
+      font-family: "Consolas", "Courier New", monospace;
+      font-size: 21px;
+      line-height: 1.8;
+      color: var(--code-text);
+      flex: 1;
+      overflow: auto;
+    }
+
+    .code-line {
+      display: flex;
+      align-items: center;
+      padding: 6px 12px;
+      border-radius: 8px;
+      transition: background 0.2s, border 0.2s;
+    }
+
+    .line-num {
+      width: 36px;
+      color: #64748B;
+      user-select: none;
+      font-size: 18px;
+    }
+
+    .syntax-fn { color: #38BDF8; font-weight: bold; }
+    .syntax-var { color: #F472B6; font-weight: bold; }
+    .syntax-str { color: #34D399; }
+    .syntax-num { color: #F59E0B; font-weight: bold; }
+    .syntax-op { color: #F87171; font-weight: bold; }
+    .syntax-punct { color: #F8FAFC; }
+    .syntax-err { color: #EF4444; font-weight: bold; }
+
+    .console-window {
+      background: #020617;
+      border-radius: var(--radius-lg);
+      padding: 20px 24px;
+      font-family: "Consolas", monospace;
+      font-size: 20px;
+      color: #38BDF8;
+      border: 1px solid #1E293B;
+      min-height: 120px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .concept-box {
+      background: linear-gradient(135deg, #FFF7ED 0%, #FFEDD5 100%);
+      border: 2px solid var(--orange-main);
+      border-radius: var(--radius-lg);
+      padding: 24px 32px;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--orange-dark);
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .concept-box.green {
+      background: linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%);
+      border-color: var(--green-main);
+      color: var(--green-dark);
+    }
+
+    .concept-box.blue {
+      background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);
+      border-color: var(--blue-night);
+      color: var(--blue-dark);
+    }
+
+    .concept-box.purple {
+      background: linear-gradient(135deg, #FAF5FF 0%, #F3E8FF 100%);
+      border-color: var(--purple-main);
+      color: #6B21A8;
+    }
+
+    .option-card {
+      background: var(--bg-card);
+      border: 2px solid #E7E5E4;
+      border-radius: var(--radius-lg);
+      padding: 18px 24px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .option-card:hover {
+      border-color: var(--blue-night);
+      background: var(--blue-soft);
+      transform: translateY(-2px);
+    }
+
+    .option-card.selected-correct {
+      border-color: var(--green-main);
+      background: var(--green-soft);
+      color: var(--green-dark);
+    }
+
+    .option-card.selected-wrong {
+      border-color: #EF4444;
+      background: #FEE2E2;
+      color: #991B1B;
+    }
+
+    /* Drag and Drop 2 Zones */
+    .drag-zone-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      width: 100%;
+      margin-top: 14px;
+    }
+
+    .drop-zone {
+      background: var(--bg-card);
+      border: 3px dashed #CBD5E1;
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      min-height: 190px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: all 0.25s;
+    }
+
+    .drop-zone.hovered {
+      border-color: var(--orange-main);
+      background: var(--orange-soft);
+    }
+
+    .drop-zone-title {
+      font-size: 20px;
+      font-weight: 900;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .chip-pool {
+      background: rgba(255,255,255,0.7);
+      border: 2px dashed #E2E8F0;
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+      min-height: 75px;
+      align-items: center;
+    }
+
+    .drag-chip {
+      background: #FFF;
+      border: 2px solid #E2E8F0;
+      padding: 8px 18px;
+      border-radius: var(--radius-pill);
+      font-family: Consolas, monospace;
+      font-size: 19px;
+      font-weight: bold;
+      color: var(--ink-main);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+      cursor: grab;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .drag-chip:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-drag);
+      border-color: var(--orange-main);
+    }
+
+    .drag-chip:active {
+      cursor: grabbing;
+    }
+
+    .drag-chip.placed-correct {
+      background: var(--green-soft);
+      border-color: var(--green-main);
+      color: var(--green-dark);
+    }
+
+    footer {
+      height: 60px;
+      padding: 0 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(255, 247, 237, 0.95);
+      border-top: 2px solid rgba(0,0,0,0.04);
+      z-index: 100;
+      flex-shrink: 0;
+    }
+
+    .shortcut-hint {
+      font-size: 15px;
+      color: var(--ink-muted);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .key-badge {
+      background: var(--bg-card);
+      border: 1px solid #D6D3D1;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-family: monospace;
+      font-size: 13px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+  </style>
+</head>
+<body>
+
+<div id="stage-container">
+  <!-- Header Navigation -->
+  <header>
+    <div class="brand-tag">
+      <span>📢</span>
+      <span>GESP Python 启航</span>
+    </div>
+    <div class="lesson-title-nav">
+      <span>第02讲</span>
+      <span style="color:var(--ink-muted);">|</span>
+      <span>输出与基本数据：让程序表达信息</span>
+    </div>
+    <div class="nav-controls">
+      <div class="slide-counter" id="slide-counter">01 / 16</div>
+      <button class="btn-nav-icon" id="btn-prev" title="上一步 / 上一幕 (←)">❮</button>
+      <button class="btn-nav-icon" id="btn-next" title="下一步 / 下一幕 (→/空格/点击空白)">❯</button>
+      <button class="btn-nav-icon" id="btn-fullscreen" title="全屏切换 (F)">⛶</button>
+    </div>
+  </header>
+
+  <!-- Top Progress Bar -->
+  <div class="progress-bar-container">
+    <div class="progress-bar-fill" id="progress-fill"></div>
+  </div>
+
+  <!-- Slides Viewport -->
+  <main id="slides-viewport">
+
+    <!-- ================= 01 封面 ================= -->
+    <section class="slide active" data-slide="1">
+      <div style="text-align: center; max-width: 960px; margin: 0 auto;">
+        <div class="slide-tag tag-orange step revealed" style="margin: 0 auto 18px;">第一阶段 · 程序、数据与状态</div>
+        <h1 class="step revealed" style="font-size: 46px; font-weight: 900; line-height: 1.25; margin-bottom: 20px; color: var(--ink-main);">
+          输出与基本数据<br/>
+          <span style="color: var(--orange-main);">让程序表达信息 📢</span>
+        </h1>
+        <p class="step revealed" style="font-size: 23px; color: var(--ink-muted); margin-bottom: 36px;">
+          拆解 print 指令，理解字符串与引号，探索数值与顺序执行！
+        </p>
+        <div class="step revealed" style="display: flex; justify-content: center; gap: 20px;">
+          <button class="btn btn-primary" style="font-size: 20px; padding: 16px 36px;" onclick="goToSlide(2)">开启第02讲探索 🚀 (或按空格键)</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 02 回顾与引入 ================= -->
+    <section class="slide" data-slide="2">
+      <div class="slide-tag tag-blue">承前启后</div>
+      <h2 class="slide-title">从“执行动作”到“表达信息” 🤖 ➔ 📢</h2>
+      <div class="card-grid-2">
+        <div class="card card-hover step" style="justify-content: center; padding: 30px;">
+          <div style="font-size: 40px; margin-bottom: 10px;">🤖 💬 回顾第01讲</div>
+          <div style="font-size: 20px; color: var(--ink-main); line-height: 1.65;">
+            我们已经让机器人小派学会了按照明确指令顺序前进、转向。<br/>
+            但在屏幕的世界里，<strong>如果程序想把文字或数字显示给人类看</strong>，该使用什么工具呢？
+          </div>
+        </div>
+
+        <div class="concept-box orange step" style="flex-direction: column; justify-content: center; text-align: center; padding: 30px;">
+          <div style="font-size: 52px; margin-bottom: 10px;">🪄 print( )</div>
+          <div style="font-size: 23px; color: var(--orange-dark); line-height: 1.55;">
+            这就是 Python 中专门用来向屏幕<strong>输出与显示信息</strong>的基本工具！
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 03 拆解 print 指令 ================= -->
+    <section class="slide" data-slide="3">
+      <div class="slide-tag tag-orange">语法解构</div>
+      <h2 class="slide-title">拆解 print 指令：print("你好，Python！") 🔍</h2>
+      <div style="max-width: 920px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; gap: 20px;">
+        <div style="background: #0F172A; border-radius: 16px; padding: 24px; font-family: Consolas, monospace; font-size: 32px; color: #FFF; text-align: center; box-shadow: 0 8px 24px rgba(15,23,42,0.25);">
+          <span style="color: #38BDF8; font-weight: bold;">print</span><span style="color: #F8FAFC;">(</span><span style="color: #34D399;">"你好，Python！"</span><span style="color: #F8FAFC;">)</span>
+        </div>
+        <div class="card-grid-3" style="gap: 16px;">
+          <div class="step" style="background: #F0F9FF; border: 1px solid #BAE6FD; padding: 18px; border-radius: 14px; text-align: center;">
+            <div style="font-size: 22px; font-weight: 900; color: #0369A1; margin-bottom: 6px;">1. print 动作名称</div>
+            <div style="font-size: 16px; color: #0C4A6E; line-height: 1.5;">告诉 Python 去“输出/显示”</div>
+          </div>
+          <div class="step" style="background: #FEF3C7; border: 1px solid #FDE68A; padding: 18px; border-radius: 14px; text-align: center;">
+            <div style="font-size: 22px; font-weight: 900; color: #B45309; margin-bottom: 6px;">2. ( ) 圆括号包裹</div>
+            <div style="font-size: 16px; color: #78350F; line-height: 1.5;">把要输出的内容装在括号里</div>
+          </div>
+          <div class="step" style="background: #F0FDF4; border: 1px solid #86EFAC; padding: 18px; border-radius: 14px; text-align: center;">
+            <div style="font-size: 22px; font-weight: 900; color: #166534; margin-bottom: 6px;">3. "..." 引号标记</div>
+            <div style="font-size: 16px; color: #14532D; line-height: 1.5;">标明这里是一段具体的文字数据</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 04 什么是字符串 ================= -->
+    <section class="slide" data-slide="4">
+      <div class="slide-tag tag-green">基本数据</div>
+      <h2 class="slide-title">认识文字数据：字符串 (String) 📝</h2>
+      <div class="card-grid-2">
+        <div class="concept-box green step" style="flex-direction: column; align-items: flex-start; padding: 28px; gap: 14px;">
+          <div style="font-size: 28px;">📝 字符串 (String)</div>
+          <div style="font-size: 19px; font-weight: normal; color: var(--ink-main); line-height: 1.65;">
+            由字符组成的数据。在 Python 中直接写出一段文字时，<strong>通常必须使用成对的引号包起来</strong>！
+          </div>
+        </div>
+
+        <div class="card step" style="justify-content: center; gap: 14px; padding: 26px;">
+          <div style="font-size: 20px; font-weight: 900; color: var(--green-dark);">💡 只要在引号里，都是字符串：</div>
+          <div style="font-size: 17px; color: var(--ink-main); line-height: 1.65;">
+            • <code>"深圳"</code> ➔ 汉字字符串<br/>
+            • <code>"ABC"</code> ➔ 英文字符串<br/>
+            • <code>"123"</code> ➔ 带引号的数字字符串<br/>
+            • <code>"🌟🚀"</code> ➔ Emoji 字符串
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 05 为什么需要引号 ================= -->
+    <section class="slide" data-slide="5">
+      <div class="slide-tag tag-orange">边界认知</div>
+      <h2 class="slide-title">为什么文字需要加引号？🤔</h2>
+      <div class="card-grid-2">
+        <div class="card card-hover step" style="padding: 24px; gap: 12px; background: #F0FDF4; border-color: var(--green-main);">
+          <div style="font-size: 20px; font-weight: 900; color: var(--green-dark);">✅ 加上引号：print("hello")</div>
+          <div style="background:#0F172A; padding:10px 14px; border-radius:8px; font-family:Consolas, monospace; font-size:18px; color:#FFF;">
+            <span class="syntax-fn">print</span><span class="syntax-punct">(</span><span class="syntax-str">"hello"</span><span class="syntax-punct">)</span>
+          </div>
+          <div style="font-size: 16px; color: var(--ink-main); line-height: 1.6;">
+            Python 清楚地知道：这是一段<strong>文字字符串</strong>，会把 <code>hello</code> 原样显示在屏幕上！
+          </div>
+        </div>
+
+        <div class="card card-hover step" style="padding: 24px; gap: 12px; background: #FEF2F2; border-color: #EF4444;">
+          <div style="font-size: 20px; font-weight: 900; color: #991B1B;">❌ 没加引号：print(hello)</div>
+          <div style="background:#0F172A; padding:10px 14px; border-radius:8px; font-family:Consolas, monospace; font-size:18px; color:#FFF;">
+            <span class="syntax-fn">print</span><span class="syntax-punct">(</span><span class="syntax-err">hello</span><span class="syntax-punct">)</span>
+          </div>
+          <div style="font-size: 16px; color: var(--ink-main); line-height: 1.6;">
+            没有引号后，Python 不会再把 hello 当作一段普通文字来处理，因此会<strong>产生错误</strong>！
+          </div>
+        </div>
+      </div>
+      <div class="concept-box blue step" style="margin-top: 16px; text-align: center; justify-content: center; font-size: 20px; padding: 14px 20px;">
+        💡 悬念：没有引号的英文名字在 Python 里还能表示什么？我们在<strong>第03讲《变量与赋值》</strong>中会正式揭晓！
+      </div>
+    </section>
+
+    <!-- ================= 06 引号成对与中英文符号 ================= -->
+    <section class="slide" data-slide="6">
+      <div class="slide-tag tag-purple">规则法典</div>
+      <h2 class="slide-title">引号成对法则与标点符号边界 📜</h2>
+      <div class="card-grid-2">
+        <div class="card step" style="padding: 24px; gap: 10px; background: #FFF;">
+          <div style="font-size: 20px; font-weight: 900; color: var(--purple-main);">🌟 单双引号成对法则：</div>
+          <div style="font-size: 17px; color: var(--ink-main); line-height: 1.65;">
+            • 双引号成对：<code>print("Python")</code> ✅<br/>
+            • 单引号成对：<code>print('Python')</code> ✅<br/>
+            • 严禁混用：<code>print("Python')</code> ❌ <span style="color:#EF4444; font-size:14px;">(前后不匹配报错)</span>
+          </div>
+        </div>
+
+        <div class="card step" style="padding: 24px; gap: 10px; background: #FFF;">
+          <div style="font-size: 20px; font-weight: 900; color: var(--orange-dark);">💡 中英文标点使用边界：</div>
+          <div style="font-size: 17px; color: var(--ink-main); line-height: 1.65;">
+            • <strong>代码语法符号</strong>（括号、引号）必须是<strong>英文半角符号</strong>！<br/>
+            • <strong>引号内部文字</strong>可以自由包含中文标点：<br/>
+            <code>print("你好，深圳！")</code> ✅ <span style="color:var(--green-dark); font-size:14px;">(引号内中文逗号感叹号完全正常)</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 07 找错小侦探 ================= -->
+    <section class="slide" data-slide="7">
+      <div class="slide-tag tag-orange">找错小侦探</div>
+      <h2 class="slide-title">找错小侦探：哪一行代码是完全正确的？🔍</h2>
+      <div style="max-width: 880px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; gap: 12px;">
+        <div class="option-card step" onclick="checkDetective(this, false, '这行代码漏掉了后面的闭合双引号！')">
+          <span style="font-family: Consolas, monospace; font-size: 21px; flex: 1;">print("北京)</span>
+          <span style="font-size: 16px; color: var(--ink-muted);">点击诊断 🔍</span>
+        </div>
+        <div class="option-card step" onclick="checkDetective(this, true, '完全正确！括号、成对双引号全部合规！')">
+          <span style="font-family: Consolas, monospace; font-size: 21px; flex: 1;">print("深圳")</span>
+          <span style="font-size: 16px; color: var(--ink-muted);">点击诊断 🔍</span>
+        </div>
+        <div class="option-card step" onclick="checkDetective(this, false, '前面是双引号，后面是单引号，不能混用哦！')">
+          <span style="font-family: Consolas, monospace; font-size: 21px; flex: 1;">print("上海')</span>
+          <span style="font-size: 16px; color: var(--ink-muted);">点击诊断 🔍</span>
+        </div>
+        <div id="detective-feedback" style="font-size: 18px; font-weight: bold; min-height: 28px;"></div>
+      </div>
+    </section>
+
+    <!-- ================= 08 初步认识数值与字符串 ================= -->
+    <section class="slide" data-slide="8">
+      <div class="slide-tag tag-blue">数据探索</div>
+      <h2 class="slide-title">初步认识：数值数据 vs 字符串数据 🔢 vs 🔤</h2>
+      <div class="card-grid-2">
+        <div class="card step" style="background: #FEF3C7; border-color: #F59E0B; padding: 26px; gap: 12px;">
+          <div style="font-size: 32px;">🔢 数值数据 (Number)</div>
+          <div style="font-size: 18px; color: var(--ink-main); line-height: 1.65;">
+            直接写在括号里的数字：<br/>
+            • 整数：<code>print(10)</code>、<code>print(100)</code><br/>
+            • 带小数点的数字：<code>print(3.14)</code>、<code>print(9.5)</code><br/>
+            <strong>数字直接书写，不需要加引号！</strong>
+          </div>
+        </div>
+
+        <div class="card step" style="background: #F0FDF4; border-color: var(--green-main); padding: 26px; gap: 12px;">
+          <div style="font-size: 32px;">🔤 字符串数据 (String)</div>
+          <div style="font-size: 18px; color: var(--ink-main); line-height: 1.65;">
+            用成对引号包裹的内容：<br/>
+            • 文字：<code>print("深圳")</code><br/>
+            • 带引号的数字：<code>print("10")</code>、<code>print("3.14")</code><br/>
+            <strong>只要被引号包起来，就是字符串！</strong>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 09 拖拽分类：数字还是字符串 ================= -->
+    <section class="slide" data-slide="9">
+      <div class="slide-tag tag-green">分类挑战</div>
+      <h2 class="slide-title">分一分：判断它们是“数值数据”还是“字符串” 📦</h2>
+      
+      <!-- Chips Pool -->
+      <div class="chip-pool" id="chip-pool">
+        <div class="drag-chip" draggable="true" data-type="num" id="chip-1">100</div>
+        <div class="drag-chip" draggable="true" data-type="num" id="chip-2">3.14</div>
+        <div class="drag-chip" draggable="true" data-type="str" id="chip-3">"北京"</div>
+        <div class="drag-chip" draggable="true" data-type="str" id="chip-4">"88"</div>
+        <div class="drag-chip" draggable="true" data-type="num" id="chip-5">0</div>
+        <div class="drag-chip" draggable="true" data-type="num" id="chip-6">9.5</div>
+        <div class="drag-chip" draggable="true" data-type="str" id="chip-7">"3.14"</div>
+        <div class="drag-chip" draggable="true" data-type="str" id="chip-8">"Python"</div>
+      </div>
+
+      <!-- 2 Drop Zones -->
+      <div class="drag-zone-container">
+        <div class="drop-zone" id="zone-num" data-accept="num">
+          <div class="drop-zone-title" style="color: #B45309;">
+            <span>🔢</span> <span>数值数据 (直接写的数字)</span>
+          </div>
+          <div class="zone-chips" style="display:flex; flex-wrap:wrap; gap:8px;"></div>
+        </div>
+
+        <div class="drop-zone" id="zone-str" data-accept="str">
+          <div class="drop-zone-title" style="color: #047857;">
+            <span>🔤</span> <span>字符串 (带成对引号)</span>
+          </div>
+          <div class="zone-chips" style="display:flex; flex-wrap:wrap; gap:8px;"></div>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+        <div id="drag-feedback" style="font-size: 16px; font-weight: bold; color: var(--green-dark);">拖拽或点击上方卡片放入对应区域！</div>
+        <button class="btn btn-secondary" style="padding: 6px 16px; font-size: 14px;" onclick="resetDragChips()">🔄 重新整理</button>
+      </div>
+    </section>
+
+    <!-- ================= 10 核心冲突：10 与 "10" ================= -->
+    <section class="slide" data-slide="10">
+      <div class="slide-tag tag-orange">核心悬念</div>
+      <h2 class="slide-title">10 与 "10" 看起来一样，真一样吗？🤔</h2>
+      <div class="card-grid-2">
+        <!-- Left Card: Question 1 & Answer 1 -->
+        <div class="card step" style="padding: 26px; gap: 12px; background: #FFF7ED; border-color: var(--orange-main); min-height: 210px;">
+          <div style="font-size: 21px; font-weight: 900; color: var(--orange-dark);">❓ 第一问：屏幕显示的样子一样吗？</div>
+          <div class="step" style="font-size: 18px; color: var(--ink-main); line-height: 1.6; background: rgba(255,255,255,0.75); padding: 12px 18px; border-radius: 12px; border: 1px solid rgba(249,115,22,0.25);">
+            <strong>答案：一模一样！</strong><br/>
+            <code>print(10)</code> ➔ 显示 <code>10</code><br/>
+            <code>print("10")</code> ➔ 显示 <code>10</code>
+          </div>
+        </div>
+
+        <!-- Right Card: Question 2 & Answer 2 -->
+        <div class="card step" style="padding: 26px; gap: 12px; background: #EEF2FF; border-color: var(--blue-night); min-height: 210px;">
+          <div style="font-size: 21px; font-weight: 900; color: var(--blue-dark);">❓ 第二问：程序里的数据一样吗？</div>
+          <div class="step" style="font-size: 18px; color: var(--ink-main); line-height: 1.6; background: rgba(255,255,255,0.75); padding: 12px 18px; border-radius: 12px; border: 1px solid rgba(79,70,229,0.25);">
+            <strong>答案：完全不同！</strong><br/>
+            • <code>10</code> 是<strong>数值形式</strong>（未来可做加减数学计算）<br/>
+            • <code>"10"</code> 是<strong>文字形式</strong>（就像印在球衣上的 10 号图案）
+          </div>
+        </div>
+      </div>
+      <div class="concept-box green step" style="margin-top: 16px; text-align: center; justify-content: center; font-size: 22px;">
+        🌟 核心认知：<strong>显示出来一样，不代表程序里的数据一样！</strong>
+      </div>
+    </section>
+
+    <!-- ================= 11 顺序预测训练 1 ================= -->
+    <section class="slide" data-slide="11">
+      <div class="slide-tag tag-purple">顺序执行</div>
+      <h2 class="slide-title">多行 print 顺序训练：预测输出结果 🔮</h2>
+      <div class="card-grid-2">
+        <div class="code-window step">
+          <div class="code-header"><span style="color:#94A3B8; font-size:15px;">steps.py</span></div>
+          <div class="code-body">
+            <div class="code-line"><span class="line-num">1</span><span class="syntax-fn">print</span><span class="syntax-punct">(</span><span class="syntax-str">"准备"</span><span class="syntax-punct">)</span></div>
+            <div class="code-line"><span class="line-num">2</span><span class="syntax-fn">print</span><span class="syntax-punct">(</span><span class="syntax-str">"开始"</span><span class="syntax-punct">)</span></div>
+            <div class="code-line"><span class="line-num">3</span><span class="syntax-fn">print</span><span class="syntax-punct">(</span><span class="syntax-str">"完成"</span><span class="syntax-punct">)</span></div>
+          </div>
+        </div>
+
+        <div class="card step" style="padding: 26px; justify-content: center; gap: 14px;">
+          <div style="font-size: 20px; font-weight: 900; color: var(--ink-main);">❓ 思考：程序运行后会按什么顺序输出？</div>
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            <button class="btn btn-secondary" style="font-size: 16px; padding: 10px 16px; text-align: left;" onclick="checkOrder1(this, true)">A. 自上而下一行行输出：准备 ➔ 开始 ➔ 完成</button>
+            <button class="btn btn-secondary" style="font-size: 16px; padding: 10px 16px; text-align: left;" onclick="checkOrder1(this, false)">B. 自下而上反向输出：完成 ➔ 开始 ➔ 准备</button>
+            <button class="btn btn-secondary" style="font-size: 16px; padding: 10px 16px; text-align: left;" onclick="checkOrder1(this, false)">C. 随机挑一行先输出</button>
+          </div>
+          <div id="order1-feedback" style="font-size: 16px; font-weight: bold; min-height: 24px;"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 12 顺序变式训练 2 ================= -->
+    <section class="slide" data-slide="12">
+      <div class="slide-tag tag-purple">顺序变式</div>
+      <h2 class="slide-title">调换代码顺序：输出会随之改变吗？🔄</h2>
+      <div class="card-grid-2">
+        <div class="code-window step">
+          <div class="code-header"><span style="color:#94A3B8; font-size:15px;">steps_swap.py</span></div>
+          <div class="code-body">
+            <div class="code-line"><span class="line-num">1</span><span class="syntax-fn">print</span><span class="syntax-punct">(</span><span class="syntax-str">"第三步：完成"</span><span class="syntax-punct">)</span></div>
+            <div class="code-line"><span class="line-num">2</span><span class="syntax-fn">print</span><span class="syntax-punct">(</span><span class="syntax-str">"第一步：准备"</span><span class="syntax-punct">)</span></div>
+            <div class="code-line"><span class="line-num">3</span><span class="syntax-fn">print</span><span class="syntax-punct">(</span><span class="syntax-str">"第二步：开始"</span><span class="syntax-punct">)</span></div>
+          </div>
+        </div>
+
+        <div class="card step" style="padding: 26px; justify-content: center; gap: 14px;">
+          <div style="font-size: 20px; font-weight: 900; color: var(--ink-main);">❓ 调换代码行顺序后，输出顺序会怎样？</div>
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            <button class="btn btn-secondary" style="font-size: 16px; padding: 10px 16px; text-align: left;" onclick="checkOrder2(this, false)">A. 仍然自动按 第一步 ➔ 第二步 ➔ 第三步 输出</button>
+            <button class="btn btn-secondary" style="font-size: 16px; padding: 10px 16px; text-align: left;" onclick="checkOrder2(this, true)">B. 严格按照代码新顺序：第三步 ➔ 第一步 ➔ 第二步 输出</button>
+          </div>
+          <div id="order2-feedback" style="font-size: 16px; font-weight: bold; min-height: 24px;"></div>
+        </div>
+      </div>
+      <div class="concept-box green step" style="margin-top: 14px; text-align: center; justify-content: center; font-size: 20px; padding: 14px 20px;">
+        🌟 核心认知：<strong>代码顺序决定执行顺序，修改代码行的先后，输出顺序随之改变！</strong>
+      </div>
+    </section>
+
+    <!-- ================= 13 真实 Python 实战：第一张信息卡 ================= -->
+    <section class="slide" data-slide="13">
+      <div class="slide-tag tag-green">实战演练</div>
+      <h2 class="slide-title">实战：编写《我的第一张 Python 信息卡》📇</h2>
+      <div class="card-grid-2">
+        <!-- Left: Real Python Code Guide -->
+        <div class="card step" style="padding: 24px; background: #FFF; border-color: var(--green-main); justify-content: center; gap: 10px;">
+          <div style="font-size: 20px; font-weight: 900; color: var(--green-dark);">🚀 真实 Python 环境实战步骤：</div>
+          <div style="font-size: 16px; color: var(--ink-main); line-height: 1.6;">
+            1. 打开 Python 编辑器，新建保存为：<strong style="color:var(--orange-dark); font-size: 17px;">my_card_02.py</strong><br/>
+            2. 输入以下代码（可以修改为你自己的姓名和幸运数字）：<br/>
+            <code style="background:#F8FAFC; padding:8px 12px; border-radius:6px; display:block; margin:6px 0; font-size:15px; font-family:Consolas, monospace; line-height: 1.45;">
+              print("=== 我的信息卡 ===")<br/>
+              print("姓名：小明")<br/>
+              print("喜欢：机器人")<br/>
+              print(7)<br/>
+              print("================")
+            </code>
+            3. 观察输出结果，向老师展示！
+          </div>
+          <button class="btn btn-green" style="padding: 10px 20px; font-size: 17px; margin-top: 4px;" onclick="confirmL2Done()">✅ 我已完成，并向老师展示运行结果</button>
+          <div id="l2-done-feedback" style="font-size: 16px; font-weight: bold; color: var(--green-dark); min-height: 20px;"></div>
+        </div>
+
+        <!-- Right: Preview Console -->
+        <div class="card step" style="padding: 24px; background: #020617; border-color: #1E293B; justify-content: center;">
+          <div style="color: #94A3B8; font-size: 16px; margin-bottom: 10px;">&gt; 预期终端运行效果：</div>
+          <div style="color: #34D399; font-family: Consolas, monospace; font-size: 18px; line-height: 1.6;">
+            === 我的信息卡 ===<br/>
+            姓名：小明<br/>
+            喜欢：机器人<br/>
+            7<br/>
+            ================
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 14 Debug 实战排错 ================= -->
+    <section class="slide" data-slide="14">
+      <div class="slide-tag tag-orange">Debug 实战</div>
+      <h2 class="slide-title">实战排错：找出这段代码中的小 Bug 🐞</h2>
+      <div class="card-grid-2">
+        <div class="code-window step">
+          <div class="code-header"><span style="color:#94A3B8; font-size:15px;">bug_fix.py</span></div>
+          <div class="code-body" id="debug-code-body">
+            <div class="code-line" id="dbg-line-1"><span class="line-num">1</span><span class="syntax-fn">print</span><span class="syntax-punct">(</span><span class="syntax-str">"=== 调试练习 ==="</span><span class="syntax-punct">)</span></div>
+            <div class="code-line" id="dbg-line-2"><span class="line-num">2</span><span class="syntax-fn">print</span><span class="syntax-err">（</span><span class="syntax-str">"姓名：小明"</span><span class="syntax-punct">)</span></div>
+            <div class="code-line" id="dbg-line-3"><span class="line-num">3</span><span class="syntax-fn">print</span><span class="syntax-punct">(</span><span class="syntax-num">1001</span><span class="syntax-punct">)</span></div>
+          </div>
+        </div>
+
+        <div class="card step" style="padding: 24px; justify-content: center; gap: 14px;">
+          <div id="debug-step-1">
+            <div style="font-size: 19px; font-weight: 900; color: var(--ink-main); margin-bottom: 8px;">🧐 观察代码：你发现哪一行最可疑？</div>
+            <div style="display: flex; gap: 10px;">
+              <button class="btn btn-secondary" style="padding: 8px 16px; font-size: 16px; flex: 1;" onclick="checkDebugLine(1)">第 1 行</button>
+              <button class="btn btn-secondary" style="padding: 8px 16px; font-size: 16px; flex: 1;" onclick="checkDebugLine(2)">第 2 行</button>
+              <button class="btn btn-secondary" style="padding: 8px 16px; font-size: 16px; flex: 1;" onclick="checkDebugLine(3)">第 3 行</button>
+            </div>
+          </div>
+
+          <div id="debug-step-2" style="display: none; flex-direction: column; gap: 10px;">
+            <div style="font-size: 17px; color: var(--orange-dark); font-weight: bold;">
+              🔍 观察发现：第 2 行使用了中文全角左括号 <code>（</code>！
+            </div>
+            <button class="btn btn-primary" style="padding: 10px 20px; font-size: 16px;" onclick="fixDebugCode()">🛠️ 修正为英文括号并重新运行</button>
+          </div>
+
+          <div id="debug-result" style="font-size: 16px; font-weight: bold; color: var(--green-dark); min-height: 24px;"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 15 课尾三层能力大通关 ================= -->
+    <section class="slide" data-slide="15">
+      <div class="slide-tag tag-green">能力大通关</div>
+      <h2 class="slide-title">本讲能力三关大挑战 🏆</h2>
+      <div style="width: 100%;">
+        <div class="card-grid-2" style="align-items: stretch;">
+          <div class="card step" style="gap: 12px; padding: 22px; justify-content: space-between;">
+            <div>
+              <div style="font-size: 16px; font-weight: 900; color: var(--orange-dark); margin-bottom: 6px;">【第一关：书写与引号】下面哪行可以正确输出 Python？</div>
+              <div style="display: flex; gap: 8px;">
+                <button class="btn btn-secondary" style="padding: 6px 10px; font-size: 14px; flex: 1;" onclick="checkPassL2_1(this, true)">print("Python")</button>
+                <button class="btn btn-secondary" style="padding: 6px 10px; font-size: 14px; flex: 1;" onclick="checkPassL2_1(this, false)">print(Python)</button>
+                <button class="btn btn-secondary" style="padding: 6px 10px; font-size: 14px; flex: 1;" onclick="checkPassL2_1(this, false)">print("Python)</button>
+              </div>
+            </div>
+
+            <div>
+              <div style="font-size: 16px; font-weight: 900; color: var(--blue-night); margin-bottom: 6px;">【第二关 A：数据辨析】10 和 "10" 在程序里完全一样吗？</div>
+              <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                <button class="btn btn-secondary" style="padding: 5px 10px; font-size: 14px; flex: 1;" onclick="checkPassL2_2a(this, false)">A. 完全一样</button>
+                <button class="btn btn-secondary" style="padding: 5px 10px; font-size: 14px; flex: 1;" onclick="checkPassL2_2a(this, true)">B. 不完全一样</button>
+              </div>
+
+              <div style="font-size: 16px; font-weight: 900; color: var(--blue-night); margin-bottom: 6px;">【第二关 B：顺序预测】print("A") ➔ print(10) ➔ print("B") 输出顺序是？</div>
+              <div style="display: flex; gap: 8px;">
+                <button class="btn btn-secondary" style="padding: 5px 10px; font-size: 14px; flex: 1;" onclick="checkPassL2_2b(this, true)">自上而下：A、10、B</button>
+                <button class="btn btn-secondary" style="padding: 5px 10px; font-size: 14px; flex: 1;" onclick="checkPassL2_2b(this, false)">倒序：B、10、A</button>
+              </div>
+            </div>
+
+            <div>
+              <div style="font-size: 16px; font-weight: 900; color: var(--green-dark); margin-bottom: 6px;">【第三关：实战成果】</div>
+              <button class="btn btn-green" style="padding: 8px 16px; font-size: 15px; width: 100%;" onclick="checkPassL2_3(this)">✅ 我已独立编写并展示信息卡作品！</button>
+            </div>
+          </div>
+
+          <div class="card step" style="text-align: center; justify-content: center; align-items: center; padding: 32px;">
+            <div style="font-size: 64px; color: var(--yellow-sun); margin-bottom: 12px;">🏅⭐️⭐️⭐️</div>
+            <div style="font-size: 24px; font-weight: 900; color: var(--orange-dark); line-height: 1.4;" id="final-award-text2">
+              完成左侧三关挑战<br/>解锁第02讲【输出表达小先锋】勋章！
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 16 显性成就与下节悬念 ================= -->
+    <section class="slide" data-slide="16">
+      <div class="slide-tag tag-orange">圆满收束</div>
+      <h2 class="slide-title">恭喜你！达成第02讲全部目标 🎉</h2>
+      <div class="card-grid-2">
+        <div class="card step" style="justify-content: center; gap: 16px; background: var(--orange-soft); border-color: var(--orange-main); padding: 32px;">
+          <div style="font-size: 24px; font-weight: 900; color: var(--orange-dark);">🎖️ 今日显性成就：</div>
+          <div style="font-size: 20px; color: var(--ink-main); line-height: 1.65;">
+            成功掌握 <code>print()</code> 基础输出，知道文字需要用成对引号表示为字符串，理解数值与字符串的初步区别，能够根据代码顺序准确预测多行输出结果，独立完成了固定信息卡作品！
+          </div>
+        </div>
+        <div class="card step" style="justify-content: center; gap: 16px; background: var(--blue-soft); border-color: var(--blue-night); padding: 32px;">
+          <div style="font-size: 24px; font-weight: 900; color: var(--blue-night);">🔮 下一讲预告与悬念：</div>
+          <div style="font-size: 20px; color: var(--ink-main); line-height: 1.65;">
+            今天我们输出的“小明”和“7”都是直接写死在代码里的。如果同一个名字在程序后面要被使用很多次，或者以后还会改变，程序怎样把它<strong>记住</strong>呢？<br/>
+            <strong>第03讲《变量与赋值：让程序记住数据》见！</strong>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer Navigation -->
+  <footer>
+    <div class="shortcut-hint">
+      <span>💡 操作提示：</span>
+      <span>点击任意空白区域 / <span class="key-badge">空格</span> / <span class="key-badge">→</span> 逐步展示与前进</span>
+      <span><span class="key-badge">←</span> 回退</span>
+      <span><span class="key-badge">F</span> 全屏</span>
+    </div>
+    <div style="display: flex; gap: 12px;">
+      <button class="btn btn-secondary" style="padding: 8px 18px; font-size: 15px;" onclick="prevStep()">❮ 上一步</button>
+      <button class="btn btn-primary" style="padding: 8px 24px; font-size: 15px;" onclick="advanceStep()">下一步 ❯</button>
+    </div>
+  </footer>
+</div>
+
+<script>
+  let currentSlide = 1;
+  const totalSlides = 16;
+  const slides = document.querySelectorAll('.slide');
+  const slideCounter = document.getElementById('slide-counter');
+  const progressFill = document.getElementById('progress-fill');
+
+  function triggerCelebration(opts = { particleCount: 50, spread: 70, origin: { y: 0.65 } }) {
+    if (typeof confetti === 'function') {
+      try { confetti(opts); } catch(e) {}
+    }
+  }
+
+  // Core Progressive Step-by-Step Reveal System
+  function advanceStep() {
+    const activeSlide = document.querySelector('.slide.active');
+    if (!activeSlide) return;
+
+    // Look for next unrevealed step within current slide
+    const nextHiddenStep = activeSlide.querySelector('.step:not(.revealed)');
+    if (nextHiddenStep) {
+      nextHiddenStep.classList.add('revealed');
+      if (typeof gsap !== 'undefined') {
+        gsap.fromTo(nextHiddenStep, 
+          { opacity: 0, y: 16, scale: 0.98 }, 
+          { opacity: 1, y: 0, scale: 1, duration: 0.35, ease: "power2.out" }
+        );
+      }
+    } else {
+      // If all steps on current slide are revealed, go to next slide!
+      if (currentSlide < totalSlides) {
+        goToSlide(currentSlide + 1);
+      }
+    }
+  }
+
+  function prevStep() {
+    const activeSlide = document.querySelector('.slide.active');
+    if (!activeSlide) return;
+
+    const revealedSteps = activeSlide.querySelectorAll('.step.revealed');
+    // If more than 1 step is revealed, unreveal the last step
+    if (revealedSteps.length > 1) {
+      const lastRevealed = revealedSteps[revealedSteps.length - 1];
+      lastRevealed.classList.remove('revealed');
+    } else {
+      // If at the beginning of current slide, navigate back to previous slide (showing all covered content)
+      if (currentSlide > 1) {
+        goToSlide(currentSlide - 1);
+      }
+    }
+  }
+
+  function goToSlide(newIndex) {
+    if (newIndex < 1 || newIndex > totalSlides) return;
+    
+    const isMovingBackward = newIndex < currentSlide;
+
+    slides.forEach((s, idx) => {
+      s.classList.remove('active', 'prev', 'next');
+      const allSteps = s.querySelectorAll('.step');
+      
+      if (idx + 1 === newIndex) {
+        s.classList.add('active');
+        if (isMovingBackward) {
+          // 向后返回旧页：显示该页全部已经讲过的内容
+          allSteps.forEach(st => st.classList.add('revealed'));
+        } else {
+          // 向前进入新页：只 Reveal 第一个内容
+          allSteps.forEach((st, sIdx) => {
+            if (sIdx === 0 || st.classList.contains('always-revealed')) {
+              st.classList.add('revealed');
+            } else {
+              st.classList.remove('revealed');
+            }
+          });
+        }
+      } else if (idx + 1 < newIndex) {
+        s.classList.add('prev');
+        allSteps.forEach(st => st.classList.add('revealed'));
+      } else {
+        s.classList.add('next');
+        allSteps.forEach(st => st.classList.remove('revealed'));
+      }
+    });
+
+    currentSlide = newIndex;
+    slideCounter.textContent = `${String(currentSlide).padStart(2, '0')} / ${totalSlides}`;
+    progressFill.style.width = `${(currentSlide / totalSlides) * 100}%`;
+  }
+
+  // Global click listener with interactive component filter
+  document.getElementById('stage-container').addEventListener('click', (e) => {
+    if (e.target.closest('button, input, textarea, select, .drag-chip, .drop-zone, .option-card, header, footer, .no-advance')) {
+      return;
+    }
+    advanceStep();
+  });
+
+  // Keyboard navigation
+  window.addEventListener('keydown', (e) => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown' || e.key === 'Enter') {
+      e.preventDefault();
+      advanceStep();
+    } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+      e.preventDefault();
+      prevStep();
+    } else if (e.key === 'f' || e.key === 'F') {
+      toggleFullscreen();
+    }
+  });
+
+  document.getElementById('btn-prev').addEventListener('click', (e) => { e.stopPropagation(); prevStep(); });
+  document.getElementById('btn-next').addEventListener('click', (e) => { e.stopPropagation(); advanceStep(); });
+  document.getElementById('btn-fullscreen').addEventListener('click', (e) => { e.stopPropagation(); toggleFullscreen(); });
+
+  function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(() => {});
+    } else {
+      document.exitFullscreen().catch(() => {});
+    }
+  }
+
+  // ================= Slide 07: Detective =================
+  function checkDetective(card, isCorrect, reason) {
+    const parent = card.parentElement;
+    parent.querySelectorAll('.option-card').forEach(c => c.classList.remove('selected-correct', 'selected-wrong'));
+    const fb = document.getElementById('detective-feedback');
+    if (isCorrect) {
+      card.classList.add('selected-correct');
+      fb.innerHTML = `✅ <strong>侦探判断正确！</strong> ${reason}`;
+      fb.style.color = "var(--green-dark)";
+      triggerCelebration({ particleCount: 30, spread: 50, origin: { y: 0.65 } });
+    } else {
+      card.classList.add('selected-wrong');
+      fb.innerHTML = `❌ <strong>发现 Bug：</strong> ${reason}`;
+      fb.style.color = "#EF4444";
+    }
+  }
+
+  // ================= Slide 09: 2-Zone Drag & Drop =================
+  let draggedChip = null;
+  let selectedChip = null;
+  const chips = document.querySelectorAll('.drag-chip');
+  const dropZones = document.querySelectorAll('.drop-zone');
+
+  chips.forEach(chip => {
+    // 1. Drag Support
+    chip.addEventListener('dragstart', (e) => {
+      draggedChip = chip;
+      e.dataTransfer.setData('text/plain', chip.id);
+      chip.style.opacity = '0.5';
+    });
+    chip.addEventListener('dragend', () => {
+      chip.style.opacity = '1';
+    });
+
+    // 2. Click-to-Select (Student must choose destination zone manually!)
+    chip.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (chip.classList.contains('placed-correct')) return;
+
+      chips.forEach(c => c.style.outline = 'none');
+      if (selectedChip === chip) {
+        selectedChip = null;
+        document.getElementById('drag-feedback').innerHTML = "已取消选择卡片，请点击或拖拽卡片！";
+        document.getElementById('drag-feedback').style.color = "var(--ink-muted)";
+      } else {
+        selectedChip = chip;
+        chip.style.outline = '3px solid var(--orange-main)';
+        document.getElementById('drag-feedback').innerHTML = `👉 已选中卡片 <strong>${chip.textContent}</strong>，请点击下方的目标区域进行分类！`;
+        document.getElementById('drag-feedback').style.color = "var(--orange-dark)";
+      }
+    });
+  });
+
+  // Drop zone click and drop handlers
+  dropZones.forEach(zone => {
+    // Drag & Drop listener
+    zone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      zone.classList.add('hovered');
+    });
+    zone.addEventListener('dragleave', () => {
+      zone.classList.remove('hovered');
+    });
+    zone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      zone.classList.remove('hovered');
+      if (draggedChip) {
+        handleChipPlacement(draggedChip, zone);
+      }
+    });
+
+    // Click on Zone listener
+    zone.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (selectedChip) {
+        handleChipPlacement(selectedChip, zone);
+      }
+    });
+  });
+
+  function handleChipPlacement(chip, zone) {
+    const acceptType = zone.getAttribute('data-accept');
+    const chipType = chip.getAttribute('data-type');
+    const fb = document.getElementById('drag-feedback');
+
+    if (acceptType === chipType) {
+      zone.querySelector('.zone-chips').appendChild(chip);
+      chip.classList.add('placed-correct');
+      chip.style.outline = 'none';
+      if (selectedChip === chip) selectedChip = null;
+      checkAllChipsPlaced();
+    } else {
+      fb.innerHTML = "❌ 放错区域啦，再仔细看有没有成对引号哦！可以重新尝试！";
+      fb.style.color = "#EF4444";
+    }
+  }
+
+  function checkAllChipsPlaced() {
+    const remaining = document.getElementById('chip-pool').querySelectorAll('.drag-chip');
+    const fb = document.getElementById('drag-feedback');
+    if (remaining.length === 0) {
+      fb.innerHTML = "🎉 完美分类！在本页这些例子中，直接书写的数字属于数值数据；带成对引号的内容属于字符串！";
+      fb.style.color = "var(--green-dark)";
+      triggerCelebration({ particleCount: 50, spread: 65, origin: { y: 0.65 } });
+    } else {
+      fb.innerHTML = `✅ 放置正确！还剩 ${remaining.length} 个数据待分类...`;
+      fb.style.color = "var(--green-dark)";
+    }
+  }
+
+  function resetDragChips() {
+    const pool = document.getElementById('chip-pool');
+    chips.forEach(chip => {
+      chip.classList.remove('placed-correct');
+      chip.style.outline = 'none';
+      pool.appendChild(chip);
+    });
+    selectedChip = null;
+    document.getElementById('drag-feedback').innerHTML = "拖拽或点击上方卡片放入对应区域！";
+    document.getElementById('drag-feedback').style.color = "var(--green-dark)";
+  }
+
+  // ================= Slide 11: Order Prediction 1 =================
+  function checkOrder1(btn, isCorrect) {
+    const parent = btn.parentElement;
+    parent.querySelectorAll('.btn').forEach(b => {
+      b.style.borderColor = 'rgba(0,0,0,0.1)';
+      b.style.background = 'var(--bg-card)';
+      b.style.color = 'var(--ink-main)';
+    });
+    const fb = document.getElementById('order1-feedback');
+    if (isCorrect) {
+      btn.style.borderColor = 'var(--green-main)';
+      btn.style.background = 'var(--green-soft)';
+      btn.style.color = 'var(--green-dark)';
+      fb.innerHTML = "✅ <strong>预测完全正确！</strong> 程序严格按照自上而下的顺序依次输出每一行！";
+      fb.style.color = "var(--green-dark)";
+      triggerCelebration({ particleCount: 30, spread: 50, origin: { y: 0.65 } });
+    } else {
+      btn.style.borderColor = '#EF4444';
+      btn.style.background = '#FEE2E2';
+      btn.style.color = '#991B1B';
+      fb.innerHTML = "❌ <strong>不对哦：</strong> Python 会从第 1 行到第 3 行按顺序执行！";
+      fb.style.color = "#EF4444";
+    }
+  }
+
+  // ================= Slide 12: Order Prediction 2 =================
+  function checkOrder2(btn, isCorrect) {
+    const parent = btn.parentElement;
+    parent.querySelectorAll('.btn').forEach(b => {
+      b.style.borderColor = 'rgba(0,0,0,0.1)';
+      b.style.background = 'var(--bg-card)';
+      b.style.color = 'var(--ink-main)';
+    });
+    const fb = document.getElementById('order2-feedback');
+    if (isCorrect) {
+      btn.style.borderColor = 'var(--green-main)';
+      btn.style.background = 'var(--green-soft)';
+      btn.style.color = 'var(--green-dark)';
+      fb.innerHTML = "✅ <strong>预测完全正确！</strong> 调换代码顺序后，程序依然按自上而下的新顺序执行！";
+      fb.style.color = "var(--green-dark)";
+      triggerCelebration({ particleCount: 35, spread: 55, origin: { y: 0.65 } });
+    } else {
+      btn.style.borderColor = '#EF4444';
+      btn.style.background = '#FEE2E2';
+      btn.style.color = '#991B1B';
+      fb.innerHTML = "❌ <strong>不对哦：</strong> 计算机不会读懂中文汉字含义去自动排序，它只认代码书写的先后顺序！";
+      fb.style.color = "#EF4444";
+    }
+  }
+
+  // ================= Slide 13: Project Confirmation =================
+  function confirmL2Done() {
+    const fb = document.getElementById('l2-done-feedback');
+    fb.innerHTML = "🎉 实战完成！请妥善保存 my_card_02.py，这是你的第 2 个 Python 程序作品！";
+    triggerCelebration({ particleCount: 60, spread: 70, origin: { y: 0.65 } });
+  }
+
+  // ================= Slide 14: Debug Practice =================
+  function checkDebugLine(line) {
+    const fb = document.getElementById('debug-result');
+    if (line === 2) {
+      document.getElementById('dbg-line-2').style.background = 'rgba(239, 68, 68, 0.2)';
+      document.getElementById('debug-step-1').style.display = 'none';
+      document.getElementById('debug-step-2').style.display = 'flex';
+      fb.innerHTML = "🎯 敏锐的观察力！成功定位第 2 行！";
+      fb.style.color = "var(--green-dark)";
+    } else {
+      fb.innerHTML = `第 ${line} 行是正确的，再仔细看其他行哦！`;
+      fb.style.color = "#EF4444";
+    }
+  }
+
+  function fixDebugCode() {
+    const line2 = document.getElementById('dbg-line-2');
+    line2.innerHTML = '<span class="line-num">2</span><span class="syntax-fn">print</span><span class="syntax-punct">(</span><span class="syntax-str">"姓名：小明"</span><span class="syntax-punct">)</span>';
+    line2.style.background = 'rgba(16, 185, 129, 0.2)';
+    document.getElementById('debug-step-2').style.display = 'none';
+    document.getElementById('debug-result').innerHTML = "✨ 修复成功！终端正确输出 3 行信息！";
+    triggerCelebration({ particleCount: 50, spread: 65, origin: { y: 0.65 } });
+  }
+
+  // ================= Slide 15: Lesson 02 Mastery 3-Pass Quiz =================
+  let p2_1 = false, p2_2a = false, p2_2b = false, p2_3 = false;
+
+  function checkPassL2_1(btn, isCorrect) {
+    const parent = btn.parentElement;
+    parent.querySelectorAll('.btn').forEach(b => {
+      b.style.borderColor = 'rgba(0,0,0,0.1)';
+      b.style.background = 'var(--bg-card)';
+      b.style.color = 'var(--ink-main)';
+    });
+    if (isCorrect) {
+      btn.style.borderColor = 'var(--green-main)';
+      btn.style.background = 'var(--green-soft)';
+      btn.style.color = 'var(--green-dark)';
+      p2_1 = true;
+    } else {
+      btn.style.borderColor = '#EF4444';
+      btn.style.background = '#FEE2E2';
+      btn.style.color = '#991B1B';
+      p2_1 = false;
+    }
+    checkAllPassedL2();
+  }
+
+  function checkPassL2_2a(btn, isCorrect) {
+    const parent = btn.parentElement;
+    parent.querySelectorAll('.btn').forEach(b => {
+      b.style.borderColor = 'rgba(0,0,0,0.1)';
+      b.style.background = 'var(--bg-card)';
+      b.style.color = 'var(--ink-main)';
+    });
+    if (isCorrect) {
+      btn.style.borderColor = 'var(--green-main)';
+      btn.style.background = 'var(--green-soft)';
+      btn.style.color = 'var(--green-dark)';
+      p2_2a = true;
+    } else {
+      btn.style.borderColor = '#EF4444';
+      btn.style.background = '#FEE2E2';
+      btn.style.color = '#991B1B';
+      p2_2a = false;
+    }
+    checkAllPassedL2();
+  }
+
+  function checkPassL2_2b(btn, isCorrect) {
+    const parent = btn.parentElement;
+    parent.querySelectorAll('.btn').forEach(b => {
+      b.style.borderColor = 'rgba(0,0,0,0.1)';
+      b.style.background = 'var(--bg-card)';
+      b.style.color = 'var(--ink-main)';
+    });
+    if (isCorrect) {
+      btn.style.borderColor = 'var(--green-main)';
+      btn.style.background = 'var(--green-soft)';
+      btn.style.color = 'var(--green-dark)';
+      p2_2b = true;
+    } else {
+      btn.style.borderColor = '#EF4444';
+      btn.style.background = '#FEE2E2';
+      btn.style.color = '#991B1B';
+      p2_2b = false;
+    }
+    checkAllPassedL2();
+  }
+
+  function checkPassL2_3(btn) {
+    btn.style.background = 'var(--green-dark)';
+    btn.textContent = '✅ 已在真实 Python 中运行并展示信息卡！';
+    p2_3 = true;
+    checkAllPassedL2();
+  }
+
+  function checkAllPassedL2() {
+    const award = document.getElementById('final-award-text2');
+    if (p2_1 && p2_2a && p2_2b && p2_3) {
+      award.innerHTML = "🏆 <strong>通关！成功斩获第02讲【输出表达小先锋】勋章！</strong>";
+      award.style.color = "var(--green-dark)";
+      triggerCelebration({ particleCount: 90, spread: 80, origin: { y: 0.6 } });
+    }
+  }
+</script>
+
+</body>
+</html>

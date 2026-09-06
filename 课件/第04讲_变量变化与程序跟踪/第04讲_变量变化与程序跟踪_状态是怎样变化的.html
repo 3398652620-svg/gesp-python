@@ -1,0 +1,1555 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第04讲 变量变化与程序跟踪：状态是怎样变化的</title>
+  <!-- GSAP Animation Engine with Fallback Support -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <!-- Canvas Confetti for Celebrations with Fallback -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+  <style>
+    :root {
+      --bg-paper: #FFF7ED;
+      --bg-card: #FFFFFF;
+      --ink-main: #1C1917;
+      --ink-muted: #78716C;
+      --orange-main: #F97316;
+      --orange-dark: #C2410C;
+      --orange-soft: #FFEDD5;
+      --green-main: #10B981;
+      --green-dark: #047857;
+      --green-soft: #D1FAE5;
+      --yellow-sun: #FBBF24;
+      --yellow-dark: #B45309;
+      --yellow-soft: #FEF3C7;
+      --blue-night: #4F46E5;
+      --blue-dark: #3730A3;
+      --blue-soft: #EEF2FF;
+      --purple-main: #9333EA;
+      --purple-soft: #F3E8FF;
+      --code-board: #0F172A;
+      --code-text: #E2E8F0;
+      --radius-lg: 24px;
+      --radius-md: 16px;
+      --radius-pill: 999px;
+      --shadow-soft: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.03);
+      --shadow-card: 0 20px 25px -5px rgba(249, 115, 22, 0.08), 0 8px 10px -6px rgba(249, 115, 22, 0.04);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background-color: var(--bg-paper);
+      color: var(--ink-main);
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #stage-container {
+      width: 100vw;
+      height: 100vh;
+      max-width: 177.78vh;
+      max-height: 56.25vw;
+      position: relative;
+      background: var(--bg-paper);
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 0 50px rgba(0,0,0,0.08);
+      overflow: hidden;
+      cursor: default;
+    }
+
+    header {
+      height: 64px;
+      padding: 0 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 2px solid rgba(0,0,0,0.04);
+      background: rgba(255, 247, 237, 0.95);
+      backdrop-filter: blur(10px);
+      z-index: 100;
+      flex-shrink: 0;
+    }
+
+    .brand-tag {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--orange-main);
+      background: var(--orange-soft);
+      padding: 6px 16px;
+      border-radius: var(--radius-pill);
+    }
+
+    .lesson-title-nav {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--ink-main);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .nav-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .slide-counter {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--ink-muted);
+      background: var(--bg-card);
+      padding: 6px 14px;
+      border-radius: var(--radius-pill);
+      box-shadow: var(--shadow-soft);
+      border: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .btn-nav-icon {
+      background: var(--bg-card);
+      border: 1px solid rgba(0,0,0,0.08);
+      color: var(--ink-main);
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: bold;
+      transition: all 0.2s;
+    }
+
+    .btn-nav-icon:hover {
+      background: var(--orange-main);
+      color: #fff;
+      border-color: var(--orange-main);
+      transform: scale(1.08);
+    }
+
+    .progress-bar-container {
+      height: 4px;
+      width: 100%;
+      background: rgba(0,0,0,0.05);
+      position: absolute;
+      top: 64px;
+      left: 0;
+      z-index: 101;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 6.25%;
+      background: linear-gradient(90deg, var(--orange-main), var(--yellow-sun));
+      transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    main {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+    }
+
+    .slide {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      padding: 32px 64px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 0.35s ease, transform 0.35s ease;
+      overflow-y: auto;
+    }
+
+    .slide.active {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transform: translateX(0);
+    }
+
+    .slide.prev {
+      transform: translateX(-40px);
+    }
+
+    .slide.next {
+      transform: translateX(40px);
+    }
+
+    /* Step-Reveal Progressive Disclosure System */
+    .step {
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+      pointer-events: none;
+    }
+
+    .step.revealed {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    .slide-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 15px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 6px 16px;
+      border-radius: var(--radius-pill);
+      margin-bottom: 12px;
+      width: fit-content;
+    }
+
+    .tag-orange { background: var(--orange-soft); color: var(--orange-dark); }
+    .tag-green { background: var(--green-soft); color: var(--green-dark); }
+    .tag-blue { background: var(--blue-soft); color: var(--blue-dark); }
+    .tag-purple { background: var(--purple-soft); color: var(--purple-main); }
+
+    .slide-title {
+      font-size: 34px;
+      font-weight: 900;
+      color: var(--ink-main);
+      margin-bottom: 20px;
+      line-height: 1.25;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .card-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 28px;
+      width: 100%;
+      height: calc(100% - 90px);
+      align-items: center;
+    }
+
+    .card-grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 20px;
+      width: 100%;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      padding: 26px;
+      box-shadow: var(--shadow-card);
+      border: 1px solid rgba(0,0,0,0.05);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .card-hover:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 20px 25px -5px rgba(249, 115, 22, 0.12);
+      transition: all 0.25s ease;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 14px 28px;
+      border-radius: var(--radius-pill);
+      font-size: 18px;
+      font-weight: 800;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      text-decoration: none;
+      outline: none;
+    }
+
+    .btn:active { transform: scale(0.96); }
+    .btn-primary { background: var(--orange-main); color: #FFF; box-shadow: 0 8px 18px rgba(249, 115, 22, 0.3); }
+    .btn-primary:hover { background: var(--orange-dark); transform: translateY(-2px); }
+    .btn-green { background: var(--green-main); color: #FFF; box-shadow: 0 8px 18px rgba(16, 185, 129, 0.3); }
+    .btn-green:hover { background: var(--green-dark); transform: translateY(-2px); }
+    .btn-blue { background: var(--blue-night); color: #FFF; box-shadow: 0 8px 18px rgba(79, 70, 229, 0.3); }
+    .btn-blue:hover { background: var(--blue-dark); transform: translateY(-2px); }
+    .btn-secondary { background: var(--bg-card); color: var(--ink-main); border: 2px solid rgba(0,0,0,0.1); }
+    .btn-secondary:hover { background: #FAFAFA; border-color: var(--orange-main); color: var(--orange-main); }
+
+    /* Code Window */
+    .code-window {
+      background: var(--code-board);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: 0 16px 36px rgba(15, 23, 42, 0.25);
+      border: 1px solid rgba(255,255,255,0.1);
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+    }
+
+    .code-header {
+      background: #1E293B;
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .code-body {
+      padding: 20px;
+      font-family: "Consolas", "Courier New", monospace;
+      font-size: 20px;
+      line-height: 1.8;
+      color: var(--code-text);
+      flex: 1;
+      overflow: auto;
+    }
+
+    .code-line {
+      display: flex;
+      align-items: center;
+      padding: 4px 10px;
+      border-radius: 8px;
+      transition: background 0.2s, border 0.2s;
+    }
+
+    .code-line.active-line {
+      background: rgba(249, 115, 22, 0.25);
+      border-left: 4px solid var(--orange-main);
+    }
+
+    .line-num {
+      width: 32px;
+      color: #64748B;
+      user-select: none;
+      font-size: 16px;
+    }
+
+    .syntax-fn { color: #38BDF8; font-weight: bold; }
+    .syntax-var { color: #F472B6; font-weight: bold; }
+    .syntax-str { color: #34D399; }
+    .syntax-num { color: #F59E0B; font-weight: bold; }
+    .syntax-op { color: #F87171; font-weight: bold; }
+    .syntax-punct { color: #F8FAFC; }
+    .syntax-err { color: #EF4444; font-weight: bold; }
+
+    .console-window {
+      background: #020617;
+      border-radius: var(--radius-lg);
+      padding: 20px 24px;
+      font-family: "Consolas", monospace;
+      font-size: 20px;
+      color: #38BDF8;
+      border: 1px solid #1E293B;
+      min-height: 120px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .concept-box {
+      background: linear-gradient(135deg, #FFF7ED 0%, #FFEDD5 100%);
+      border: 2px solid var(--orange-main);
+      border-radius: var(--radius-lg);
+      padding: 20px 28px;
+      font-size: 21px;
+      font-weight: 700;
+      color: var(--orange-dark);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .concept-box.green {
+      background: linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%);
+      border-color: var(--green-main);
+      color: var(--green-dark);
+    }
+
+    .concept-box.blue {
+      background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);
+      border-color: var(--blue-night);
+      color: var(--blue-dark);
+    }
+
+    .concept-box.purple {
+      background: linear-gradient(135deg, #FAF5FF 0%, #F3E8FF 100%);
+      border-color: var(--purple-main);
+      color: #6B21A8;
+    }
+
+    /* Trace Table Styling */
+    .trace-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #FFF;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      box-shadow: var(--shadow-soft);
+      font-size: 16px;
+    }
+
+    .trace-table th {
+      background: #F1F5F9;
+      color: #334155;
+      font-weight: 800;
+      padding: 10px 14px;
+      text-align: center;
+      border-bottom: 2px solid #E2E8F0;
+    }
+
+    .trace-table td {
+      padding: 10px 14px;
+      text-align: center;
+      border-bottom: 1px solid #F1F5F9;
+      font-family: Consolas, monospace;
+      font-size: 16px;
+      color: #0F172A;
+      transition: background 0.3s;
+    }
+
+    .trace-table tr.active-row td {
+      background: #FEF3C7;
+      font-weight: bold;
+    }
+
+    footer {
+      height: 60px;
+      padding: 0 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(255, 247, 237, 0.95);
+      border-top: 2px solid rgba(0,0,0,0.04);
+      z-index: 100;
+      flex-shrink: 0;
+    }
+
+    .shortcut-hint {
+      font-size: 15px;
+      color: var(--ink-muted);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .key-badge {
+      background: var(--bg-card);
+      border: 1px solid #D6D3D1;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-family: monospace;
+      font-size: 13px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+  </style>
+</head>
+<body>
+
+<div id="stage-container">
+  <!-- Header Navigation -->
+  <header>
+    <div class="brand-tag">
+      <span>⏳</span>
+      <span>GESP Python 启航</span>
+    </div>
+    <div class="lesson-title-nav">
+      <span>第04讲</span>
+      <span style="color:var(--ink-muted);">|</span>
+      <span>变量变化与程序跟踪：状态是怎样变化的</span>
+    </div>
+    <div class="nav-controls">
+      <div class="slide-counter" id="slide-counter">01 / 16</div>
+      <button class="btn-nav-icon" id="btn-prev" title="上一步 / 上一幕 (←)">❮</button>
+      <button class="btn-nav-icon" id="btn-next" title="下一步 / 下一幕 (→/空格/点击空白)">❯</button>
+      <button class="btn-nav-icon" id="btn-fullscreen" title="全屏切换 (F)">⛶</button>
+    </div>
+  </header>
+
+  <!-- Top Progress Bar -->
+  <div class="progress-bar-container">
+    <div class="progress-bar-fill" id="progress-fill"></div>
+  </div>
+
+  <!-- Slides Viewport -->
+  <main id="slides-viewport">
+
+    <!-- ================= 01 封面 ================= -->
+    <section class="slide active" data-slide="1">
+      <div style="text-align: center; max-width: 960px; margin: 0 auto;">
+        <div class="slide-tag tag-orange step revealed" style="margin: 0 auto 18px;">第一阶段 · 程序、数据与状态</div>
+        <h1 class="step revealed" style="font-size: 46px; font-weight: 900; line-height: 1.25; margin-bottom: 20px; color: var(--ink-main);">
+          变量变化与程序跟踪<br/>
+          <span style="color: var(--orange-main);">状态是怎样变化的 ⏳</span>
+        </h1>
+        <p class="step revealed" style="font-size: 23px; color: var(--ink-muted); margin-bottom: 36px;">
+          拆解 x = x + 1，掌握右算左赋，使用 Trace Table 跟踪状态演进！
+        </p>
+        <div class="step revealed" style="display: flex; justify-content: center; gap: 20px;">
+          <button class="btn btn-primary" style="font-size: 20px; padding: 16px 36px;" onclick="goToSlide(2)">开启第04讲探索 🚀 (或按空格键)</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 02 回顾与引入 ================= -->
+    <section class="slide" data-slide="2">
+      <div class="slide-tag tag-blue">承前启后</div>
+      <h2 class="slide-title">从“记住数据”到“数据随时间演进” 🏷️ ➔ ⏳</h2>
+      <div class="card-grid-2">
+        <div class="card card-hover step" style="justify-content: center; padding: 30px;">
+          <div style="font-size: 38px; margin-bottom: 10px;">🏷️ 回顾第03讲</div>
+          <div style="font-size: 19px; color: var(--ink-main); line-height: 1.65;">
+            我们学会了用变量记住数据（如 <code>score = 90</code>）。<br/>
+            但在真实的游戏或程序中，游戏分数会增加、倒计时会减少、生命值会扣除——<strong>数据并不是静止不变的！</strong>
+          </div>
+        </div>
+
+        <div class="concept-box orange step" style="flex-direction: column; justify-content: center; text-align: center; padding: 30px;">
+          <div style="font-size: 48px; margin-bottom: 10px;">⏳ 状态在时间中演进</div>
+          <div style="font-size: 21px; color: var(--orange-dark); line-height: 1.55;">
+            程序一行一行执行，变量的值随着赋值语句一步步改变。<br/>
+            这就是程序的<strong>当前状态</strong>！
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 03 认知冲突：x = x + 1 ================= -->
+    <section class="slide" data-slide="3">
+      <div class="slide-tag tag-orange">认知冲突</div>
+      <h2 class="slide-title">x = x + 1 为什么数学里不成立，Python 里很常见？🤔</h2>
+      <div class="card-grid-2">
+        <div class="card step" style="padding: 24px; gap: 12px; background: #FEF2F2; border-color: #EF4444;">
+          <div style="font-size: 22px; font-weight: 900; color: #991B1B;">📐 数学视角（等式判断）</div>
+          <div style="background:#FFF; padding:12px 16px; border-radius:10px; font-family:Consolas, monospace; font-size:22px; color:#EF4444; border:1px solid #FECACA;">
+            x = x + 1 ➔ 0 = 1 ❌ (荒谬！)
+          </div>
+          <div style="font-size: 16px; color: var(--ink-main); line-height: 1.6;">
+            在数学中，<code>=</code> 表示两边永远相等。任何数字都不可能等于自己加 1！
+          </div>
+        </div>
+
+        <div class="card step" style="padding: 24px; gap: 12px; background: #F0FDF4; border-color: var(--green-main);">
+          <div style="font-size: 22px; font-weight: 900; color: var(--green-dark);">💻 Python 执行视角（动作指令）</div>
+          <div style="background:#0F172A; padding:12px 16px; border-radius:10px; font-family:Consolas, monospace; font-size:22px; color:#34D399;">
+            <span class="syntax-var">x</span> <span class="syntax-op">=</span> <span class="syntax-var">x</span> <span class="syntax-op">+</span> <span class="syntax-num">1</span> ✅
+          </div>
+          <div style="font-size: 16px; color: var(--ink-main); line-height: 1.6;">
+            在 Python 中，<code>=</code> 是<strong>赋值操作</strong>！表示：算出右边的新结果，存回左边的变量里！
+          </div>
+        </div>
+      </div>
+      <div class="concept-box green step" style="margin-top: 14px; text-align: center; justify-content: center; font-size: 20px;">
+        🌟 核心认知：<strong>代码中的 = 是动作指令（赋值），绝非数学里的永恒相等！</strong>
+      </div>
+    </section>
+
+    <!-- ================= 04 解密 x = x + 1 机制 ================= -->
+    <section class="slide" data-slide="4">
+      <div class="slide-tag tag-orange">执行机制</div>
+      <h2 class="slide-title">赋值黄金法则：先算右边，再赋给左边 ⬅️</h2>
+      <div style="max-width: 940px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; gap: 18px;">
+        <div style="background: #0F172A; border-radius: 16px; padding: 18px; font-family: Consolas, monospace; font-size: 26px; color: #FFF; text-align: center; box-shadow: 0 8px 24px rgba(15,23,42,0.25);">
+          <span style="color:#94A3B8; font-size:18px;">假设当前 x=10 ➔ </span>
+          <span style="color: #F472B6; font-weight: bold;">x</span> <span style="color: #F87171; font-weight: bold;">=</span> <span style="color: #F472B6; font-weight: bold;">x</span> <span style="color: #F87171; font-weight: bold;">+</span> <span style="color: #F59E0B; font-weight: bold;">1</span>
+        </div>
+        <div class="card-grid-3" style="gap: 16px;">
+          <div class="step" style="background: #FFF0F5; border: 1px solid #FBCFE8; padding: 18px; border-radius: 14px; text-align: center;">
+            <div style="font-size: 20px; font-weight: 900; color: #9D174D; margin-bottom: 6px;">1. 取出右边当前值</div>
+            <div style="font-size: 15px; color: #831843; line-height: 1.5;">找到右边 <code>x</code> 当前保存的旧值 <strong>10</strong></div>
+          </div>
+          <div class="step" style="background: #FEF3C7; border: 1px solid #FDE68A; padding: 18px; border-radius: 14px; text-align: center;">
+            <div style="font-size: 20px; font-weight: 900; color: #B45309; margin-bottom: 6px;">2. 算出右边新结果</div>
+            <div style="font-size: 15px; color: #78350F; line-height: 1.5;">计算 <code>10 + 1</code> 得到结果 <strong>11</strong></div>
+          </div>
+          <div class="step" style="background: #F0FDF4; border: 1px solid #86EFAC; padding: 18px; border-radius: 14px; text-align: center;">
+            <div style="font-size: 20px; font-weight: 900; color: #166534; margin-bottom: 6px;">3. 赋回左边覆盖旧值</div>
+            <div style="font-size: 15px; color: #14532D; line-height: 1.5;">把 <strong>11</strong> 存入变量 x，旧值 10 被覆盖！</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 05 互动推演 1 单变量更新模拟器 ================= -->
+    <section class="slide" data-slide="5">
+      <div class="slide-tag tag-green">推演互动 01</div>
+      <h2 class="slide-title">🧪 单变量更新模拟器：亲身体验状态更新 🧠</h2>
+      <div style="max-width: 980px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; gap: 14px;">
+        <div style="display: grid; grid-template-columns: 1.1fr 1fr; gap: 20px; align-items: stretch;">
+          <!-- Left: Code Window + Simulated Terminal Output -->
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            <div class="code-window">
+              <div class="code-header">
+                <span style="color:#94A3B8; font-size:14px;">💻 mutate_demo.py</span>
+                <span style="color:#64748B; font-size:12px;">Python 3.10</span>
+              </div>
+              <div class="code-body" style="font-size: 18px; padding: 12px 18px;">
+                <div class="code-line active-line" id="sim1-line-1"><span class="line-num">1</span><span class="syntax-var">x</span> <span class="syntax-op">=</span> <span class="syntax-num">10</span></div>
+                <div class="code-line" id="sim1-line-2"><span class="line-num">2</span><span class="syntax-var">x</span> <span class="syntax-op">=</span> <span class="syntax-var">x</span> <span class="syntax-op">+</span> <span class="syntax-num">1</span></div>
+                <div class="code-line" id="sim1-line-3"><span class="line-num">3</span><span class="syntax-fn">print</span><span class="syntax-punct">(</span><span class="syntax-var">x</span><span class="syntax-punct">)</span></div>
+              </div>
+            </div>
+
+            <!-- Simulated Terminal Output Window -->
+            <div class="console-window" style="min-height: 80px; padding: 10px 16px; justify-content: center;">
+              <div style="color:#64748B; font-size:12px; display: flex; justify-content: space-between;">
+                <span>🖥️ 屏幕终端输出 (Terminal)</span>
+                <span id="sim1-term-status" style="color:#10B981;">● 运行中</span>
+              </div>
+              <div id="sim1-terminal-out" style="color:#34D399; font-family: Consolas, monospace; font-size: 20px; font-weight: bold; margin-top: 2px;">
+                <span style="color:#475569; font-size:13px; font-weight: normal;">(第 1~2 行执行状态更新，等待 print 输出...)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Interactive Variable Status Card -->
+          <div class="card" style="padding: 18px; justify-content: space-between; background: #FFF;">
+            <div>
+              <div style="font-size: 17px; font-weight: 900; color: var(--ink-main); margin-bottom: 6px;">🧠 变量 x 的当前状态：</div>
+              <div id="sim1-val-box" style="font-size: 24px; font-weight: 900; color: #4F46E5; background: #EEF2FF; padding: 10px; border-radius: 12px; text-align: center; border: 2px solid #A5B4FC;">
+                x 当前值：<span id="sim1-val-text">10</span>
+              </div>
+            </div>
+            
+            <div style="display: flex; gap: 8px; margin: 6px 0;">
+              <button class="btn btn-primary" id="btn-sim1-step" style="padding: 8px 14px; font-size: 14px; flex: 1;" onclick="stepSim1()">▶️ 执行第 2 行 (x = x + 1)</button>
+              <button class="btn btn-secondary" style="padding: 8px 12px; font-size: 13px;" onclick="resetSim1()">🔄 重置</button>
+            </div>
+            
+            <div id="sim1-feedback" style="font-size: 13px; font-weight: bold; color: var(--green-dark); min-height: 44px; background: #F0FDF4; padding: 8px 10px; border-radius: 10px; border-left: 4px solid var(--green-main); line-height: 1.5;">
+              📍 执行第 1 行：变量 x 被赋值为 10，当前记录值 10。
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 06 连续更新与时间维度 ================= -->
+    <section class="slide" data-slide="6">
+      <div class="slide-tag tag-purple">状态演进</div>
+      <h2 class="slide-title">连续多次更新：状态是一步步演进的 📈</h2>
+      <div class="card-grid-2">
+        <div class="code-window step">
+          <div class="code-header"><span style="color:#94A3B8; font-size:15px;">steps_count.py</span></div>
+          <div class="code-body">
+            <div class="code-line"><span class="line-num">1</span><span class="syntax-var">x</span> <span class="syntax-op">=</span> <span class="syntax-num">5</span></div>
+            <div class="code-line"><span class="line-num">2</span><span class="syntax-var">x</span> <span class="syntax-op">=</span> <span class="syntax-var">x</span> <span class="syntax-op">+</span> <span class="syntax-num">2</span></div>
+            <div class="code-line"><span class="line-num">3</span><span class="syntax-var">x</span> <span class="syntax-op">=</span> <span class="syntax-var">x</span> <span class="syntax-op">+</span> <span class="syntax-num">3</span></div>
+          </div>
+        </div>
+
+        <div class="card step" style="justify-content: center; gap: 14px; padding: 26px;">
+          <div style="font-size: 20px; font-weight: 900; color: var(--blue-night);">⏱️ 状态演进时间线：</div>
+          <div style="display: flex; flex-direction: column; gap: 10px; font-size: 17px; line-height: 1.6;">
+            <div style="background:#F8FAFC; padding:8px 14px; border-radius:8px; border-left:4px solid #94A3B8;">
+              ① 初始状态：<code>x = 5</code> ➔ 当前值为 <strong>5</strong>
+            </div>
+            <div style="background:#FEF3C7; padding:8px 14px; border-radius:8px; border-left:4px solid #F59E0B;">
+              ② 执行第 2 行：<code>5 + 2</code> ➔ 当前值更新为 <strong>7</strong>
+            </div>
+            <div style="background:#DCFCE7; padding:8px 14px; border-radius:8px; border-left:4px solid #10B981;">
+              ③ 执行第 3 行：<code>7 + 3</code> ➔ 当前值更新为 <strong>10</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="concept-box green step" style="margin-top: 14px; text-align: center; justify-content: center; font-size: 20px;">
+        🌟 核心认知：<strong>变量状态是一行行按顺序演进的（5 ➔ 7 ➔ 10），不是瞬间跳出来的！</strong>
+      </div>
+    </section>
+
+    <!-- ================= 07 插入中间输出 ================= -->
+    <section class="slide" data-slide="7">
+      <div class="slide-tag tag-blue">瞬间快照</div>
+      <h2 class="slide-title">print(x) 输出的是“那一瞬间”的当前值！📸</h2>
+      <div class="card-grid-2">
+        <div class="code-window step">
+          <div class="code-header"><span style="color:#94A3B8; font-size:15px;">snapshot.py</span></div>
+          <div class="code-body">
+            <div class="code-line"><span class="line-num">1</span><span class="syntax-var">x</span> <span class="syntax-op">=</span> <span class="syntax-num">2</span></div>
+            <div class="code-line"><span class="line-num">2</span><span class="syntax-fn">print</span><span class="syntax-punct">(</span><span class="syntax-var">x</span><span class="syntax-punct">)</span></div>
+            <div class="code-line"><span class="line-num">3</span><span class="syntax-var">x</span> <span class="syntax-op">=</span> <span class="syntax-var">x</span> <span class="syntax-op">+</span> <span class="syntax-num">5</span></div>
+            <div class="code-line"><span class="line-num">4</span><span class="syntax-fn">print</span><span class="syntax-punct">(</span><span class="syntax-var">x</span><span class="syntax-punct">)</span></div>
+          </div>
+        </div>
+
+        <div class="card step" style="justify-content: center; gap: 14px; padding: 26px;">
+          <div style="font-size: 20px; font-weight: 900; color: var(--ink-main);">📷 快照输出分析：</div>
+          <div style="font-size: 17px; color: var(--ink-main); line-height: 1.65;">
+            • 执行到第 2 行时，<code>x</code> 当前是 <strong>2</strong> ➔ 屏幕输出 <code>2</code><br/>
+            • 执行第 3 行后，<code>x</code> 被更新为 <strong>7</strong><br/>
+            • 执行到第 4 行时，<code>x</code> 当前是 <strong>7</strong> ➔ 屏幕输出 <code>7</code>
+          </div>
+          <div class="console-window" style="min-height: 80px; padding: 12px 18px;">
+            <div style="color:#94A3B8; font-size:13px;">&gt; 终端输出：</div>
+            <div style="color:#34D399; font-size:18px;">2<br/>7</div>
+          </div>
+        </div>
+      </div>
+      <div class="concept-box blue step" style="margin-top: 14px; text-align: center; justify-content: center; font-size: 20px;">
+        💡 拍照比喻：<strong>print() 就像相机快门，只能拍下执行到该时刻的瞬间当前值！</strong>
+      </div>
+    </section>
+
+    <!-- ================= 08 认识 Trace Table ================= -->
+    <section class="slide" data-slide="8">
+      <div class="slide-tag tag-purple">思维支架</div>
+      <h2 class="slide-title">认识 Trace Table：把程序状态一步一步记下来 📊</h2>
+      <div class="card-grid-2">
+        <div class="card step" style="padding: 26px; justify-content: center; gap: 14px;">
+          <div style="font-size: 22px; font-weight: 900; color: var(--purple-main);">📋 为什么我们需要 Trace Table？</div>
+          <div style="font-size: 17px; color: var(--ink-main); line-height: 1.65;">
+            当程序有多个变量、多步赋值时，只靠脑子容易记混。<br/>
+            <strong>Trace Table（状态跟踪表）</strong> 可以帮助我们稳定记录每一行代码执行后的当前状态。
+          </div>
+        </div>
+
+        <div class="card step" style="padding: 24px; justify-content: center; gap: 10px; background: #FFF;">
+          <div style="font-size: 18px; font-weight: 900; color: var(--ink-main);">📋 跟踪表三大核心列：</div>
+          <table class="trace-table">
+            <thead>
+              <tr>
+                <th>执行步骤 / 行号</th>
+                <th>变量 a 当前值</th>
+                <th>变量 b 当前值</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>a = 3</code></td>
+                <td><strong style="color:var(--orange-dark);">3</strong></td>
+                <td><span style="color:#94A3B8;">未赋值</span></td>
+              </tr>
+              <tr>
+                <td><code>b = 5</code></td>
+                <td>3</td>
+                <td><strong style="color:var(--blue-night);">5</strong></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="concept-box green step" style="margin-top: 14px; text-align: center; justify-content: center; font-size: 20px;">
+        🌟 核心法则：<strong>每一行只记录“该语句执行完成后”变量的最新当前值！</strong>
+      </div>
+    </section>
+
+    <!-- ================= 09 互动实验 2 手把手推演 Trace Table ================= -->
+    <section class="slide" data-slide="9">
+      <div class="slide-tag tag-orange">互动实验 02</div>
+      <h2 class="slide-title">实战推演：亲自推演并填写 Trace Table ✍️</h2>
+      <div style="max-width: 960px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; gap: 14px;">
+        <div style="display: grid; grid-template-columns: 1fr 1.35fr; gap: 20px;">
+          <!-- Left: Code Window -->
+          <div class="code-window" style="min-height: 250px;">
+            <div class="code-header"><span style="color:#94A3B8; font-size:15px;">multi_trace.py</span></div>
+            <div class="code-body" style="font-size: 18px;">
+              <div class="code-line active-line" id="tr-line-1"><span class="line-num">1</span><span class="syntax-var">a</span> <span class="syntax-op">=</span> <span class="syntax-num">3</span></div>
+              <div class="code-line" id="tr-line-2"><span class="line-num">2</span><span class="syntax-var">b</span> <span class="syntax-op">=</span> <span class="syntax-num">5</span></div>
+              <div class="code-line" id="tr-line-3"><span class="line-num">3</span><span class="syntax-var">a</span> <span class="syntax-op">=</span> <span class="syntax-var">a</span> <span class="syntax-op">+</span> <span class="syntax-num">2</span></div>
+              <div class="code-line" id="tr-line-4"><span class="line-num">4</span><span class="syntax-var">b</span> <span class="syntax-op">=</span> <span class="syntax-var">b</span> <span class="syntax-op">+</span> <span class="syntax-num">1</span></div>
+            </div>
+          </div>
+
+          <!-- Right: Interactive Trace Table & Question Panel -->
+          <div class="card" style="padding: 18px; justify-content: space-between; background: #FFF;">
+            <table class="trace-table" id="interactive-trace-table">
+              <thead>
+                <tr>
+                  <th>执行语句</th>
+                  <th>a 当前值</th>
+                  <th>b 当前值</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr id="tbl-row-1" class="active-row">
+                  <td>第 1 行: a = 3</td>
+                  <td id="cell-a-1">?</td>
+                  <td id="cell-b-1">?</td>
+                </tr>
+                <tr id="tbl-row-2">
+                  <td>第 2 行: b = 5</td>
+                  <td id="cell-a-2">-</td>
+                  <td id="cell-b-2">-</td>
+                </tr>
+                <tr id="tbl-row-3">
+                  <td>第 3 行: a = a + 2</td>
+                  <td id="cell-a-3">-</td>
+                  <td id="cell-b-3">-</td>
+                </tr>
+                <tr id="tbl-row-4">
+                  <td>第 4 行: b = b + 1</td>
+                  <td id="cell-a-4">-</td>
+                  <td id="cell-b-4">-</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <!-- Question Interactive Box -->
+            <div id="trace-interactive-box" style="margin-top: 10px; background: #F8FAFC; padding: 12px; border-radius: 12px; border: 1px solid #E2E8F0;">
+              <div id="trace-question-text" style="font-size: 14px; font-weight: bold; color: var(--ink-main); margin-bottom: 6px;">
+                📍 思考：执行完第 1 行 a = 3 后，a 和 b 的当前值是？
+              </div>
+              <div id="trace-options-container" style="display: flex; gap: 8px;">
+                <button class="btn btn-secondary" style="padding: 6px 10px; font-size: 13px; flex: 1;" onclick="chooseTraceAns(1, true)">A. a=3, b=未赋值</button>
+                <button class="btn btn-secondary" style="padding: 6px 10px; font-size: 13px; flex: 1;" onclick="chooseTraceAns(1, false)">B. a=3, b=0</button>
+                <button class="btn btn-secondary" style="padding: 6px 10px; font-size: 13px; flex: 1;" onclick="chooseTraceAns(1, false)">C. a=未赋值, b=3</button>
+              </div>
+              <div id="trace-step-feedback" style="font-size: 13px; font-weight: bold; min-height: 18px; margin-top: 4px; color: var(--orange-dark);"></div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; margin-top: 6px;">
+              <button class="btn btn-secondary" style="padding: 4px 12px; font-size: 13px;" onclick="resetTraceTable()">🔄 重新推演</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 10 多变量独立维护 ================= -->
+    <section class="slide" data-slide="10">
+      <div class="slide-tag tag-blue">多变量状态</div>
+      <h2 class="slide-title">多变量状态：各自管理自己的专属记忆 👥</h2>
+      <div class="card-grid-2">
+        <div class="card step" style="padding: 24px; gap: 12px; background: #FFF7ED; border-color: var(--orange-main);">
+          <div style="font-size: 22px; font-weight: 900; color: var(--orange-dark);">🅰️ 变量 a 的独立时间线</div>
+          <div style="font-size: 17px; color: var(--ink-main); line-height: 1.6;">
+            • 第 1 行初始化为 <strong>3</strong><br/>
+            • 第 3 行执行 <code>a = a + 2</code> 更新为 <strong>5</strong><br/>
+            <strong>变量 a 只关注自己的更新指令！</strong>
+          </div>
+        </div>
+
+        <div class="card step" style="padding: 24px; gap: 12px; background: #EEF2FF; border-color: var(--blue-night);">
+          <div style="font-size: 22px; font-weight: 900; color: var(--blue-dark);">🅱️ 变量 b 的独立时间线</div>
+          <div style="font-size: 17px; color: var(--ink-main); line-height: 1.6;">
+            • 第 2 行初始化为 <strong>5</strong><br/>
+            • 第 4 行执行 <code>b = b + 1</code> 更新为 <strong>6</strong><br/>
+            <strong>变量 b 的数值不会被 a 的计算打扰！</strong>
+          </div>
+        </div>
+      </div>
+      <div class="concept-box green step" style="margin-top: 14px; text-align: center; justify-content: center; font-size: 20px;">
+        🌟 核心认知：<strong>每个变量都各自维护自己的当前值，互不干扰！</strong>
+      </div>
+    </section>
+
+    <!-- ================= 11 核心变式：b = a ================= -->
+    <section class="slide" data-slide="11">
+      <div class="slide-tag tag-purple">关键变式</div>
+      <h2 class="slide-title">关键认知变式：b = a 会把变量永久绑定吗？🔗❌</h2>
+      <div class="card-grid-2">
+        <div class="code-window step">
+          <div class="code-header"><span style="color:#94A3B8; font-size:15px;">link_test.py</span></div>
+          <div class="code-body">
+            <div class="code-line"><span class="line-num">1</span><span class="syntax-var">a</span> <span class="syntax-op">=</span> <span class="syntax-num">3</span></div>
+            <div class="code-line"><span class="line-num">2</span><span class="syntax-var">b</span> <span class="syntax-op">=</span> <span class="syntax-var">a</span></div>
+            <div class="code-line"><span class="line-num">3</span><span class="syntax-var">a</span> <span class="syntax-op">=</span> <span class="syntax-num">5</span></div>
+            <div class="code-line"><span class="line-num">4</span><span class="syntax-fn">print</span><span class="syntax-punct">(</span><span class="syntax-var">b</span><span class="syntax-punct">)</span></div>
+          </div>
+        </div>
+
+        <div class="card step" style="justify-content: center; gap: 14px; padding: 26px;">
+          <div style="font-size: 20px; font-weight: 900; color: var(--ink-main);">❓ 思考：第 4 行 print(b) 输出几？</div>
+          <div style="font-size: 17px; color: var(--ink-main); line-height: 1.65;">
+            • 第 2 行 <code>b = a</code> 执行时，只把 <code>a</code> <strong>当时的值 3</strong> 复制给了 <code>b</code>！<br/>
+            • 第 3 行 <code>a</code> 改成了 5，<strong>绝对不会自动把 b 连带着改掉！</strong><br/>
+            • 所以 <code>b</code> 依然保存着 <strong>3</strong>！
+          </div>
+        </div>
+      </div>
+      <div class="concept-box green step" style="margin-top: 14px; text-align: center; justify-content: center; font-size: 20px;">
+        🌟 核心金句：<strong>赋值只发生在当前时刻，绝不是建立永久连线！</strong>
+      </div>
+    </section>
+
+    <!-- ================= 12 变式挑战与预测 ================= -->
+    <section class="slide" data-slide="12">
+      <div class="slide-tag tag-orange">变式预测</div>
+      <h2 class="slide-title">推演挑战：预测这段代码的最终输出 🔮</h2>
+      <div class="card-grid-2">
+        <div class="code-window step">
+          <div class="code-header"><span style="color:#94A3B8; font-size:15px;">quiz_link.py</span></div>
+          <div class="code-body">
+            <div class="code-line"><span class="line-num">1</span><span class="syntax-var">a</span> <span class="syntax-op">=</span> <span class="syntax-num">10</span></div>
+            <div class="code-line"><span class="line-num">2</span><span class="syntax-var">b</span> <span class="syntax-op">=</span> <span class="syntax-var">a</span></div>
+            <div class="code-line"><span class="line-num">3</span><span class="syntax-var">a</span> <span class="syntax-op">=</span> <span class="syntax-num">20</span></div>
+            <div class="code-line"><span class="line-num">4</span><span class="syntax-fn">print</span><span class="syntax-punct">(</span><span class="syntax-var">b</span><span class="syntax-punct">)</span></div>
+          </div>
+        </div>
+
+        <div class="card step" style="padding: 26px; justify-content: center; gap: 14px;">
+          <div style="font-size: 20px; font-weight: 900; color: var(--ink-main);">❓ 终端最终输出什么？</div>
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            <button class="btn btn-secondary" style="font-size: 16px; padding: 10px 16px; text-align: left;" onclick="checkLinkQuiz(this, false, '不对哦！b = a 执行时 a 是 10，b 得到 10。后续 a 改成 20 不会影响 b！')">A. 输出 20 (误以为 b 随着 a 改变)</button>
+            <button class="btn btn-secondary" style="font-size: 16px; padding: 10px 16px; text-align: left;" onclick="checkLinkQuiz(this, true, '完全正确！b 记录的是执行当时 a 的值 10，独立存在！')">B. 输出 10 (理解赋值的瞬间独立性)</button>
+          </div>
+          <div id="link-quiz-feedback" style="font-size: 16px; font-weight: bold; min-height: 24px;"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 13 易错辨析 ================= -->
+    <section class="slide" data-slide="13">
+      <div class="slide-tag tag-blue">易错辨析</div>
+      <h2 class="slide-title">易错辨析：右边的 score 到底取哪个值？ 🧠</h2>
+      <div class="card-grid-2">
+        <div class="code-window step">
+          <div class="code-header"><span style="color:#94A3B8; font-size:15px;">score_trace.py</span></div>
+          <div class="code-body" id="dbg4-code-body">
+            <div class="code-line"><span class="line-num">1</span><span class="syntax-var">score</span> <span class="syntax-op">=</span> <span class="syntax-num">10</span></div>
+            <div class="code-line"><span class="line-num">2</span><span class="syntax-var">score</span> <span class="syntax-op">=</span> <span class="syntax-var">score</span> <span class="syntax-op">+</span> <span class="syntax-num">5</span></div>
+            <div class="code-line"><span class="line-num">3</span><span class="syntax-fn">print</span><span class="syntax-punct">(</span><span class="syntax-var">score</span><span class="syntax-punct">)</span></div>
+          </div>
+        </div>
+
+        <div class="card step" style="padding: 24px; justify-content: center; gap: 14px;">
+          <div style="font-size: 18px; font-weight: 900; color: var(--ink-main);">🧐 思考辨析：执行到第 2 行时，右边的 score 取的是几？</div>
+          <div style="display: flex; gap: 10px;">
+            <button class="btn btn-secondary" style="padding: 8px 16px; font-size: 16px; flex: 1;" onclick="checkDbgChoice(this, true)">取当前旧值 10</button>
+            <button class="btn btn-secondary" style="padding: 8px 16px; font-size: 16px; flex: 1;" onclick="checkDbgChoice(this, false)">取计算后的新值 15</button>
+          </div>
+          <div id="dbg4-feedback" style="font-size: 15px; font-weight: bold; min-height: 24px;"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 14 真实 Python 独立编程 ================= -->
+    <section class="slide" data-slide="14">
+      <div class="slide-tag tag-green">独立编程</div>
+      <h2 class="slide-title">独立编程：用 Trace Table 预测并运行程序 💻</h2>
+      <div class="card-grid-2">
+        <!-- Left: Real Python Code Guide -->
+        <div class="card step" style="padding: 20px; background: #FFF; border-color: var(--green-main); justify-content: center; gap: 8px;">
+          <div style="font-size: 18px; font-weight: 900; color: var(--green-dark);">🚀 真实 Python 环境练习步骤：</div>
+          <div style="font-size: 14px; color: var(--ink-main); line-height: 1.5;">
+            1. 打开 Python 编辑器，新建保存为：<strong style="color:var(--orange-dark); font-size: 15px;">trace_04.py</strong><br/>
+            2. 输入以下多变量状态程序：<br/>
+            <code style="background:#F8FAFC; padding:4px 8px; border-radius:6px; display:block; margin:3px 0; font-size:13px; font-family:Consolas, monospace; line-height: 1.4;">
+              a = 10<br/>
+              b = 5<br/>
+              a = a + 2<br/>
+              b = a + b<br/>
+              print(a)<br/>
+              print(b)
+            </code>
+            3. <strong>运行前先独立完成 Trace Table 推演</strong>，记录 a、b 每一步的当前值并预测最终输出；<br/>
+            4. 在终端运行验证，向老师展示推演与运行结果！
+          </div>
+          <button class="btn btn-green" style="padding: 8px 16px; font-size: 15px; margin-top: 2px;" onclick="confirmL4Done()">✅ 我已完成 Trace 并运行验证</button>
+          <div id="l4-done-feedback" style="font-size: 14px; font-weight: bold; color: var(--green-dark); min-height: 18px;"></div>
+        </div>
+
+        <!-- Right: Preview Console (Hidden until verified) -->
+        <div class="card step" style="padding: 20px; background: #020617; border-color: #1E293B; justify-content: center;">
+          <div style="color: #94A3B8; font-size: 14px; margin-bottom: 8px;">&gt; 终端核对区域：</div>
+          <div id="l4-console-out" style="color: #FBBF24; font-family: Consolas, monospace; font-size: 16px; line-height: 1.6;">
+            ⏳ 请先独立完成 Trace Table 并预测输出！<br/>
+            完成真实运行后点击左侧按钮核对结果。
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 15 课尾三层能力大通关 ================= -->
+    <section class="slide" data-slide="15">
+      <div class="slide-tag tag-green">能力大通关</div>
+      <h2 class="slide-title">本讲能力三关大挑战 🏆</h2>
+      <div style="width: 100%;">
+        <div class="card-grid-2" style="align-items: stretch;">
+          <div class="card step" style="gap: 12px; padding: 20px; justify-content: space-between;">
+            <div>
+              <div style="font-size: 15px; font-weight: 900; color: var(--orange-dark); margin-bottom: 4px;">【第一关 A：更新计算】x = 5; x = x + 3 最终 x 是？</div>
+              <div style="display: flex; gap: 8px; margin-bottom: 6px;">
+                <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 13px; flex: 1;" onclick="checkPassL4_1a(this, true)">8</button>
+                <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 13px; flex: 1;" onclick="checkPassL4_1a(this, false)">5</button>
+                <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 13px; flex: 1;" onclick="checkPassL4_1a(this, false)">3</button>
+              </div>
+
+              <div style="font-size: 15px; font-weight: 900; color: var(--orange-dark); margin-bottom: 4px;">【第一关 B：赋值顺序】x = x + 1 的执行顺序是？</div>
+              <div style="display: flex; gap: 8px;">
+                <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 13px; flex: 1;" onclick="checkPassL4_1b(this, true)">先算右边再更新左边</button>
+                <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 13px; flex: 1;" onclick="checkPassL4_1b(this, false)">先看左边</button>
+              </div>
+            </div>
+
+            <div>
+              <div style="font-size: 15px; font-weight: 900; color: var(--blue-night); margin-bottom: 4px;">【第二关 A：变量独立】a = 3; b = a; a = 5; print(b) 输出？</div>
+              <div style="display: flex; gap: 8px; margin-bottom: 6px;">
+                <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 13px; flex: 1;" onclick="checkPassL4_2a(this, true)">3</button>
+                <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 13px; flex: 1;" onclick="checkPassL4_2a(this, false)">5</button>
+              </div>
+
+              <div style="font-size: 15px; font-weight: 900; color: var(--blue-night); margin-bottom: 4px;">【第二关 B：多变量跟踪】a=2; b=4; a=a+1; b=b+2 最终 a, b 是？</div>
+              <div style="display: flex; gap: 8px;">
+                <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 13px; flex: 1;" onclick="checkPassL4_2b(this, true)">a=3, b=6</button>
+                <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 13px; flex: 1;" onclick="checkPassL4_2b(this, false)">a=2, b=4</button>
+              </div>
+            </div>
+
+            <div>
+              <div style="font-size: 15px; font-weight: 900; color: var(--green-dark); margin-bottom: 4px;">【第三关：独立编程】</div>
+              <button class="btn btn-green" style="padding: 8px 14px; font-size: 14px; width: 100%;" onclick="checkPassL4_3(this)">✅ 我已独立推演并运行 trace_04.py！</button>
+            </div>
+          </div>
+
+          <div class="card step" style="text-align: center; justify-content: center; align-items: center; padding: 32px;">
+            <div style="font-size: 64px; color: var(--yellow-sun); margin-bottom: 12px;">🏅⭐️⭐️⭐️</div>
+            <div style="font-size: 22px; font-weight: 900; color: var(--orange-dark); line-height: 1.4;" id="final-award-text4">
+              完成左侧三关挑战<br/>达成第04讲核心能力目标！
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 16 显性成就与下节悬念 ================= -->
+    <section class="slide" data-slide="16">
+      <div class="slide-tag tag-orange">圆满收束</div>
+      <h2 class="slide-title">恭喜你！达成第04讲全部目标 🎉</h2>
+      <div class="card-grid-2">
+        <div class="card step" style="justify-content: center; gap: 16px; background: var(--orange-soft); border-color: var(--orange-main); padding: 32px;">
+          <div style="font-size: 24px; font-weight: 900; color: var(--orange-dark);">🎖️ 本讲能力收束：</div>
+          <div style="font-size: 19px; color: var(--ink-main); line-height: 1.65;">
+            彻底掌握 <code>x = x + 1</code>“先算右边再赋给左边”的执行机制；理解程序状态在时间中按顺序演进；理解多变量独立性与 <code>b = a</code> 的瞬间复制本质；熟练使用 Trace Table 跟踪状态！
+          </div>
+        </div>
+        <div class="card step" style="justify-content: center; gap: 16px; background: var(--blue-soft); border-color: var(--blue-night); padding: 32px;">
+          <div style="font-size: 24px; font-weight: 900; color: var(--blue-night);">🔮 下一讲预告与悬念：</div>
+          <div style="font-size: 19px; color: var(--ink-main); line-height: 1.65;">
+            今天我们只用了最简单的 <code>+1</code>、<code>+2</code> 来更新状态。那 Python 中到底有哪些丰富的算术运算符（乘除、整除、取余数）？表达式又该怎样计算？<br/>
+            <strong>第05讲《算术运算与表达式：让数据参与计算》见！</strong>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer Navigation -->
+  <footer>
+    <div class="shortcut-hint">
+      <span>💡 操作提示：</span>
+      <span>点击任意空白区域 / <span class="key-badge">空格</span> / <span class="key-badge">→</span> 逐步展示与前进</span>
+      <span><span class="key-badge">←</span> 回退</span>
+      <span><span class="key-badge">F</span> 全屏</span>
+    </div>
+    <div style="display: flex; gap: 12px;">
+      <button class="btn btn-secondary" style="padding: 8px 18px; font-size: 15px;" onclick="prevStep()">❮ 上一步</button>
+      <button class="btn btn-primary" style="padding: 8px 24px; font-size: 15px;" onclick="advanceStep()">下一步 ❯</button>
+    </div>
+  </footer>
+</div>
+
+<script>
+  let currentSlide = 1;
+  const totalSlides = 16;
+  const slides = document.querySelectorAll('.slide');
+  const slideCounter = document.getElementById('slide-counter');
+  const progressFill = document.getElementById('progress-fill');
+
+  function triggerCelebration(opts = { particleCount: 50, spread: 70, origin: { y: 0.65 } }) {
+    if (typeof confetti === 'function') {
+      try { confetti(opts); } catch(e) {}
+    }
+  }
+
+  // Core Progressive Step-by-Step Reveal System
+  function advanceStep() {
+    const activeSlide = document.querySelector('.slide.active');
+    if (!activeSlide) return;
+
+    const nextHiddenStep = activeSlide.querySelector('.step:not(.revealed)');
+    if (nextHiddenStep) {
+      nextHiddenStep.classList.add('revealed');
+      if (typeof gsap !== 'undefined') {
+        gsap.fromTo(nextHiddenStep, 
+          { opacity: 0, y: 16, scale: 0.98 }, 
+          { opacity: 1, y: 0, scale: 1, duration: 0.35, ease: "power2.out" }
+        );
+      }
+    } else {
+      if (currentSlide < totalSlides) {
+        goToSlide(currentSlide + 1);
+      }
+    }
+  }
+
+  function prevStep() {
+    const activeSlide = document.querySelector('.slide.active');
+    if (!activeSlide) return;
+
+    const revealedSteps = activeSlide.querySelectorAll('.step.revealed');
+    if (revealedSteps.length > 1) {
+      const lastRevealed = revealedSteps[revealedSteps.length - 1];
+      lastRevealed.classList.remove('revealed');
+    } else {
+      if (currentSlide > 1) {
+        goToSlide(currentSlide - 1);
+      }
+    }
+  }
+
+  function goToSlide(newIndex) {
+    if (newIndex < 1 || newIndex > totalSlides) return;
+    
+    const isMovingBackward = newIndex < currentSlide;
+
+    slides.forEach((s, idx) => {
+      s.classList.remove('active', 'prev', 'next');
+      const allSteps = s.querySelectorAll('.step');
+      
+      if (idx + 1 === newIndex) {
+        s.classList.add('active');
+        if (isMovingBackward) {
+          allSteps.forEach(st => st.classList.add('revealed'));
+        } else {
+          allSteps.forEach((st, sIdx) => {
+            if (sIdx === 0 || st.classList.contains('always-revealed')) {
+              st.classList.add('revealed');
+            } else {
+              st.classList.remove('revealed');
+            }
+          });
+        }
+      } else if (idx + 1 < newIndex) {
+        s.classList.add('prev');
+        allSteps.forEach(st => st.classList.add('revealed'));
+      } else {
+        s.classList.add('next');
+        allSteps.forEach(st => st.classList.remove('revealed'));
+      }
+    });
+
+    currentSlide = newIndex;
+    slideCounter.textContent = `${String(currentSlide).padStart(2, '0')} / ${totalSlides}`;
+    progressFill.style.width = `${(currentSlide / totalSlides) * 100}%`;
+  }
+
+  // Global click listener with interactive component filter
+  document.getElementById('stage-container').addEventListener('click', (e) => {
+    if (e.target.closest('button, input, textarea, select, .drag-chip, .drop-zone, .option-card, header, footer, .no-advance, table')) {
+      return;
+    }
+    advanceStep();
+  });
+
+  // Keyboard navigation
+  window.addEventListener('keydown', (e) => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown' || e.key === 'Enter') {
+      e.preventDefault();
+      advanceStep();
+    } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+      e.preventDefault();
+      prevStep();
+    } else if (e.key === 'f' || e.key === 'F') {
+      toggleFullscreen();
+    }
+  });
+
+  document.getElementById('btn-prev').addEventListener('click', (e) => { e.stopPropagation(); prevStep(); });
+  document.getElementById('btn-next').addEventListener('click', (e) => { e.stopPropagation(); advanceStep(); });
+  document.getElementById('btn-fullscreen').addEventListener('click', (e) => { e.stopPropagation(); toggleFullscreen(); });
+
+  function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(() => {});
+    } else {
+      document.exitFullscreen().catch(() => {});
+    }
+  }
+
+  // ================= Slide 05: Single Variable Mutation Simulator =================
+  let sim1Step = 1;
+  function stepSim1() {
+    const l1 = document.getElementById('sim1-line-1');
+    const l2 = document.getElementById('sim1-line-2');
+    const l3 = document.getElementById('sim1-line-3');
+    const valText = document.getElementById('sim1-val-text');
+    const fb = document.getElementById('sim1-feedback');
+    const btn = document.getElementById('btn-sim1-step');
+    const termOut = document.getElementById('sim1-terminal-out');
+
+    if (sim1Step === 1) {
+      l1.classList.remove('active-line');
+      l2.classList.add('active-line');
+      fb.innerHTML = "👉 <strong>第一步：</strong>取出右边 x 当前值 10，计算 10 + 1 = 11；<br/>👉 <strong>第二步：</strong>把 11 赋给左边 x，状态更新为 11！";
+      fb.style.color = "var(--orange-dark)";
+      fb.style.background = "#FFF7ED";
+      fb.style.borderColor = "var(--orange-main)";
+      
+      if (typeof gsap !== 'undefined') {
+        gsap.fromTo(valText, 
+          { scale: 1.4, color: "#EF4444" }, 
+          { scale: 1, color: "#10B981", duration: 0.4, onStart: () => { valText.textContent = "11"; } }
+        );
+      } else {
+        valText.textContent = "11";
+      }
+      btn.textContent = "▶️ 执行第 3 行 (print(x))";
+      sim1Step = 2;
+      triggerCelebration({ particleCount: 30, spread: 50, origin: { y: 0.65 } });
+    } else if (sim1Step === 2) {
+      l2.classList.remove('active-line');
+      l3.classList.add('active-line');
+      
+      // Simulate real terminal output
+      termOut.innerHTML = '<span style="color:#34D399; font-size:22px; font-weight:bold;">11</span>';
+      if (typeof gsap !== 'undefined') {
+        gsap.fromTo(termOut, { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(2)" });
+      }
+
+      fb.innerHTML = "✨ <strong>执行第 3 行 print(x)：</strong>成功将变量 x 当前保存的值 11 打印到终端屏幕！";
+      fb.style.color = "var(--green-dark)";
+      fb.style.background = "#F0FDF4";
+      fb.style.borderColor = "var(--green-main)";
+      btn.textContent = "✅ 推演完成";
+      btn.classList.remove('btn-primary');
+      btn.classList.add('btn-green');
+      sim1Step = 3;
+      triggerCelebration({ particleCount: 40, spread: 60, origin: { y: 0.65 } });
+    }
+  }
+
+  function resetSim1() {
+    sim1Step = 1;
+    document.getElementById('sim1-line-1').classList.add('active-line');
+    document.getElementById('sim1-line-2').classList.remove('active-line');
+    document.getElementById('sim1-line-3').classList.remove('active-line');
+    document.getElementById('sim1-val-text').textContent = "10";
+    document.getElementById('sim1-val-text').style.color = "#4F46E5";
+    
+    const btn = document.getElementById('btn-sim1-step');
+    btn.textContent = "▶️ 执行第 2 行 (x = x + 1)";
+    btn.classList.add('btn-primary');
+    btn.classList.remove('btn-green');
+
+    document.getElementById('sim1-terminal-out').innerHTML = '<span style="color:#475569; font-size:13px; font-weight: normal;">(第 1~2 行执行状态更新，等待 print 输出...)</span>';
+    
+    const fb = document.getElementById('sim1-feedback');
+    fb.innerHTML = "📍 执行第 1 行：变量 x 被赋值为 10，当前记录值 10。";
+    fb.style.color = "var(--green-dark)";
+    fb.style.background = "#F0FDF4";
+    fb.style.borderColor = "var(--green-main)";
+  }
+
+  // ================= Slide 09: Interactive Trace Table with Student Participation =================
+  let curTraceStep = 1;
+
+  const traceQuestions = [
+    {
+      line: 1,
+      q: "📍 思考：执行完第 1 行 a = 3 后，a 和 b 的当前值是？",
+      opts: [
+        { label: "A. a=3, b=未赋值", correct: true },
+        { label: "B. a=3, b=0", correct: false },
+        { label: "C. a=未赋值, b=3", correct: false }
+      ],
+      a_val: "3",
+      b_val: "未赋值",
+      hint: "第 1 行只对 a 赋值为 3，b 此时还未被创建和赋值！"
+    },
+    {
+      line: 2,
+      q: "📍 思考：执行完第 2 行 b = 5 后，a 和 b 的当前值是？",
+      opts: [
+        { label: "A. a=3, b=5", correct: true },
+        { label: "B. a=5, b=3", correct: false },
+        { label: "C. a=未赋值, b=5", correct: false }
+      ],
+      a_val: "3",
+      b_val: "5",
+      hint: "第 2 行对 b 赋值为 5，a 依然保持之前的值 3！"
+    },
+    {
+      line: 3,
+      q: "📍 思考：执行完第 3 行 a = a + 2 后，a 和 b 的当前值是？",
+      opts: [
+        { label: "A. a=5, b=5", correct: true },
+        { label: "B. a=2, b=5", correct: false },
+        { label: "C. a=5, b=7", correct: false }
+      ],
+      a_val: "5",
+      b_val: "5",
+      hint: "取出 a 旧值 3 计算 3+2=5 赋回给 a；b 保持不变依然是 5！"
+    },
+    {
+      line: 4,
+      q: "📍 思考：执行完第 4 行 b = b + 1 后，a 和 b 的当前值是？",
+      opts: [
+        { label: "A. a=5, b=6", correct: true },
+        { label: "B. a=6, b=5", correct: false },
+        { label: "C. a=5, b=5", correct: false }
+      ],
+      a_val: "5",
+      b_val: "6",
+      hint: "取出 b 旧值 5 计算 5+1=6 赋回给 b；a 保持不变依然是 5！"
+    }
+  ];
+
+  function chooseTraceAns(stepIdx, isCorrect) {
+    const qData = traceQuestions[stepIdx - 1];
+    const fb = document.getElementById('trace-step-feedback');
+
+    if (isCorrect) {
+      document.getElementById(`cell-a-${stepIdx}`).textContent = qData.a_val;
+      document.getElementById(`cell-b-${stepIdx}`).textContent = qData.b_val;
+      fb.innerHTML = `✅ <strong>判断完全正确！</strong> ${qData.hint}`;
+      fb.style.color = "var(--green-dark)";
+      triggerCelebration({ particleCount: 25, spread: 45, origin: { y: 0.65 } });
+
+      if (stepIdx < 4) {
+        curTraceStep = stepIdx + 1;
+        setTimeout(() => {
+          renderTraceStepUI(curTraceStep);
+        }, 800);
+      } else {
+        fb.innerHTML = "🎉 <strong>太棒了！全部 4 步 Trace 推演完成，最终状态 a=5, b=6！</strong>";
+        triggerCelebration({ particleCount: 50, spread: 65, origin: { y: 0.65 } });
+      }
+    } else {
+      fb.innerHTML = "❌ <strong>判断不对哦：</strong> 再仔细推演这一行执行后的变量值！";
+      fb.style.color = "#EF4444";
+    }
+  }
+
+  function renderTraceStepUI(stepIdx) {
+    for (let i = 1; i <= 4; i++) {
+      const line = document.getElementById(`tr-line-${i}`);
+      const row = document.getElementById(`tbl-row-${i}`);
+      if (line) {
+        if (i === stepIdx) line.classList.add('active-line');
+        else line.classList.remove('active-line');
+      }
+      if (row) {
+        if (i === stepIdx) row.classList.add('active-row');
+        else row.classList.remove('active-row');
+      }
+    }
+
+    const qData = traceQuestions[stepIdx - 1];
+    document.getElementById('trace-question-text').textContent = qData.q;
+    const container = document.getElementById('trace-options-container');
+    container.innerHTML = "";
+    qData.opts.forEach(opt => {
+      const btn = document.createElement('button');
+      btn.className = "btn btn-secondary";
+      btn.style.padding = "6px 10px";
+      btn.style.fontSize = "13px";
+      btn.style.flex = "1";
+      btn.textContent = opt.label;
+      btn.onclick = () => chooseTraceAns(stepIdx, opt.correct);
+      container.appendChild(btn);
+    });
+    document.getElementById('trace-step-feedback').textContent = "";
+  }
+
+  function resetTraceTable() {
+    curTraceStep = 1;
+    for (let i = 1; i <= 4; i++) {
+      document.getElementById(`cell-a-${i}`).textContent = (i === 1) ? "?" : "-";
+      document.getElementById(`cell-b-${i}`).textContent = (i === 1) ? "?" : "-";
+    }
+    renderTraceStepUI(1);
+    document.getElementById('trace-step-feedback').textContent = "重新推演开始，请选择第 1 行答案！";
+    document.getElementById('trace-step-feedback').style.color = "var(--orange-dark)";
+  }
+
+  // ================= Slide 12: b = a Link Quiz =================
+  function checkLinkQuiz(btn, isCorrect, reason) {
+    const parent = btn.parentElement;
+    parent.querySelectorAll('.btn').forEach(b => {
+      b.style.borderColor = 'rgba(0,0,0,0.1)';
+      b.style.background = 'var(--bg-card)';
+      b.style.color = 'var(--ink-main)';
+    });
+    const fb = document.getElementById('link-quiz-feedback');
+    if (isCorrect) {
+      btn.style.borderColor = 'var(--green-main)';
+      btn.style.background = 'var(--green-soft)';
+      btn.style.color = 'var(--green-dark)';
+      fb.innerHTML = `✅ <strong>判断正确！</strong> ${reason}`;
+      fb.style.color = "var(--green-dark)";
+      triggerCelebration({ particleCount: 35, spread: 55, origin: { y: 0.65 } });
+    } else {
+      btn.style.borderColor = '#EF4444';
+      btn.style.background = '#FEE2E2';
+      btn.style.color = '#991B1B';
+      fb.innerHTML = `❌ <strong>注意避坑：</strong> ${reason}`;
+      fb.style.color = "#EF4444";
+    }
+  }
+
+  // ================= Slide 13: Easy-Mistake Analysis Quiz =================
+  function checkDbgChoice(btn, isCorrect) {
+    const parent = btn.parentElement;
+    parent.querySelectorAll('.btn').forEach(b => {
+      b.style.borderColor = 'rgba(0,0,0,0.1)';
+      b.style.background = 'var(--bg-card)';
+      b.style.color = 'var(--ink-main)';
+    });
+    const fb = document.getElementById('dbg4-feedback');
+    if (isCorrect) {
+      btn.style.borderColor = 'var(--green-main)';
+      btn.style.background = 'var(--green-soft)';
+      btn.style.color = 'var(--green-dark)';
+      fb.innerHTML = "🎯 <strong>完全正确！</strong> 执行第二行时，先读取 score 当前旧值 10，计算 10+5 得到 15，再把 15 赋回 score！";
+      fb.style.color = "var(--green-dark)";
+      triggerCelebration({ particleCount: 30, spread: 50, origin: { y: 0.65 } });
+    } else {
+      btn.style.borderColor = '#EF4444';
+      btn.style.background = '#FEE2E2';
+      btn.style.color = '#991B1B';
+      fb.innerHTML = "❌ <strong>不对哦：</strong> 在第二行赋值完成之前，score 依然是第 1 行的旧值 10！";
+      fb.style.color = "#EF4444";
+    }
+  }
+
+  // ================= Slide 14: Project Confirmation & Reveal =================
+  function confirmL4Done() {
+    const fb = document.getElementById('l4-done-feedback');
+    const consoleOut = document.getElementById('l4-console-out');
+    consoleOut.innerHTML = '<span style="color:#34D399; font-size:20px; font-weight:bold;">12<br/>17</span>';
+    fb.innerHTML = "🎉 独立推演完成！对照终端输出，你的 Trace 预测正确了吗？请妥善保存 trace_04.py！";
+    triggerCelebration({ particleCount: 60, spread: 70, origin: { y: 0.65 } });
+  }
+
+  // ================= Slide 15: Lesson 04 Mastery 3-Pass Quiz =================
+  let p4_1a = false, p4_1b = false, p4_2a = false, p4_2b = false, p4_3 = false;
+
+  function checkPassL4_1a(btn, isCorrect) {
+    const parent = btn.parentElement;
+    parent.querySelectorAll('.btn').forEach(b => {
+      b.style.borderColor = 'rgba(0,0,0,0.1)';
+      b.style.background = 'var(--bg-card)';
+      b.style.color = 'var(--ink-main)';
+    });
+    if (isCorrect) {
+      btn.style.borderColor = 'var(--green-main)';
+      btn.style.background = 'var(--green-soft)';
+      btn.style.color = 'var(--green-dark)';
+      p4_1a = true;
+    } else {
+      btn.style.borderColor = '#EF4444';
+      btn.style.background = '#FEE2E2';
+      btn.style.color = '#991B1B';
+      p4_1a = false;
+    }
+    checkAllPassedL4();
+  }
+
+  function checkPassL4_1b(btn, isCorrect) {
+    const parent = btn.parentElement;
+    parent.querySelectorAll('.btn').forEach(b => {
+      b.style.borderColor = 'rgba(0,0,0,0.1)';
+      b.style.background = 'var(--bg-card)';
+      b.style.color = 'var(--ink-main)';
+    });
+    if (isCorrect) {
+      btn.style.borderColor = 'var(--green-main)';
+      btn.style.background = 'var(--green-soft)';
+      btn.style.color = 'var(--green-dark)';
+      p4_1b = true;
+    } else {
+      btn.style.borderColor = '#EF4444';
+      btn.style.background = '#FEE2E2';
+      btn.style.color = '#991B1B';
+      p4_1b = false;
+    }
+    checkAllPassedL4();
+  }
+
+  function checkPassL4_2a(btn, isCorrect) {
+    const parent = btn.parentElement;
+    parent.querySelectorAll('.btn').forEach(b => {
+      b.style.borderColor = 'rgba(0,0,0,0.1)';
+      b.style.background = 'var(--bg-card)';
+      b.style.color = 'var(--ink-main)';
+    });
+    if (isCorrect) {
+      btn.style.borderColor = 'var(--green-main)';
+      btn.style.background = 'var(--green-soft)';
+      btn.style.color = 'var(--green-dark)';
+      p4_2a = true;
+    } else {
+      btn.style.borderColor = '#EF4444';
+      btn.style.background = '#FEE2E2';
+      btn.style.color = '#991B1B';
+      p4_2a = false;
+    }
+    checkAllPassedL4();
+  }
+
+  function checkPassL4_2b(btn, isCorrect) {
+    const parent = btn.parentElement;
+    parent.querySelectorAll('.btn').forEach(b => {
+      b.style.borderColor = 'rgba(0,0,0,0.1)';
+      b.style.background = 'var(--bg-card)';
+      b.style.color = 'var(--ink-main)';
+    });
+    if (isCorrect) {
+      btn.style.borderColor = 'var(--green-main)';
+      btn.style.background = 'var(--green-soft)';
+      btn.style.color = 'var(--green-dark)';
+      p4_2b = true;
+    } else {
+      btn.style.borderColor = '#EF4444';
+      btn.style.background = '#FEE2E2';
+      btn.style.color = '#991B1B';
+      p4_2b = false;
+    }
+    checkAllPassedL4();
+  }
+
+  function checkPassL4_3(btn) {
+    btn.style.background = 'var(--green-dark)';
+    btn.textContent = '✅ 已在真实 Python 中运行并展示变量程序！';
+    p4_3 = true;
+    checkAllPassedL4();
+  }
+
+  function checkAllPassedL4() {
+    const award = document.getElementById('final-award-text4');
+    if (p4_1a && p4_1b && p4_2a && p4_2b && p4_3) {
+      award.innerHTML = "✅ <strong>太棒了！第04讲核心能力检查全部通过！</strong>";
+      award.style.color = "var(--green-dark)";
+      triggerCelebration({ particleCount: 90, spread: 80, origin: { y: 0.6 } });
+    }
+  }
+</script>
+
+</body>
+</html>

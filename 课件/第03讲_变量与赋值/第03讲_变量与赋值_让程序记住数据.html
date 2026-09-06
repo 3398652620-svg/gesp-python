@@ -1,0 +1,1420 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第03讲 变量与赋值：让程序记住数据</title>
+  <!-- GSAP Animation Engine with Fallback Support -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <!-- Canvas Confetti for Celebrations with Fallback -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+  <style>
+    :root {
+      --bg-paper: #FFF7ED;
+      --bg-card: #FFFFFF;
+      --ink-main: #1C1917;
+      --ink-muted: #78716C;
+      --orange-main: #F97316;
+      --orange-dark: #C2410C;
+      --orange-soft: #FFEDD5;
+      --green-main: #10B981;
+      --green-dark: #047857;
+      --green-soft: #D1FAE5;
+      --yellow-sun: #FBBF24;
+      --yellow-dark: #B45309;
+      --yellow-soft: #FEF3C7;
+      --blue-night: #4F46E5;
+      --blue-dark: #3730A3;
+      --blue-soft: #EEF2FF;
+      --purple-main: #9333EA;
+      --purple-soft: #F3E8FF;
+      --code-board: #0F172A;
+      --code-text: #E2E8F0;
+      --radius-lg: 24px;
+      --radius-md: 16px;
+      --radius-pill: 999px;
+      --shadow-soft: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.03);
+      --shadow-card: 0 20px 25px -5px rgba(249, 115, 22, 0.08), 0 8px 10px -6px rgba(249, 115, 22, 0.04);
+      --shadow-drag: 0 20px 30px rgba(0, 0, 0, 0.15);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background-color: var(--bg-paper);
+      color: var(--ink-main);
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #stage-container {
+      width: 100vw;
+      height: 100vh;
+      max-width: 177.78vh;
+      max-height: 56.25vw;
+      position: relative;
+      background: var(--bg-paper);
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 0 50px rgba(0,0,0,0.08);
+      overflow: hidden;
+      cursor: default;
+    }
+
+    header {
+      height: 64px;
+      padding: 0 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 2px solid rgba(0,0,0,0.04);
+      background: rgba(255, 247, 237, 0.95);
+      backdrop-filter: blur(10px);
+      z-index: 100;
+      flex-shrink: 0;
+    }
+
+    .brand-tag {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--orange-main);
+      background: var(--orange-soft);
+      padding: 6px 16px;
+      border-radius: var(--radius-pill);
+    }
+
+    .lesson-title-nav {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--ink-main);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .nav-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .slide-counter {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--ink-muted);
+      background: var(--bg-card);
+      padding: 6px 14px;
+      border-radius: var(--radius-pill);
+      box-shadow: var(--shadow-soft);
+      border: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .btn-nav-icon {
+      background: var(--bg-card);
+      border: 1px solid rgba(0,0,0,0.08);
+      color: var(--ink-main);
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: bold;
+      transition: all 0.2s;
+    }
+
+    .btn-nav-icon:hover {
+      background: var(--orange-main);
+      color: #fff;
+      border-color: var(--orange-main);
+      transform: scale(1.08);
+    }
+
+    .progress-bar-container {
+      height: 4px;
+      width: 100%;
+      background: rgba(0,0,0,0.05);
+      position: absolute;
+      top: 64px;
+      left: 0;
+      z-index: 101;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 6.25%;
+      background: linear-gradient(90deg, var(--orange-main), var(--yellow-sun));
+      transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    main {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+    }
+
+    .slide {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      padding: 32px 64px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 0.35s ease, transform 0.35s ease;
+      overflow-y: auto;
+    }
+
+    .slide.active {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transform: translateX(0);
+    }
+
+    .slide.prev {
+      transform: translateX(-40px);
+    }
+
+    .slide.next {
+      transform: translateX(40px);
+    }
+
+    /* Step-Reveal Progressive Disclosure System */
+    .step {
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+      pointer-events: none;
+    }
+
+    .step.revealed {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    .slide-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 15px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 6px 16px;
+      border-radius: var(--radius-pill);
+      margin-bottom: 12px;
+      width: fit-content;
+    }
+
+    .tag-orange { background: var(--orange-soft); color: var(--orange-dark); }
+    .tag-green { background: var(--green-soft); color: var(--green-dark); }
+    .tag-blue { background: var(--blue-soft); color: var(--blue-dark); }
+    .tag-purple { background: var(--purple-soft); color: var(--purple-main); }
+
+    .slide-title {
+      font-size: 34px;
+      font-weight: 900;
+      color: var(--ink-main);
+      margin-bottom: 20px;
+      line-height: 1.25;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .card-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 28px;
+      width: 100%;
+      height: calc(100% - 90px);
+      align-items: center;
+    }
+
+    .card-grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 24px;
+      width: 100%;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      box-shadow: var(--shadow-card);
+      border: 1px solid rgba(0,0,0,0.05);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .card-hover:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 20px 25px -5px rgba(249, 115, 22, 0.12);
+      transition: all 0.25s ease;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 14px 28px;
+      border-radius: var(--radius-pill);
+      font-size: 18px;
+      font-weight: 800;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      text-decoration: none;
+      outline: none;
+    }
+
+    .btn:active { transform: scale(0.96); }
+    .btn-primary { background: var(--orange-main); color: #FFF; box-shadow: 0 8px 18px rgba(249, 115, 22, 0.3); }
+    .btn-primary:hover { background: var(--orange-dark); transform: translateY(-2px); }
+    .btn-green { background: var(--green-main); color: #FFF; box-shadow: 0 8px 18px rgba(16, 185, 129, 0.3); }
+    .btn-green:hover { background: var(--green-dark); transform: translateY(-2px); }
+    .btn-blue { background: var(--blue-night); color: #FFF; box-shadow: 0 8px 18px rgba(79, 70, 229, 0.3); }
+    .btn-blue:hover { background: var(--blue-dark); transform: translateY(-2px); }
+    .btn-secondary { background: var(--bg-card); color: var(--ink-main); border: 2px solid rgba(0,0,0,0.1); }
+    .btn-secondary:hover { background: #FAFAFA; border-color: var(--orange-main); color: var(--orange-main); }
+
+    /* Code Window */
+    .code-window {
+      background: var(--code-board);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: 0 16px 36px rgba(15, 23, 42, 0.25);
+      border: 1px solid rgba(255,255,255,0.1);
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+    }
+
+    .code-header {
+      background: #1E293B;
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .code-body {
+      padding: 24px;
+      font-family: "Consolas", "Courier New", monospace;
+      font-size: 21px;
+      line-height: 1.8;
+      color: var(--code-text);
+      flex: 1;
+      overflow: auto;
+    }
+
+    .code-line {
+      display: flex;
+      align-items: center;
+      padding: 6px 12px;
+      border-radius: 8px;
+      transition: background 0.2s, border 0.2s;
+    }
+
+    .line-num {
+      width: 36px;
+      color: #64748B;
+      user-select: none;
+      font-size: 18px;
+    }
+
+    .syntax-fn { color: #38BDF8; font-weight: bold; }
+    .syntax-var { color: #F472B6; font-weight: bold; }
+    .syntax-str { color: #34D399; }
+    .syntax-num { color: #F59E0B; font-weight: bold; }
+    .syntax-op { color: #F87171; font-weight: bold; }
+    .syntax-punct { color: #F8FAFC; }
+    .syntax-err { color: #EF4444; font-weight: bold; }
+
+    .console-window {
+      background: #020617;
+      border-radius: var(--radius-lg);
+      padding: 20px 24px;
+      font-family: "Consolas", monospace;
+      font-size: 20px;
+      color: #38BDF8;
+      border: 1px solid #1E293B;
+      min-height: 120px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .concept-box {
+      background: linear-gradient(135deg, #FFF7ED 0%, #FFEDD5 100%);
+      border: 2px solid var(--orange-main);
+      border-radius: var(--radius-lg);
+      padding: 24px 32px;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--orange-dark);
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .concept-box.green {
+      background: linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%);
+      border-color: var(--green-main);
+      color: var(--green-dark);
+    }
+
+    .concept-box.blue {
+      background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);
+      border-color: var(--blue-night);
+      color: var(--blue-dark);
+    }
+
+    .concept-box.purple {
+      background: linear-gradient(135deg, #FAF5FF 0%, #F3E8FF 100%);
+      border-color: var(--purple-main);
+      color: #6B21A8;
+    }
+
+    .option-card {
+      background: var(--bg-card);
+      border: 2px solid #E7E5E4;
+      border-radius: var(--radius-lg);
+      padding: 18px 24px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .option-card:hover {
+      border-color: var(--blue-night);
+      background: var(--blue-soft);
+      transform: translateY(-2px);
+    }
+
+    .option-card.selected-correct {
+      border-color: var(--green-main);
+      background: var(--green-soft);
+      color: var(--green-dark);
+    }
+
+    .option-card.selected-wrong {
+      border-color: #EF4444;
+      background: #FEE2E2;
+      color: #991B1B;
+    }
+
+    footer {
+      height: 60px;
+      padding: 0 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(255, 247, 237, 0.95);
+      border-top: 2px solid rgba(0,0,0,0.04);
+      z-index: 100;
+      flex-shrink: 0;
+    }
+
+    .shortcut-hint {
+      font-size: 15px;
+      color: var(--ink-muted);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .key-badge {
+      background: var(--bg-card);
+      border: 1px solid #D6D3D1;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-family: monospace;
+      font-size: 13px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+  </style>
+</head>
+<body>
+
+<div id="stage-container">
+  <!-- Header Navigation -->
+  <header>
+    <div class="brand-tag">
+      <span>🏷️</span>
+      <span>GESP Python 启航</span>
+    </div>
+    <div class="lesson-title-nav">
+      <span>第03讲</span>
+      <span style="color:var(--ink-muted);">|</span>
+      <span>变量与赋值：让程序记住数据</span>
+    </div>
+    <div class="nav-controls">
+      <div class="slide-counter" id="slide-counter">01 / 16</div>
+      <button class="btn-nav-icon" id="btn-prev" title="上一步 / 上一幕 (←)">❮</button>
+      <button class="btn-nav-icon" id="btn-next" title="下一步 / 下一幕 (→/空格/点击空白)">❯</button>
+      <button class="btn-nav-icon" id="btn-fullscreen" title="全屏切换 (F)">⛶</button>
+    </div>
+  </header>
+
+  <!-- Top Progress Bar -->
+  <div class="progress-bar-container">
+    <div class="progress-bar-fill" id="progress-fill"></div>
+  </div>
+
+  <!-- Slides Viewport -->
+  <main id="slides-viewport">
+
+    <!-- ================= 01 封面 ================= -->
+    <section class="slide active" data-slide="1">
+      <div style="text-align: center; max-width: 960px; margin: 0 auto;">
+        <div class="slide-tag tag-orange step revealed" style="margin: 0 auto 18px;">第一阶段 · 程序、数据与状态</div>
+        <h1 class="step revealed" style="font-size: 46px; font-weight: 900; line-height: 1.25; margin-bottom: 20px; color: var(--ink-main);">
+          变量与赋值<br/>
+          <span style="color: var(--orange-main);">让程序记住数据 🏷️</span>
+        </h1>
+        <p class="step revealed" style="font-size: 23px; color: var(--ink-muted); margin-bottom: 36px;">
+          给数据起专属名字，理解赋值方向与“当前值”，迈入“程序状态”第一课！
+        </p>
+        <div class="step revealed" style="display: flex; justify-content: center; gap: 20px;">
+          <button class="btn btn-primary" style="font-size: 20px; padding: 16px 36px;" onclick="goToSlide(2)">开启第03讲探索 🚀 (或按空格键)</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 02 痛点与引入 ================= -->
+    <section class="slide" data-slide="2">
+      <div class="slide-tag tag-blue">回顾与思考</div>
+      <h2 class="slide-title">写死数据的烦恼：怎样让程序“记住”信息？🤔</h2>
+      <div class="card-grid-2">
+        <div class="card card-hover step" style="justify-content: center; padding: 30px;">
+          <div style="font-size: 40px; margin-bottom: 10px;">😫 痛点回顾</div>
+          <div style="font-size: 20px; color: var(--ink-main); line-height: 1.65;">
+            在第02讲中，如果我们要输出 3 次小明的名字：<br/>
+            <code style="background:#F8FAFC; padding:4px 8px; border-radius:6px; font-family:Consolas,monospace; display:block; margin:8px 0;">
+              print("小明")<br/>print("小明")<br/>print("小明")
+            </code>
+            如果主角改成了“小红”，或者要在 100 处使用，难道每次都要重新写一遍吗？
+          </div>
+        </div>
+
+        <div class="concept-box orange step" style="flex-direction: column; justify-content: center; text-align: center; padding: 30px;">
+          <div style="font-size: 52px; margin-bottom: 10px;">🏷️ 变量 (Variable)</div>
+          <div style="font-size: 22px; color: var(--orange-dark); line-height: 1.55;">
+            能不能先给数据<strong>起一个名字</strong>？<br/>
+            让程序把数据<strong>记住</strong>，之后直接呼唤名字使用它！
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 03 什么是变量与赋值 ================= -->
+    <section class="slide" data-slide="3">
+      <div class="slide-tag tag-orange">核心概念</div>
+      <h2 class="slide-title">变量与赋值语句：name = "小明" 🔍</h2>
+      <div style="max-width: 920px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; gap: 20px;">
+        <div style="background: #0F172A; border-radius: 16px; padding: 24px; font-family: Consolas, monospace; font-size: 32px; color: #FFF; text-align: center; box-shadow: 0 8px 24px rgba(15,23,42,0.25);">
+          <span style="color: #F472B6; font-weight: bold;">name</span> <span style="color: #F87171; font-weight: bold;">=</span> <span style="color: #34D399;">"小明"</span>
+        </div>
+        <div class="card-grid-3" style="gap: 16px;">
+          <div class="step" style="background: #FFF0F5; border: 1px solid #FBCFE8; padding: 18px; border-radius: 14px; text-align: center;">
+            <div style="font-size: 22px; font-weight: 900; color: #9D174D; margin-bottom: 6px;">1. name 变量名</div>
+            <div style="font-size: 16px; color: #831843; line-height: 1.5;">程序给数据起的名字（专属标签）</div>
+          </div>
+          <div class="step" style="background: #FEF2F2; border: 1px solid #FECACA; padding: 18px; border-radius: 14px; text-align: center;">
+            <div style="font-size: 22px; font-weight: 900; color: #991B1B; margin-bottom: 6px;">2. = 赋值符号</div>
+            <div style="font-size: 16px; color: #7F1D1D; line-height: 1.5;">不是数学等号！表示“把右边的值交给左边保存”</div>
+          </div>
+          <div class="step" style="background: #F0FDF4; border: 1px solid #86EFAC; padding: 18px; border-radius: 14px; text-align: center;">
+            <div style="font-size: 22px; font-weight: 900; color: #166534; margin-bottom: 6px;">3. "小明" 当前值</div>
+            <div style="font-size: 16px; color: #14532D; line-height: 1.5;">当前被保存在变量里的具体数据</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 04 赋值方向与轻量判断 ================= -->
+    <section class="slide" data-slide="4">
+      <div class="slide-tag tag-green">核心思维</div>
+      <h2 class="slide-title">赋值方向：先看右边，再赋给左边 ⬅️</h2>
+      <div class="card-grid-2">
+        <div class="card step" style="padding: 26px; justify-content: center; gap: 14px;">
+          <div style="background: #0F172A; padding: 14px 20px; border-radius: 12px; font-family: Consolas, monospace; font-size: 24px; color: #FFF;">
+            <span style="color: #F472B6;">score</span> <span style="color: #F87171;">=</span> <span style="color: #F59E0B;">90</span>
+          </div>
+          <div style="font-size: 19px; font-weight: 900; color: var(--ink-main);">❓ 这行代码最准确的理解是什么？</div>
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            <button class="btn btn-secondary" style="font-size: 16px; padding: 10px 16px; text-align: left;" onclick="checkAssignDirChoice(this, false, '不对哦！= 不是数学里的永恒相等，而是赋值动作。')">A. score 和 90 永远相等</button>
+            <button class="btn btn-secondary" style="font-size: 16px; padding: 10px 16px; text-align: left;" onclick="checkAssignDirChoice(this, true, '完全正确！先得到右边的 90，再把它赋给左边的变量 score 保存！')">B. 先得到右边的 90，再把它赋给左边的 score</button>
+          </div>
+          <div id="assign-dir-feedback" style="font-size: 16px; font-weight: bold; min-height: 24px;"></div>
+        </div>
+
+        <div class="concept-box green step" style="flex-direction: column; justify-content: center; text-align: center; padding: 28px;">
+          <div style="font-size: 40px; margin-bottom: 8px;">🎯 赋值黄金口诀</div>
+          <div style="font-size: 21px; color: var(--green-dark); line-height: 1.6;">
+            <strong>先看右边是什么数据</strong><br/>
+            ➔ <strong>再把结果赋给左边的变量名保存！</strong><br/>
+            程序从此记住了它的<strong>当前值</strong>！
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 05 核心认知冲突：name vs "name" ================= -->
+    <section class="slide" data-slide="5">
+      <div class="slide-tag tag-orange">核心认知冲突</div>
+      <h2 class="slide-title">print(name) 与 print("name") 一样吗？🤔</h2>
+      
+      <!-- Top Premise Code Box -->
+      <div style="background: #0F172A; border-radius: 14px; padding: 12px 24px; font-family: Consolas, monospace; font-size: 22px; color: #FFF; display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; box-shadow: 0 4px 12px rgba(15,23,42,0.15);">
+        <div><span style="color:#94A3B8; font-size:15px; font-family:sans-serif;">📌 变量定义前提：</span> <span style="color:#F472B6; font-weight:bold;">name</span> <span style="color:#F87171; font-weight:bold;">=</span> <span style="color:#34D399;">"小明"</span></div>
+        <div style="font-size: 14px; color: #38BDF8; font-family: sans-serif;">🧠 变量 name 当前记住的值是 "小明"</div>
+      </div>
+
+      <div class="card-grid-2" style="height: auto; gap: 20px;">
+        <!-- Left Card: Code 1 & Answer 1 -->
+        <div class="card step" style="padding: 22px; gap: 10px; background: #FFF7ED; border-color: var(--orange-main); min-height: 190px;">
+          <div style="font-size: 19px; font-weight: 900; color: var(--orange-dark);">❓ 写法一：print(name)</div>
+          <div style="background:#0F172A; padding:8px 14px; border-radius:8px; font-family:Consolas, monospace; font-size:18px; color:#FFF;">
+            <span class="syntax-fn">print</span><span class="syntax-punct">(</span><span class="syntax-var">name</span><span class="syntax-punct">)</span>
+          </div>
+          <div class="step" style="font-size: 16px; color: var(--ink-main); line-height: 1.55; background: rgba(255,255,255,0.85); padding: 10px 14px; border-radius: 8px; border: 1px solid rgba(249,115,22,0.25);">
+            <strong>➔ 屏幕输出：小明</strong><br/>
+            没有引号，Python 会去寻找变量 <code>name</code> 当前保存的值！
+          </div>
+        </div>
+
+        <!-- Right Card: Code 2 & Answer 2 -->
+        <div class="card step" style="padding: 22px; gap: 10px; background: #EEF2FF; border-color: var(--blue-night); min-height: 190px;">
+          <div style="font-size: 19px; font-weight: 900; color: var(--blue-dark);">❓ 写法二：print("name")</div>
+          <div style="background:#0F172A; padding:8px 14px; border-radius:8px; font-family:Consolas, monospace; font-size:18px; color:#FFF;">
+            <span class="syntax-fn">print</span><span class="syntax-punct">(</span><span class="syntax-str">"name"</span><span class="syntax-punct">)</span>
+          </div>
+          <div class="step" style="font-size: 16px; color: var(--ink-main); line-height: 1.55; background: rgba(255,255,255,0.85); padding: 10px 14px; border-radius: 8px; border: 1px solid rgba(79,70,229,0.25);">
+            <strong>➔ 屏幕输出：name</strong><br/>
+            带了双引号，Python 会把它当作<strong>普通字符串文字</strong>原样输出！
+          </div>
+        </div>
+      </div>
+      <div class="concept-box green step" style="margin-top: 14px; text-align: center; justify-content: center; font-size: 20px; padding: 14px 20px;">
+        🌟 核心认知：<strong>在已定义变量的前提下，不带引号是取变量当前值，带了引号则是输出字符串！</strong>
+      </div>
+    </section>
+
+    <!-- ================= 06 变量可以记住不同形式的数据 ================= -->
+    <section class="slide" data-slide="6">
+      <div class="slide-tag tag-blue">数据探索</div>
+      <h2 class="slide-title">变量可以记住不同形式的数据 📦</h2>
+      <div class="card-grid-3" style="margin-top: 10px;">
+        <div class="card step" style="background: #F3E8FF; border-color: #A855F7; padding: 22px;">
+          <div style="font-size: 32px; margin-bottom: 6px;">🔤</div>
+          <div style="font-size: 20px; font-weight: 900; color: #7E22CE; margin-bottom: 6px;">文字数据</div>
+          <div style="font-family: Consolas, monospace; font-size: 18px; background: #FFF; padding: 8px; border-radius: 8px; margin-bottom: 8px;">
+            name = <span class="syntax-str">"小明"</span>
+          </div>
+          <div style="font-size: 15px; color: #6B21A8;">变量可以保存文字信息</div>
+        </div>
+
+        <div class="card step" style="background: #FEF3C7; border-color: #F59E0B; padding: 22px;">
+          <div style="font-size: 32px; margin-bottom: 6px;">🔢</div>
+          <div style="font-size: 20px; font-weight: 900; color: #B45309; margin-bottom: 6px;">整数形式的数值</div>
+          <div style="font-family: Consolas, monospace; font-size: 18px; background: #FFF; padding: 8px; border-radius: 8px; margin-bottom: 8px;">
+            age = <span class="syntax-num">10</span>
+          </div>
+          <div style="font-size: 15px; color: #92400E;">变量也可以保存数字</div>
+        </div>
+
+        <div class="card step" style="background: #E0F2FE; border-color: #38BDF8; padding: 22px;">
+          <div style="font-size: 32px; margin-bottom: 6px;">💧</div>
+          <div style="font-size: 20px; font-weight: 900; color: #0369A1; margin-bottom: 6px;">带小数点的数值</div>
+          <div style="font-family: Consolas, monospace; font-size: 18px; background: #FFF; padding: 8px; border-radius: 8px; margin-bottom: 8px;">
+            height = <span class="syntax-num">1.52</span>
+          </div>
+          <div style="font-size: 15px; color: #075985;">带小数点的数字同样可以保存进变量</div>
+        </div>
+      </div>
+      <div class="concept-box blue step" style="margin-top: 16px; text-align: center; justify-content: center; font-size: 19px; padding: 12px 20px;">
+        💡 这些数据以后还会有更正式的类型名称，我们会在后面的课程中逐步学习。
+      </div>
+    </section>
+
+    <!-- ================= 07 网页变量沙盘预览 ================= -->
+    <section class="slide" data-slide="7">
+      <div class="slide-tag tag-green">沙盘探索</div>
+      <h2 class="slide-title">🧪 变量赋值模拟器（网页沙盘） 📦</h2>
+      <div style="max-width: 960px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; gap: 14px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+          <div class="card" style="padding: 20px; gap: 12px;">
+            <div style="font-size: 18px; font-weight: 900; color: var(--ink-main);">修改变量当前值并测试：</div>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+              <div style="display: flex; align-items: center; justify-content: space-between; background:#F8FAFC; padding:8px 12px; border-radius:8px;">
+                <span style="font-family:Consolas, monospace; font-size:18px; font-weight:bold; color:var(--purple-main);">hero_name = "</span>
+                <input type="text" id="lab-hero" value="钢铁侠" style="padding:4px 8px; border:1px solid #CBD5E1; border-radius:6px; font-size:16px; width:130px; text-align:center;" oninput="updateVarLab()" />
+                <span style="font-family:Consolas, monospace; font-size:18px; font-weight:bold; color:var(--purple-main);">"</span>
+              </div>
+              <div style="display: flex; align-items: center; justify-content: space-between; background:#F8FAFC; padding:8px 12px; border-radius:8px;">
+                <span style="font-family:Consolas, monospace; font-size:18px; font-weight:bold; color:var(--orange-dark);">hero_level =</span>
+                <input type="number" id="lab-level" value="99" style="padding:4px 8px; border:1px solid #CBD5E1; border-radius:6px; font-size:16px; width:130px; text-align:center;" oninput="updateVarLab()" />
+              </div>
+            </div>
+            <button class="btn btn-secondary" style="padding: 8px 16px; font-size: 15px;" onclick="runVarLab()">⚡ 模拟运行赋值与输出</button>
+            <div style="font-size: 13px; color: var(--ink-muted);">💡 提示：这里用于快速观察变量效果，文字需要加引号，数字直接书写！真正的 Python 程序稍后在本地 IDE 实战！</div>
+          </div>
+
+          <div class="console-window" style="min-height: 160px; justify-content: center;">
+            <div style="color: #94A3B8; font-size: 15px; margin-bottom: 6px;">&gt; 网页模拟输出结果：</div>
+            <div id="var-lab-out" style="color: #34D399; font-size: 19px; line-height: 1.6;">
+              英雄： 钢铁侠<br/>等级： 99
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 08 变量命名规则整合 ================= -->
+    <section class="slide" data-slide="8">
+      <div class="slide-tag tag-purple">规则指南</div>
+      <h2 class="slide-title">变量命名规则：本阶段四大原则 📜</h2>
+      <div class="card-grid-2">
+        <div class="card step" style="padding: 24px; gap: 10px; background: #F0FDF4; border-color: var(--green-main);">
+          <div style="font-size: 20px; font-weight: 900; color: var(--green-dark);">✅ 1. 允许使用的字符：</div>
+          <div style="font-size: 17px; color: var(--ink-main); line-height: 1.6;">
+            本阶段我们统一使用<strong>英文字母、数字和下划线 <code>_</code></strong> 来命名变量。<br/>
+            例如：<code>age</code>, <code>score_1</code>, <code>_count</code>
+          </div>
+        </div>
+
+        <div class="card step" style="padding: 24px; gap: 10px; background: #FEF2F2; border-color: #EF4444;">
+          <div style="font-size: 20px; font-weight: 900; color: #991B1B;">🚫 2. 严禁以数字开头：</div>
+          <div style="font-size: 17px; color: var(--ink-main); line-height: 1.6;">
+            变量名绝对不能以数字开头！<br/>
+            <code>2score</code> ❌ ➔ 应该写成 <code>score2</code> ✅
+          </div>
+        </div>
+
+        <div class="card step" style="padding: 24px; gap: 10px; background: #FEF2F2; border-color: #EF4444;">
+          <div style="font-size: 20px; font-weight: 900; color: #991B1B;">🚫 3. 严禁包含空格：</div>
+          <div style="font-size: 17px; color: var(--ink-main); line-height: 1.6;">
+            变量名是一个整体，中间不能有空格！<br/>
+            <code>my age</code> ❌ ➔ 应该写成 <code>my_age</code> ✅
+          </div>
+        </div>
+
+        <div class="card step" style="padding: 24px; gap: 10px; background: #FFF7ED; border-color: var(--orange-main);">
+          <div style="font-size: 20px; font-weight: 900; color: var(--orange-dark);">🔠 4. Python 严格区分大小写：</div>
+          <div style="font-size: 17px; color: var(--ink-main); line-height: 1.6;">
+            <code>age = 12</code> 与 <code>Age = 15</code> 是两个<strong>完全独立的变量</strong>！
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 09 互动实验 2 变量名质检官 ================= -->
+    <section class="slide" data-slide="9">
+      <div class="slide-tag tag-orange">互动实验 02</div>
+      <h2 class="slide-title">变量名质检官：判断以下名称是否合法 🔍</h2>
+      <div style="max-width: 880px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; gap: 12px;">
+        <div class="option-card step" onclick="checkNameInspector(this, true, 'age 是标准合法的变量名！')">
+          <span style="font-family: Consolas, monospace; font-size: 20px; flex: 1;">age</span>
+          <span style="font-size: 16px; color: var(--ink-muted);">点击质检 🔍</span>
+        </div>
+        <div class="option-card step" onclick="checkNameInspector(this, false, '违规！2score 以数字开头了，必须字母或下划线开头！')">
+          <span style="font-family: Consolas, monospace; font-size: 20px; flex: 1;">2score</span>
+          <span style="font-size: 16px; color: var(--ink-muted);">点击质检 🔍</span>
+        </div>
+        <div class="option-card step" onclick="checkNameInspector(this, true, '_score 下划线开头在语法上完全合法！')">
+          <span style="font-family: Consolas, monospace; font-size: 20px; flex: 1;">_score</span>
+          <span style="font-size: 16px; color: var(--ink-muted);">点击质检 🔍</span>
+        </div>
+        <div class="option-card step" onclick="checkNameInspector(this, true, 'student_name 使用下划线连接单词，合法且规范！')">
+          <span style="font-family: Consolas, monospace; font-size: 20px; flex: 1;">student_name</span>
+          <span style="font-size: 16px; color: var(--ink-muted);">点击质检 🔍</span>
+        </div>
+        <div class="option-card step" onclick="checkNameInspector(this, false, '违规！for 是 Python 核心关键字，不能作普通变量名！')">
+          <span style="font-family: Consolas, monospace; font-size: 20px; flex: 1;">for</span>
+          <span style="font-size: 16px; color: var(--ink-muted);">点击质检 🔍</span>
+        </div>
+        <div class="option-card step" onclick="checkNameInspector(this, false, '违规！my score 中间包含了空格，变量名必须连在一起！')">
+          <span style="font-family: Consolas, monospace; font-size: 20px; flex: 1;">my score</span>
+          <span style="font-size: 16px; color: var(--ink-muted);">点击质检 🔍</span>
+        </div>
+        <div id="inspector-feedback" style="font-size: 17px; font-weight: bold; min-height: 26px;"></div>
+      </div>
+    </section>
+
+    <!-- ================= 10 关键字保护与见名知意 ================= -->
+    <section class="slide" data-slide="10">
+      <div class="slide-tag tag-purple">编程素养</div>
+      <h2 class="slide-title">关键字保护与“见名知意”好习惯 💡</h2>
+      <div class="card-grid-2">
+        <div class="card step" style="padding: 24px; gap: 10px; background: #FEF2F2; border-color: #EF4444;">
+          <div style="font-size: 20px; font-weight: 900; color: #991B1B;">⛔ 关键字不能作变量名：</div>
+          <div style="background:#0F172A; padding:10px 14px; border-radius:8px; font-family:Consolas, monospace; font-size:18px; color:#FFF;">
+            <span style="color:#EF4444;">for</span> = 10
+          </div>
+          <div style="font-size: 14px; color: #EF4444; font-weight: bold;">SyntaxError (语法错误)</div>
+          <div style="font-size: 15px; color: var(--ink-main); line-height: 1.55;">
+            Python 中的 <code>if</code>, <code>for</code>, <code>while</code> 是核心语法保留词，不能作为变量名！
+          </div>
+        </div>
+
+        <div class="card step" style="padding: 24px; gap: 10px; background: #F0FDF4; border-color: var(--green-main);">
+          <div style="font-size: 20px; font-weight: 900; color: var(--green-dark);">🌟 见名知意原则：</div>
+          <div style="font-size: 16px; color: var(--ink-main); line-height: 1.6;">
+            • <code>a = "小明"</code>（别人读不懂 a 是什么）<br/>
+            • <code>name = "小明"</code>（一目了然知道是姓名！）<br/>
+            <span style="font-size:14px; color:var(--ink-muted);">💡 常量彩蛋：程序员常用全大写（如 <code>PI = 3.14</code>）表示约定不改的固定值。</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 11 同一个变量为什么两次输出不一样 ================= -->
+    <section class="slide" data-slide="11">
+      <div class="slide-tag tag-purple">状态观察</div>
+      <h2 class="slide-title">同一个变量，为什么两次输出不一样？ 👀</h2>
+      <div class="card-grid-2">
+        <div class="code-window step">
+          <div class="code-header"><span style="color:#94A3B8; font-size:15px;">name_change.py</span></div>
+          <div class="code-body">
+            <div class="code-line"><span class="line-num">1</span><span class="syntax-var">name</span> <span class="syntax-op">=</span> <span class="syntax-str">"小明"</span></div>
+            <div class="code-line"><span class="line-num">2</span><span class="syntax-fn">print</span><span class="syntax-punct">(</span><span class="syntax-var">name</span><span class="syntax-punct">)</span></div>
+            <div class="code-line"><span class="line-num">3</span><span class="syntax-var">name</span> <span class="syntax-op">=</span> <span class="syntax-str">"小红"</span></div>
+            <div class="code-line"><span class="line-num">4</span><span class="syntax-fn">print</span><span class="syntax-punct">(</span><span class="syntax-var">name</span><span class="syntax-punct">)</span></div>
+          </div>
+        </div>
+
+        <div class="card step" style="padding: 22px; justify-content: space-between; gap: 10px;">
+          <div>
+            <div style="font-size: 16px; font-weight: 900; color: var(--orange-dark); margin-bottom: 4px;">❓ 第一次 print(name) 会输出什么？</div>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 14px; flex: 1;" onclick="checkNameQ1(this, true)">小明</button>
+              <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 14px; flex: 1;" onclick="checkNameQ1(this, false)">小红</button>
+            </div>
+          </div>
+
+          <div>
+            <div style="font-size: 16px; font-weight: 900; color: var(--blue-night); margin-bottom: 4px;">❓ 第二次 print(name) 会输出什么？</div>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 14px; flex: 1;" onclick="checkNameQ2(this, false)">小明</button>
+              <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 14px; flex: 1;" onclick="checkNameQ2(this, true)">小红</button>
+            </div>
+          </div>
+
+          <div id="name-change-feedback" style="font-size: 14px; font-weight: bold; min-height: 22px;"></div>
+        </div>
+      </div>
+      <div class="concept-box green step" style="margin-top: 14px; text-align: center; justify-content: center; font-size: 20px; padding: 14px 20px;">
+        🌟 核心认知：<strong>同一个变量名，在程序执行到不同位置时，可能保存不同的当前值！</strong>
+      </div>
+    </section>
+
+    <!-- ================= 12 核心构建 3 重新赋值：状态会变化 ================= -->
+    <section class="slide" data-slide="12">
+      <div class="slide-tag tag-orange">程序状态</div>
+      <h2 class="slide-title">重新赋值：变量记住的是“当前最新的值”！🔄</h2>
+      <div class="card-grid-2">
+        <div class="concept-box orange step" style="flex-direction: column; align-items: flex-start; gap: 12px; padding: 28px;">
+          <div style="font-size: 32px;">🧠 变量即状态</div>
+          <div style="font-size: 19px; font-weight: normal; color: var(--ink-main); line-height: 1.65;">
+            变量不是一成不变的！每当程序执行一次新的赋值语句，变量就会<strong>丢掉旧值，记住全新的当前值</strong>！
+          </div>
+        </div>
+
+        <div class="card step" style="justify-content: center; gap: 14px; padding: 26px;">
+          <div style="font-size: 20px; font-weight: 900; color: var(--orange-dark);">🔍 思考：当城市改变时</div>
+          <div style="font-size: 17px; color: var(--ink-main); line-height: 1.65;">
+            如果先写 <code>city = "深圳"</code>，后来搬家了又写 <code>city = "广州"</code>，那么程序现在记住的到底是谁？让我们通过下一幕互动亲自推演！
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 13 核心互动：当前值刷新沙盘 ================= -->
+    <section class="slide" data-slide="13">
+      <div class="slide-tag tag-green">状态推演互动</div>
+      <h2 class="slide-title">追踪变量状态：当前值刷新挑战 🧠</h2>
+      <div style="max-width: 960px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; gap: 16px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+          <!-- Left: Step-by-step Code Box -->
+          <div class="code-window" style="height: 240px;">
+            <div class="code-header"><span style="color:#94A3B8; font-size:15px;">city_state.py</span></div>
+            <div class="code-body" style="font-size: 19px;">
+              <div class="code-line"><span class="line-num">1</span><span class="syntax-var">city</span> <span class="syntax-op">=</span> <span class="syntax-str">"深圳"</span></div>
+              <div class="code-line"><span class="line-num">2</span><span class="syntax-fn">print</span><span class="syntax-punct">(</span><span class="syntax-var">city</span><span class="syntax-punct">)</span></div>
+              <div class="code-line"><span class="line-num">3</span><span class="syntax-var">city</span> <span class="syntax-op">=</span> <span class="syntax-str">"广州"</span></div>
+              <div class="code-line"><span class="line-num">4</span><span class="syntax-fn">print</span><span class="syntax-punct">(</span><span class="syntax-var">city</span><span class="syntax-punct">)</span></div>
+            </div>
+          </div>
+
+          <!-- Right: Interactive Memory State Box -->
+          <div class="card" style="padding: 22px; justify-content: center; gap: 12px; background: #FFF;">
+            <div style="font-size: 18px; font-weight: 900; color: var(--ink-main);">🧠 程序内部变量当前值：</div>
+            <div id="city-memory-display" style="font-size: 26px; font-weight: 900; color: #4F46E5; background: #EEF2FF; padding: 12px; border-radius: 12px; text-align: center; border: 2px solid #A5B4FC;">
+              city 当前值：<span id="city-val-text">"深圳"</span>
+            </div>
+
+            <!-- Question Challenge -->
+            <div id="reassign-question-box" style="margin-top: 6px;">
+              <div style="font-size: 16px; font-weight: bold; color: var(--orange-dark); margin-bottom: 8px;">❓ 执行第 3 行后，city 现在记住的是什么？</div>
+              <div style="display: flex; gap: 10px;">
+                <button class="btn btn-secondary" style="padding: 6px 14px; font-size: 15px; flex: 1;" onclick="chooseCityState(this, '深圳', false)">深圳</button>
+                <button class="btn btn-secondary" style="padding: 6px 14px; font-size: 15px; flex: 1;" onclick="chooseCityState(this, '广州', true)">广州</button>
+              </div>
+            </div>
+            <div id="city-state-feedback" style="font-size: 15px; font-weight: bold; min-height: 22px;"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 14 独立编程：用变量保存并输出数据 ================= -->
+    <section class="slide" data-slide="14">
+      <div class="slide-tag tag-green">独立编程</div>
+      <h2 class="slide-title">独立编程：用变量保存并输出数据 💻</h2>
+      <div class="card-grid-2">
+        <!-- Left: Real Python Code Guide -->
+        <div class="card step" style="padding: 24px; background: #FFF; border-color: var(--green-main); justify-content: center; gap: 10px;">
+          <div style="font-size: 20px; font-weight: 900; color: var(--green-dark);">🚀 真实 Python 环境练习步骤：</div>
+          <div style="font-size: 16px; color: var(--ink-main); line-height: 1.6;">
+            1. 打开 Python 编辑器，新建保存为：<strong style="color:var(--orange-dark); font-size: 17px;">variables_03.py</strong><br/>
+            2. 独立定义 3 个变量保存姓名、年龄与爱好（可写自己的数据）；<br/>
+            3. 使用 <code>print()</code> 依次输出变量保存的当前值：<br/>
+            <code style="background:#F8FAFC; padding:8px 12px; border-radius:6px; display:block; margin:6px 0; font-size:14px; font-family:Consolas, monospace; line-height: 1.45;">
+              name = "小明"<br/>
+              age = 10<br/>
+              hobby = "编程"<br/>
+              <br/>
+              print(name)<br/>
+              print(age)<br/>
+              print(hobby)
+            </code>
+            4. 运行前先预测输出，在终端运行并向老师展示！
+          </div>
+          <button class="btn btn-green" style="padding: 10px 20px; font-size: 17px; margin-top: 4px;" onclick="confirmL3Done()">✅ 我已完成，并向老师展示运行结果</button>
+          <div id="l3-done-feedback" style="font-size: 16px; font-weight: bold; color: var(--green-dark); min-height: 20px;"></div>
+        </div>
+
+        <!-- Right: Preview Console -->
+        <div class="card step" style="padding: 24px; background: #020617; border-color: #1E293B; justify-content: center;">
+          <div style="color: #94A3B8; font-size: 16px; margin-bottom: 10px;">&gt; 预期终端运行效果：</div>
+          <div style="color: #34D399; font-family: Consolas, monospace; font-size: 18px; line-height: 1.6;">
+            小明<br/>
+            10<br/>
+            编程
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 15 课尾三层能力大通关 ================= -->
+    <section class="slide" data-slide="15">
+      <div class="slide-tag tag-green">能力大通关</div>
+      <h2 class="slide-title">本讲能力三关大挑战 🏆</h2>
+      <div style="width: 100%;">
+        <div class="card-grid-2" style="align-items: stretch;">
+          <div class="card step" style="gap: 12px; padding: 20px; justify-content: space-between;">
+            <div>
+              <div style="font-size: 15px; font-weight: 900; color: var(--orange-dark); margin-bottom: 4px;">【第一关 A：赋值理解】score = 90 中 = 表示什么？</div>
+              <div style="display: flex; gap: 8px; margin-bottom: 6px;">
+                <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 13px; flex: 1;" onclick="checkPassL3_1a(this, false)">A. score和90永远相等</button>
+                <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 13px; flex: 1;" onclick="checkPassL3_1a(this, true)">B. 把90赋给score保存</button>
+              </div>
+
+              <div style="font-size: 15px; font-weight: 900; color: var(--orange-dark); margin-bottom: 4px;">【第一关 B：变量辨析】name = "小明"，print(name) 输出？</div>
+              <div style="display: flex; gap: 8px;">
+                <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 13px; flex: 1;" onclick="checkPassL3_1b(this, true)">小明（当前值）</button>
+                <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 13px; flex: 1;" onclick="checkPassL3_1b(this, false)">name（单词本身）</button>
+              </div>
+            </div>
+
+            <div>
+              <div style="font-size: 15px; font-weight: 900; color: var(--blue-night); margin-bottom: 4px;">【第二关 A：命名规则】以下哪个是合法变量名？</div>
+              <div style="display: flex; gap: 8px; margin-bottom: 6px;">
+                <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 13px; flex: 1;" onclick="checkPassL3_2a(this, false)">2score</button>
+                <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 13px; flex: 1;" onclick="checkPassL3_2a(this, true)">_score</button>
+                <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 13px; flex: 1;" onclick="checkPassL3_2a(this, false)">for</button>
+              </div>
+
+              <div style="font-size: 15px; font-weight: 900; color: var(--blue-night); margin-bottom: 4px;">【第二关 B：当前值】city="深圳"; city="广州"，print(city)最终输出？</div>
+              <div style="display: flex; gap: 8px;">
+                <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 13px; flex: 1;" onclick="checkPassL3_2b(this, true)">广州（最新值）</button>
+                <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 13px; flex: 1;" onclick="checkPassL3_2b(this, false)">深圳（旧值）</button>
+              </div>
+            </div>
+
+            <div>
+              <div style="font-size: 15px; font-weight: 900; color: var(--green-dark); margin-bottom: 4px;">【第三关：独立编程】</div>
+              <button class="btn btn-green" style="padding: 8px 14px; font-size: 14px; width: 100%;" onclick="checkPassL3_3(this)">✅ 我已独立完成变量程序并向老师展示！</button>
+            </div>
+          </div>
+
+          <div class="card step" style="text-align: center; justify-content: center; align-items: center; padding: 32px;">
+            <div style="font-size: 64px; color: var(--yellow-sun); margin-bottom: 12px;">🏅⭐️⭐️⭐️</div>
+            <div style="font-size: 22px; font-weight: 900; color: var(--orange-dark); line-height: 1.4;" id="final-award-text3">
+              完成左侧三关挑战<br/>达成第03讲核心能力目标！
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 16 显性成就与下节悬念 ================= -->
+    <section class="slide" data-slide="16">
+      <div class="slide-tag tag-orange">圆满收束</div>
+      <h2 class="slide-title">恭喜你！达成第03讲全部目标 🎉</h2>
+      <div class="card-grid-2">
+        <div class="card step" style="justify-content: center; gap: 16px; background: var(--orange-soft); border-color: var(--orange-main); padding: 32px;">
+          <div style="font-size: 24px; font-weight: 900; color: var(--orange-dark);">🎖️ 本讲能力收束：</div>
+          <div style="font-size: 20px; color: var(--ink-main); line-height: 1.65;">
+            理解赋值语句的阅读方式：先看右边，再把结果赋给左边变量保存；能够辨析 <code>name</code> 与 <code>"name"</code>；掌握基础变量命名规则；能够判断变量当前值并理解简单重新赋值，并独立完成变量保存与输出练习（<code>variables_03.py</code>）。
+          </div>
+        </div>
+        <div class="card step" style="justify-content: center; gap: 16px; background: var(--blue-soft); border-color: var(--blue-night); padding: 32px;">
+          <div style="font-size: 24px; font-weight: 900; color: var(--blue-night);">🔮 下一讲预告与悬念：</div>
+          <div style="font-size: 20px; color: var(--ink-main); line-height: 1.65;">
+            今天我们学会了给变量赋予新数据。但如果赋值语句的右边不仅有新数据，还出现了变量自己（例如 <code>x = x + 1</code>），程序到底会怎么执行？<br/>
+            <strong>第04讲《变量变化与程序跟踪：状态是怎样变化的》见！</strong>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer Navigation -->
+  <footer>
+    <div class="shortcut-hint">
+      <span>💡 操作提示：</span>
+      <span>点击任意空白区域 / <span class="key-badge">空格</span> / <span class="key-badge">→</span> 逐步展示与前进</span>
+      <span><span class="key-badge">←</span> 回退</span>
+      <span><span class="key-badge">F</span> 全屏</span>
+    </div>
+    <div style="display: flex; gap: 12px;">
+      <button class="btn btn-secondary" style="padding: 8px 18px; font-size: 15px;" onclick="prevStep()">❮ 上一步</button>
+      <button class="btn btn-primary" style="padding: 8px 24px; font-size: 15px;" onclick="advanceStep()">下一步 ❯</button>
+    </div>
+  </footer>
+</div>
+
+<script>
+  let currentSlide = 1;
+  const totalSlides = 16;
+  const slides = document.querySelectorAll('.slide');
+  const slideCounter = document.getElementById('slide-counter');
+  const progressFill = document.getElementById('progress-fill');
+
+  function triggerCelebration(opts = { particleCount: 50, spread: 70, origin: { y: 0.65 } }) {
+    if (typeof confetti === 'function') {
+      try { confetti(opts); } catch(e) {}
+    }
+  }
+
+  // Core Progressive Step-by-Step Reveal System
+  function advanceStep() {
+    const activeSlide = document.querySelector('.slide.active');
+    if (!activeSlide) return;
+
+    // Look for next unrevealed step within current slide
+    const nextHiddenStep = activeSlide.querySelector('.step:not(.revealed)');
+    if (nextHiddenStep) {
+      nextHiddenStep.classList.add('revealed');
+      if (typeof gsap !== 'undefined') {
+        gsap.fromTo(nextHiddenStep, 
+          { opacity: 0, y: 16, scale: 0.98 }, 
+          { opacity: 1, y: 0, scale: 1, duration: 0.35, ease: "power2.out" }
+        );
+      }
+    } else {
+      // If all steps on current slide are revealed, go to next slide!
+      if (currentSlide < totalSlides) {
+        goToSlide(currentSlide + 1);
+      }
+    }
+  }
+
+  function prevStep() {
+    const activeSlide = document.querySelector('.slide.active');
+    if (!activeSlide) return;
+
+    const revealedSteps = activeSlide.querySelectorAll('.step.revealed');
+    // If more than 1 step is revealed, unreveal the last step
+    if (revealedSteps.length > 1) {
+      const lastRevealed = revealedSteps[revealedSteps.length - 1];
+      lastRevealed.classList.remove('revealed');
+    } else {
+      // If at the beginning of current slide, navigate back to previous slide (showing all covered content)
+      if (currentSlide > 1) {
+        goToSlide(currentSlide - 1);
+      }
+    }
+  }
+
+  function goToSlide(newIndex) {
+    if (newIndex < 1 || newIndex > totalSlides) return;
+    
+    const isMovingBackward = newIndex < currentSlide;
+
+    slides.forEach((s, idx) => {
+      s.classList.remove('active', 'prev', 'next');
+      const allSteps = s.querySelectorAll('.step');
+      
+      if (idx + 1 === newIndex) {
+        s.classList.add('active');
+        if (isMovingBackward) {
+          // 向后返回旧页：显示该页全部已经讲过的内容
+          allSteps.forEach(st => st.classList.add('revealed'));
+        } else {
+          // 向前进入新页：只 Reveal 第一个内容
+          allSteps.forEach((st, sIdx) => {
+            if (sIdx === 0 || st.classList.contains('always-revealed')) {
+              st.classList.add('revealed');
+            } else {
+              st.classList.remove('revealed');
+            }
+          });
+        }
+      } else if (idx + 1 < newIndex) {
+        s.classList.add('prev');
+        // Past slides keep all their steps revealed
+        allSteps.forEach(st => st.classList.add('revealed'));
+      } else {
+        s.classList.add('next');
+        // Future slides reset steps to unrevealed
+        allSteps.forEach(st => st.classList.remove('revealed'));
+      }
+    });
+
+    currentSlide = newIndex;
+    slideCounter.textContent = `${String(currentSlide).padStart(2, '0')} / ${totalSlides}`;
+    progressFill.style.width = `${(currentSlide / totalSlides) * 100}%`;
+  }
+
+  // Click on screen / slide / cards to advance
+  document.getElementById('stage-container').addEventListener('click', (e) => {
+    if (e.target.closest('button, input, textarea, select, .drag-chip, .drop-zone, .option-card, header, footer, .no-advance')) {
+      return;
+    }
+    advanceStep();
+  });
+
+  // Keyboard navigation
+  window.addEventListener('keydown', (e) => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown' || e.key === 'Enter') {
+      e.preventDefault();
+      advanceStep();
+    } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+      e.preventDefault();
+      prevStep();
+    } else if (e.key === 'f' || e.key === 'F') {
+      toggleFullscreen();
+    }
+  });
+
+  document.getElementById('btn-prev').addEventListener('click', (e) => { e.stopPropagation(); prevStep(); });
+  document.getElementById('btn-next').addEventListener('click', (e) => { e.stopPropagation(); advanceStep(); });
+  document.getElementById('btn-fullscreen').addEventListener('click', (e) => { e.stopPropagation(); toggleFullscreen(); });
+
+  function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(() => {});
+    } else {
+      document.exitFullscreen().catch(() => {});
+    }
+  }
+
+  // ================= Slide 04: Assignment Direction Check =================
+  function checkAssignDirChoice(btn, isCorrect, reason) {
+    const parent = btn.parentElement;
+    parent.querySelectorAll('.btn').forEach(b => {
+      b.style.borderColor = 'rgba(0,0,0,0.1)';
+      b.style.background = 'var(--bg-card)';
+      b.style.color = 'var(--ink-main)';
+    });
+    const fb = document.getElementById('assign-dir-feedback');
+    if (isCorrect) {
+      btn.style.borderColor = 'var(--green-main)';
+      btn.style.background = 'var(--green-soft)';
+      btn.style.color = 'var(--green-dark)';
+      fb.innerHTML = `✅ <strong>理解正确！</strong> ${reason}`;
+      fb.style.color = "var(--green-dark)";
+      triggerCelebration({ particleCount: 30, spread: 50, origin: { y: 0.65 } });
+    } else {
+      btn.style.borderColor = '#EF4444';
+      btn.style.background = '#FEE2E2';
+      btn.style.color = '#991B1B';
+      fb.innerHTML = `❌ <strong>需要注意：</strong> ${reason}`;
+      fb.style.color = "#EF4444";
+    }
+  }
+
+  // ================= Slide 07: Variable Lab =================
+  function updateVarLab() {
+    const hero = document.getElementById('lab-hero').value || '钢铁侠';
+    const lvl = document.getElementById('lab-level').value || '99';
+    const out = document.getElementById('var-lab-out');
+    out.innerHTML = `英雄： ${hero}<br/>等级： ${lvl}`;
+  }
+
+  function runVarLab() {
+    updateVarLab();
+    triggerCelebration({ particleCount: 35, spread: 55, origin: { y: 0.65 } });
+  }
+
+  // ================= Slide 09: Name Inspector =================
+  function checkNameInspector(card, isLegal, reason) {
+    const parent = card.parentElement;
+    parent.querySelectorAll('.option-card').forEach(c => c.classList.remove('selected-correct', 'selected-wrong'));
+    const fb = document.getElementById('inspector-feedback');
+    if (isLegal) {
+      card.classList.add('selected-correct');
+      fb.innerHTML = `✅ <strong>质检合格！</strong> ${reason}`;
+      fb.style.color = "var(--green-dark)";
+      triggerCelebration({ particleCount: 30, spread: 50, origin: { y: 0.65 } });
+    } else {
+      card.classList.add('selected-wrong');
+      fb.innerHTML = `❌ <strong>质检不合格：</strong> ${reason}`;
+      fb.style.color = "#EF4444";
+    }
+  }
+
+  // ================= Slide 13: Reassignment State Challenge =================
+  function chooseCityState(btn, val, isCorrect) {
+    const parent = btn.parentElement;
+    parent.querySelectorAll('.btn').forEach(b => {
+      b.style.borderColor = 'rgba(0,0,0,0.1)';
+      b.style.background = 'var(--bg-card)';
+      b.style.color = 'var(--ink-main)';
+    });
+    const fb = document.getElementById('city-state-feedback');
+    const valText = document.getElementById('city-val-text');
+
+    if (isCorrect) {
+      btn.style.borderColor = 'var(--green-main)';
+      btn.style.background = 'var(--green-soft)';
+      btn.style.color = 'var(--green-dark)';
+      fb.innerHTML = "✅ <strong>判断完全正确！</strong> 变量当前值更新为 广州，旧值 深圳 已被覆盖！";
+      fb.style.color = "var(--green-dark)";
+      
+      // Animate memory update
+      if (typeof gsap !== 'undefined') {
+        gsap.fromTo(valText, 
+          { scale: 1.4, color: "#EF4444" }, 
+          { scale: 1, color: "#10B981", duration: 0.4, onStart: () => { valText.textContent = '"广州"'; } }
+        );
+      } else {
+        valText.textContent = '"广州"';
+      }
+      triggerCelebration({ particleCount: 40, spread: 60, origin: { y: 0.65 } });
+    } else {
+      btn.style.borderColor = '#EF4444';
+      btn.style.background = '#FEE2E2';
+      btn.style.color = '#991B1B';
+      fb.innerHTML = "❌ <strong>不对哦：</strong> 第 3 行重新赋值为 广州 后，深圳 已经被覆盖啦！";
+      fb.style.color = "#EF4444";
+    }
+  }
+
+  // ================= Slide 14: Project Confirmation =================
+  function confirmL3Done() {
+    const fb = document.getElementById('l3-done-feedback');
+    fb.innerHTML = "🎉 变量独立练习完成！请妥善保存 variables_03.py，并向老师展示真实运行结果！";
+    triggerCelebration({ particleCount: 60, spread: 70, origin: { y: 0.65 } });
+  }
+
+  // ================= Slide 11: Name Change Observation =================
+  let nameQ1 = false, nameQ2 = false;
+
+  function checkNameQ1(btn, isCorrect) {
+    const parent = btn.parentElement;
+    parent.querySelectorAll('.btn').forEach(b => {
+      b.style.borderColor = 'rgba(0,0,0,0.1)';
+      b.style.background = 'var(--bg-card)';
+      b.style.color = 'var(--ink-main)';
+    });
+    if (isCorrect) {
+      btn.style.borderColor = 'var(--green-main)';
+      btn.style.background = 'var(--green-soft)';
+      btn.style.color = 'var(--green-dark)';
+      nameQ1 = true;
+    } else {
+      btn.style.borderColor = '#EF4444';
+      btn.style.background = '#FEE2E2';
+      btn.style.color = '#991B1B';
+      nameQ1 = false;
+    }
+    updateNameChangeFeedback();
+  }
+
+  function checkNameQ2(btn, isCorrect) {
+    const parent = btn.parentElement;
+    parent.querySelectorAll('.btn').forEach(b => {
+      b.style.borderColor = 'rgba(0,0,0,0.1)';
+      b.style.background = 'var(--bg-card)';
+      b.style.color = 'var(--ink-main)';
+    });
+    if (isCorrect) {
+      btn.style.borderColor = 'var(--green-main)';
+      btn.style.background = 'var(--green-soft)';
+      btn.style.color = 'var(--green-dark)';
+      nameQ2 = true;
+    } else {
+      btn.style.borderColor = '#EF4444';
+      btn.style.background = '#FEE2E2';
+      btn.style.color = '#991B1B';
+      nameQ2 = false;
+    }
+    updateNameChangeFeedback();
+  }
+
+  function updateNameChangeFeedback() {
+    const fb = document.getElementById('name-change-feedback');
+    if (nameQ1 && nameQ2) {
+      fb.innerHTML = "✅ <strong>太棒了！</strong> 第 2 行输出 小明，第 4 行重新赋值后输出 小红！";
+      fb.style.color = "var(--green-dark)";
+      triggerCelebration({ particleCount: 30, spread: 50, origin: { y: 0.65 } });
+    }
+  }
+
+  // ================= Slide 15: Lesson 03 Mastery 3-Pass Quiz =================
+  let p3_1a = false, p3_1b = false, p3_2a = false, p3_2b = false, p3_3 = false;
+
+  function checkPassL3_1a(btn, isCorrect) {
+    const parent = btn.parentElement;
+    parent.querySelectorAll('.btn').forEach(b => {
+      b.style.borderColor = 'rgba(0,0,0,0.1)';
+      b.style.background = 'var(--bg-card)';
+      b.style.color = 'var(--ink-main)';
+    });
+    if (isCorrect) {
+      btn.style.borderColor = 'var(--green-main)';
+      btn.style.background = 'var(--green-soft)';
+      btn.style.color = 'var(--green-dark)';
+      p3_1a = true;
+    } else {
+      btn.style.borderColor = '#EF4444';
+      btn.style.background = '#FEE2E2';
+      btn.style.color = '#991B1B';
+      p3_1a = false;
+    }
+    checkAllPassedL3();
+  }
+
+  function checkPassL3_1b(btn, isCorrect) {
+    const parent = btn.parentElement;
+    parent.querySelectorAll('.btn').forEach(b => {
+      b.style.borderColor = 'rgba(0,0,0,0.1)';
+      b.style.background = 'var(--bg-card)';
+      b.style.color = 'var(--ink-main)';
+    });
+    if (isCorrect) {
+      btn.style.borderColor = 'var(--green-main)';
+      btn.style.background = 'var(--green-soft)';
+      btn.style.color = 'var(--green-dark)';
+      p3_1b = true;
+    } else {
+      btn.style.borderColor = '#EF4444';
+      btn.style.background = '#FEE2E2';
+      btn.style.color = '#991B1B';
+      p3_1b = false;
+    }
+    checkAllPassedL3();
+  }
+
+  function checkPassL3_2a(btn, isCorrect) {
+    const parent = btn.parentElement;
+    parent.querySelectorAll('.btn').forEach(b => {
+      b.style.borderColor = 'rgba(0,0,0,0.1)';
+      b.style.background = 'var(--bg-card)';
+      b.style.color = 'var(--ink-main)';
+    });
+    if (isCorrect) {
+      btn.style.borderColor = 'var(--green-main)';
+      btn.style.background = 'var(--green-soft)';
+      btn.style.color = 'var(--green-dark)';
+      p3_2a = true;
+    } else {
+      btn.style.borderColor = '#EF4444';
+      btn.style.background = '#FEE2E2';
+      btn.style.color = '#991B1B';
+      p3_2a = false;
+    }
+    checkAllPassedL3();
+  }
+
+  function checkPassL3_2b(btn, isCorrect) {
+    const parent = btn.parentElement;
+    parent.querySelectorAll('.btn').forEach(b => {
+      b.style.borderColor = 'rgba(0,0,0,0.1)';
+      b.style.background = 'var(--bg-card)';
+      b.style.color = 'var(--ink-main)';
+    });
+    if (isCorrect) {
+      btn.style.borderColor = 'var(--green-main)';
+      btn.style.background = 'var(--green-soft)';
+      btn.style.color = 'var(--green-dark)';
+      p3_2b = true;
+    } else {
+      btn.style.borderColor = '#EF4444';
+      btn.style.background = '#FEE2E2';
+      btn.style.color = '#991B1B';
+      p3_2b = false;
+    }
+    checkAllPassedL3();
+  }
+
+  function checkPassL3_3(btn) {
+    btn.style.background = 'var(--green-dark)';
+    btn.textContent = '✅ 已在真实 Python 中运行并展示变量程序！';
+    p3_3 = true;
+    checkAllPassedL3();
+  }
+
+  function checkAllPassedL3() {
+    const award = document.getElementById('final-award-text3');
+    if (p3_1a && p3_1b && p3_2a && p3_2b && p3_3) {
+      award.innerHTML = "✅ <strong>太棒了！第03讲核心能力检查全部通过！</strong>";
+      award.style.color = "var(--green-dark)";
+      triggerCelebration({ particleCount: 90, spread: 80, origin: { y: 0.6 } });
+    }
+  }
+</script>
+
+</body>
+</html>
