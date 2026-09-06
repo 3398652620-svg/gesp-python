@@ -407,14 +407,14 @@
       background: linear-gradient(135deg, #FFF7ED 0%, #FFEDD5 100%);
       border: 2px solid var(--orange-main);
       border-radius: var(--radius-lg);
-      padding: 18px 26px;
-      font-size: 21px;
-      font-weight: 700;
+      padding: 18px 24px;
+      font-size: 20px;
+      font-weight: 600;
       color: var(--orange-dark);
-      display: flex;
-      align-items: center;
-      gap: 16px;
+      display: block;
+      line-height: 1.65;
       box-shadow: var(--shadow-card);
+      word-break: break-word;
     }
 
     .concept-box.blue {
@@ -1030,9 +1030,11 @@
             <div style="color:#34D399; font-weight:bold;">&gt; 完成</div>
           </div>
 
-          <div class="concept-box step" style="font-size: 19px; padding: 14px 20px; margin-top: 4px;">
-            ⬇️ <strong>核心铁律：</strong><br/>
-            像今天学习的这种顺序程序，会按照代码<strong>“从上到下，一行一行依次执行”</strong>！
+          <div class="concept-box step" style="font-size: 20px; padding: 18px 22px; line-height: 1.65; margin-top: 4px;">
+            <div style="font-size: 21px; font-weight: 900; margin-bottom: 6px; color: var(--orange-dark);">⬇️ 核心铁律：</div>
+            <div style="font-size: 19px; color: var(--ink-main);">
+              像今天学习的这种顺序程序，会按照代码<strong style="color: var(--orange-dark);">“从上到下，一行一行依次执行”</strong>！
+            </div>
           </div>
         </div>
       </div>
@@ -1072,8 +1074,8 @@
 
         <!-- Right: Inquiry & Reality -->
         <div class="card step" style="padding: 24px; justify-content: center; gap: 14px; background: #FFF;">
-          <div style="font-size: 20px; font-weight: 800; color: var(--orange-dark);">
-            ❓ 深度思考：现实中“完成”在最后。电脑这么聪明，会不会自动帮你调回合理顺序？
+          <div style="font-size: 21px; font-weight: 800; color: var(--orange-dark); line-height: 1.5;">
+            ❓ <strong>深度追问：</strong>现实中“完成”在最后，电脑这么聪明，会不会自动帮你调回合理顺序？
           </div>
 
           <div class="console-window step" style="min-height: 100px; font-size: 21px; padding: 14px 18px;">
@@ -1085,9 +1087,12 @@
             </div>
           </div>
 
-          <div class="concept-box step" style="font-size: 19px; padding: 14px 20px; line-height: 1.6;">
-            🚨 <strong>黄金铁律：</strong><br/>
-            计算机<strong>只严格按照你写下的代码顺序执行</strong>，绝不替你自作聪明纠错！顺序错了，责任全在程序员的代码里！
+          <div class="concept-box step" style="font-size: 20px; padding: 18px 22px; line-height: 1.65;">
+            <div style="font-size: 21px; font-weight: 900; margin-bottom: 6px; color: var(--orange-dark);">🚨 黄金铁律：</div>
+            <div style="font-size: 19px; color: var(--ink-main);">
+              计算机<strong style="color: #DC2626;">只严格按照你写下的代码顺序执行</strong>，绝不替你自作聪明纠错！<br/>
+              顺序错了，责任全在程序员的代码里！
+            </div>
           </div>
         </div>
       </div>
@@ -1175,10 +1180,12 @@
             2. 但它达成生活目标了吗？（<strong>没有！光脚穿鞋太荒唐！</strong>）
           </div>
           
-          <div class="concept-box step" style="font-size: 19px; padding: 14px 20px;">
-            ⚡ <strong>程序员心智模型：</strong><br/>
-            <strong>能运行 ≠ 程序一定正确！</strong><br/>
-            当结果不对时，电脑没有坏，需要由程序员回到代码检查顺序与逻辑！
+          <div class="concept-box step" style="font-size: 20px; padding: 18px 22px; line-height: 1.65;">
+            <div style="font-size: 21px; font-weight: 900; margin-bottom: 6px; color: var(--orange-dark);">⚡ 程序员心智模型：</div>
+            <div style="font-size: 19px; color: var(--ink-main);">
+              <strong style="color: #DC2626; font-size: 21px;">能运行 ≠ 程序一定正确！</strong><br/>
+              当结果不对时，电脑没有坏，需要由程序员回到代码检查顺序与逻辑！
+            </div>
           </div>
 
           <div class="step" style="font-size: 17px; font-weight: bold; color: var(--green-dark); background: #DCFCE7; padding: 10px 14px; border-radius: 10px;">
@@ -1321,9 +1328,11 @@
           更亲手在真实 Python 环境中跑通了属于自己的程序名片！
         </div>
 
-        <div class="concept-box blue" style="font-size: 21px; max-width: 760px; text-align: left; padding: 18px 26px; margin: 8px 0;">
-          🔮 <strong>下一讲悬念留白：</strong><br/>
-          今天我们打印的文字两边都紧紧包着<strong>双引号</strong>。如果哪天粗心的小程序员<strong>忘写了双引号</strong>，计算机还会听话吗？它会生气报错，还是会变出更神奇的魔法？敬请期待正式课探索！
+        <div class="concept-box blue" style="font-size: 20px; max-width: 760px; text-align: left; padding: 18px 24px; margin: 8px 0; line-height: 1.65;">
+          <div style="font-size: 21px; font-weight: 900; margin-bottom: 6px; color: var(--blue-dark);">🔮 下一讲悬念留白：</div>
+          <div style="font-size: 19px; color: var(--ink-main);">
+            今天我们打印的文字两边都紧紧包着<strong>双引号</strong>。如果哪天粗心的小程序员<strong>忘写了双引号</strong>，计算机还会听话吗？它会生气报错，还是会变出更神奇的魔法？敬请期待正式课探索！
+          </div>
         </div>
 
         <button class="btn btn-primary no-advance" style="padding: 14px 40px; font-size: 20px;" onclick="goToSlide(1)">
