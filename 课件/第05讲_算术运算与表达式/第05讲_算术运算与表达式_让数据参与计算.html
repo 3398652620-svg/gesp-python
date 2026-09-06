@@ -811,64 +811,80 @@
       </div>
     </section>
 
-    <!-- ================= 09 互动实验 01 除法三兄弟沙盘 ================= -->
+        <!-- ================= 09 代码实战全景推演 ================= -->
     <section class="slide" data-slide="9">
-      <div class="slide-tag tag-green">交互实验 01</div>
-      <h2 class="slide-title">🧪 互动沙盘：亲自动手调配 a 和 b 的除法结果 🎛️</h2>
+      <div class="slide-tag tag-blue">代码实战</div>
+      <h2 class="slide-title">💻 代码实战推演：除法三兄弟在程序中如何分工？🔍</h2>
+      
       <div style="max-width: 980px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; gap: 14px;">
+        <!-- Top: Code & Terminal Side-by-Side -->
         <div style="display: grid; grid-template-columns: 1.1fr 1fr; gap: 20px; align-items: stretch;">
-          <!-- Left: Control & Code -->
-          <div class="card" style="padding: 20px; gap: 14px; background: #FFF;">
-            <div style="font-size: 20px; font-weight: 900; color: var(--ink-main);">⚙️ 设置被除数 a 和除数 b：</div>
-            <div style="display: flex; gap: 16px; align-items: center;">
-              <div style="flex: 1;">
-                <label style="font-size: 17px; color: var(--ink-muted); font-weight: bold;">被除数 a：</label>
-                <input type="number" id="sandbox-a" value="19" min="1" max="99" style="width: 100%; padding: 8px 12px; font-size: 22px; font-weight: bold; border-radius: 8px; border: 2px solid #CBD5E1; font-family: Consolas, monospace;" onchange="updateDivideSandbox()">
-              </div>
-              <div style="flex: 1;">
-                <label style="font-size: 17px; color: var(--ink-muted); font-weight: bold;">除数 b：</label>
-                <input type="number" id="sandbox-b" value="4" min="1" max="99" style="width: 100%; padding: 8px 12px; font-size: 22px; font-weight: bold; border-radius: 8px; border: 2px solid #CBD5E1; font-family: Consolas, monospace;" onchange="updateDivideSandbox()">
-              </div>
-            </div>
-            
-            <div style="display: flex; gap: 10px;">
-              <button class="btn btn-primary" style="padding: 10px 18px; font-size: 18px; flex: 1;" onclick="updateDivideSandbox()">▶️ 计算并打印输出</button>
-            </div>
-
-            <div style="background: #F8FAFC; padding: 10px 14px; border-radius: 10px; font-family: Consolas, monospace; font-size: 18px; line-height: 1.6; color: #334155;">
-              a = <span id="sb-code-a">19</span><br/>
-              b = <span id="sb-code-b">4</span><br/>
-              print(a / b) &nbsp;&nbsp;<span style="color:#64748B;"># 普通除法</span><br/>
-              print(a // b) &nbsp;<span style="color:#64748B;"># 整除</span><br/>
-              print(a % b) &nbsp;&nbsp;<span style="color:#64748B;"># 取余</span>
+          <!-- Left: Code -->
+          <div class="code-window step">
+            <div class="code-header"><span style="color:#94A3B8; font-size:16px;">divide_demo.py</span></div>
+            <div class="code-body" style="font-size: 21px; padding: 14px 20px; line-height: 1.6;">
+              <div class="code-line"><span class="line-num">1</span><span class="syntax-var">a</span> <span class="syntax-op">=</span> <span class="syntax-num">19</span></div>
+              <div class="code-line"><span class="line-num">2</span><span class="syntax-var">b</span> <span class="syntax-op">=</span> <span class="syntax-num">4</span></div>
+              <div class="code-line"><span class="line-num">3</span><span class="syntax-fn">print</span><span class="syntax-punct">(</span><span class="syntax-var">a</span> <span class="syntax-op">/</span> <span class="syntax-var">b</span><span class="syntax-punct">)</span> &nbsp;&nbsp;<span style="color:#38BDF8; font-weight:bold;"># 普通除法</span></div>
+              <div class="code-line"><span class="line-num">4</span><span class="syntax-fn">print</span><span class="syntax-punct">(</span><span class="syntax-var">a</span> <span class="syntax-op">//</span> <span class="syntax-var">b</span><span class="syntax-punct">)</span> &nbsp;<span style="color:#34D399; font-weight:bold;"># 整除</span></div>
+              <div class="code-line"><span class="line-num">5</span><span class="syntax-fn">print</span><span class="syntax-punct">(</span><span class="syntax-var">a</span> <span class="syntax-op">%</span> <span class="syntax-var">b</span><span class="syntax-punct">)</span> &nbsp;&nbsp;<span style="color:#C084FC; font-weight:bold;"># 取余</span></div>
             </div>
           </div>
 
-          <!-- Right: Simulated Terminal Output & Visual Explanation -->
-          <div style="display: flex; flex-direction: column; gap: 12px;">
-            <div class="console-window" style="min-height: 120px; padding: 14px 18px;">
-              <div style="color:#64748B; font-size:16px; display: flex; justify-content: space-between;">
-                <span>🖥️ 屏幕终端输出 (Terminal 模拟预览)</span>
-                  <span style="color:#10B981;">● 实时运行中</span>
+          <!-- Right: Terminal Output -->
+          <div class="console-window step" style="padding: 16px 22px; justify-content: space-between;">
+            <div>
+              <div style="color:#64748B; font-size:16px; display: flex; justify-content: space-between; border-bottom: 1px solid #1E293B; padding-bottom: 6px;">
+                <span>🖥️ 真实终端输出 (Terminal)</span>
+                <span style="color:#10B981; font-weight:bold;">● Python 3</span>
               </div>
-              <div id="sandbox-term-out" style="color:#34D399; font-family: Consolas, monospace; font-size: 22px; line-height: 1.5; margin-top: 6px;">
-                4.75<br/>
-                4<br/>
-                3
+              <div style="font-family: Consolas, monospace; font-size: 24px; line-height: 1.7; margin-top: 10px;">
+                <div style="color:#38BDF8; font-weight:bold;">4.75 &nbsp;<span style="color:#64748B; font-size:16px; font-weight:normal;">➔ a / b 的精确浮点结果</span></div>
+                <div style="color:#34D399; font-weight:bold;">4 &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#64748B; font-size:16px; font-weight:normal;">➔ a // b 的整除商（4 组）</span></div>
+                <div style="color:#C084FC; font-weight:bold;">3 &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#64748B; font-size:16px; font-weight:normal;">➔ a % b 的余数零头（剩 3 个）</span></div>
               </div>
             </div>
-
-            <div class="card" style="padding: 14px 18px; background: #FFF7ED; border-color: var(--orange-main); justify-content: center;">
-              <div style="font-size: 18px; font-weight: bold; color: var(--orange-dark); line-height: 1.6;" id="sandbox-explain">
-                📦 解释：19 个物品，每 4 个装一盒，最多能完整装满 <strong>4</strong> 盒（整除 //），还剩下 <strong>3</strong> 个零头（取余 %）！<br/><span style="font-size:16px; color:#78716C; font-weight:normal;">（注：网页终端为拟真预览，真实数值以本地 Python 环境输出为准）</span>
-              </div>
+            <div style="font-size: 16px; color: #94A3B8; background: rgba(255,255,255,0.05); padding: 6px 12px; border-radius: 6px;">
+              📌 同一组数据 <code>19</code> 和 <code>4</code>，三条语句输出了三个截然不同的答案！
             </div>
           </div>
+        </div>
+
+        <!-- Middle: 3 Breakdown Cards -->
+        <div class="card-grid-3 step" style="margin-top: 2px;">
+          <div class="card" style="padding: 14px 18px; gap: 6px; background: #EFF6FF; border-color: #3B82F6;">
+            <div style="font-size: 19px; font-weight: 900; color: #1E40AF;">🍰 ① 普通除法 /</div>
+            <div style="font-size: 16px; color: var(--ink-main); line-height: 1.5;">
+              <strong>回答：</strong>如果每一份都分得丝毫不差，每个人精确分得多少？<br/>
+              ➔ 答案是 <strong>4.75</strong> 份（始终带小数）。
+            </div>
+          </div>
+
+          <div class="card" style="padding: 14px 18px; gap: 6px; background: #F0FDF4; border-color: var(--green-main);">
+            <div style="font-size: 19px; font-weight: 900; color: var(--green-dark);">📦 ② 整除 //</div>
+            <div style="font-size: 16px; color: var(--ink-main); line-height: 1.5;">
+              <strong>回答：</strong>按 4 个一组打包，最多能完整装满几整盒？<br/>
+              ➔ 答案是 <strong>4</strong> 盒（非负整数中商的整数部分）。
+            </div>
+          </div>
+
+          <div class="card" style="padding: 14px 18px; gap: 6px; background: #FAF5FF; border-color: var(--purple-main);">
+            <div style="font-size: 19px; font-weight: 900; color: #6B21A8;">🍪 ③ 取余 %</div>
+            <div style="font-size: 16px; color: var(--ink-main); line-height: 1.5;">
+              <strong>回答：</strong>装满 4 盒之后，桌上还剩下几个单装不下的零头？<br/>
+              ➔ 答案是剩下的 <strong>3</strong> 个零头。
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom Concept Box -->
+        <div class="concept-box blue step" style="margin-top: 2px; text-align: center; justify-content: center; font-size: 19px; padding: 12px 20px;">
+          💡 核心法则：<strong>面对同一对数据，三种除法分别回答了三种完全不同的实际生活问题，各司其职、不可替代！</strong>
         </div>
       </div>
     </section>
 
-        <!-- ================= 10 变量建模 ================= -->
+            <!-- ================= 10 变量建模 ================= -->
     <section class="slide" data-slide="10">
       <div class="slide-tag tag-blue">变量建模 · 思维跃迁</div>
       <h2 class="slide-title">🏪 文具店收银危机：从固定数字到通用变量建模 🏷️</h2>
@@ -879,71 +895,55 @@
           <div style="font-size: 21px; font-weight: 900; color: #1E40AF;">
             📢 突发警报：放学了！文具店收银台前排起长龙！
           </div>
-          <span style="background: #3B82F6; color: #FFF; font-size: 16px; font-weight: 800; padding: 3px 10px; border-radius: 20px;">真实痛点</span>
+          <span style="background: #3B82F6; color: #FFF; font-size: 16px; font-weight: 800; padding: 3px 10px; border-radius: 20px;">真实生活痛点</span>
         </div>
         <div style="font-size: 18px; color: #1E3A8A; line-height: 1.5;">
           • <strong>顾客小明：</strong>“买 4 支 12 元钢笔！” ➔ • <strong>顾客小红：</strong>“买 6 本 8 元草稿本！” ➔ • <strong>顾客小刚：</strong>“买 10 盒 15 元彩笔！”<br/>
-          🤔 <strong>扎心发问：</strong>每来一个新顾客，难道程序员都要打开代码、手动修改里面的数字并重新运行吗？！
-        </div>
-      </div>
-
-      <!-- Customer Interactive Selector -->
-      <div class="step" style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px; background: #FFF; padding: 10px 16px; border-radius: 12px; border: 1px solid #E2E8F0;">
-        <span style="font-size: 17px; font-weight: 900; color: var(--ink-main); white-space: nowrap;">👉 切换排队顾客：</span>
-        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-          <button class="btn btn-primary customer-btn" id="cust-btn-1" style="padding: 6px 14px; font-size: 16px;" onclick="switchShopCustomer(1)">👨‍🎓 顾客A：钢笔 (12元 × 4支)</button>
-          <button class="btn btn-secondary customer-btn" id="cust-btn-2" style="padding: 6px 14px; font-size: 16px;" onclick="switchShopCustomer(2)">👧 顾客B：草稿本 (8元 × 6本)</button>
-          <button class="btn btn-secondary customer-btn" id="cust-btn-3" style="padding: 6px 14px; font-size: 16px;" onclick="switchShopCustomer(3)">👦 顾客C：水彩笔 (15元 × 10盒)</button>
+          🤔 <strong>扎心发问：</strong>现实中商品和数量一直在变！难道每来一位新顾客，程序员都要手动打开代码修改数字再重新运行吗？！
         </div>
       </div>
 
       <div class="card-grid-2" style="height: auto; gap: 16px;">
         <!-- Left: Hardcoded -->
-        <div class="card step" style="padding: 18px; gap: 10px; background: #FFF; border-color: #CBD5E1;">
+        <div class="card step" style="padding: 20px; gap: 12px; background: #FFF; border-color: #CBD5E1;">
           <div style="display: flex; align-items: center; justify-content: space-between;">
-            <div style="font-size: 21px; font-weight: 900; color: #EF4444;">❌ 数字写死（硬编码 · 一次性筷子）</div>
-            <span id="hardcode-status-badge" style="background: #FEE2E2; color: #991B1B; font-size: 16px; font-weight: bold; padding: 2px 8px; border-radius: 6px;">只能算顾客A</span>
+            <div style="font-size: 21px; font-weight: 900; color: #EF4444;">❌ 数字写死（硬编码 · 一次性程序）</div>
+            <span style="background: #FEE2E2; color: #991B1B; font-size: 16px; font-weight: bold; padding: 3px 8px; border-radius: 6px;">像一次性筷子</span>
           </div>
           <div class="code-window" style="box-shadow: none;">
-            <div class="code-body" style="font-size: 20px; padding: 12px 16px; line-height: 1.5;">
-              <div class="code-line"><span class="line-num">1</span><span style="color:#64748B;"># 数字焊死在代码里</span></div>
-              <div class="code-line"><span class="line-num">2</span><span class="syntax-var">total</span> <span class="syntax-op">=</span> <span class="syntax-num">12</span> <span class="syntax-op">*</span> <span class="syntax-num">4</span></div>
-              <div class="code-line"><span class="line-num">3</span><span class="syntax-fn">print</span><span class="syntax-punct">(</span><span class="syntax-var">total</span><span class="syntax-punct">)</span> &nbsp;<span style="color:#34D399; font-weight:bold;"># 输出 48</span></div>
+            <div class="code-body" style="font-size: 21px; padding: 14px 18px; line-height: 1.6;">
+              <div class="code-line"><span class="line-num">1</span><span style="color:#64748B;"># 数字被直接焊死在算式里</span></div>
+              <div class="code-line"><span class="line-num">2</span><span class="syntax-var">total</span> <span class="syntax-op">=</span> <span class="syntax-num">12</span> <span class="syntax-op">*</span> <span class="syntax-num">4</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#64748B;"># 只能算小明这一单</span></div>
+              <div class="code-line"><span class="line-num">3</span><span class="syntax-fn">print</span><span class="syntax-punct">(</span><span class="syntax-var">total</span><span class="syntax-punct">)</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#34D399; font-weight:bold;"># 输出 48</span></div>
             </div>
           </div>
-          <div id="hardcode-tip" style="font-size: 16px; color: #991B1B; background: #FFF5F5; padding: 8px 12px; border-radius: 8px; line-height: 1.5;">
-            ⚠️ <strong>致命缺陷：</strong>当顾客换成买草稿本的小红时，代码不会自动变化！必须停下程序手动修改数字，收银台直接崩溃！
+          <div style="font-size: 16px; color: #991B1B; background: #FFF5F5; padding: 10px 14px; border-radius: 8px; line-height: 1.5;">
+            ⚠️ <strong>致命缺陷：</strong>当顾客换成买草稿本的小红时，代码完全作废！必须停下程序手动修改数字重新运行，收银台当场瘫痪！
           </div>
         </div>
 
         <!-- Right: Variable Modeling -->
-        <div class="card step" style="padding: 18px; gap: 10px; background: #F0FDF4; border-color: var(--green-main);">
+        <div class="card step" style="padding: 20px; gap: 12px; background: #F0FDF4; border-color: var(--green-main);">
           <div style="display: flex; align-items: center; justify-content: space-between;">
-            <div style="font-size: 21px; font-weight: 900; color: var(--green-dark);">✅ 变量建模（通用自动化神器）</div>
-            <span id="model-status-badge" style="background: #DCFCE7; color: #166534; font-size: 16px; font-weight: bold; padding: 2px 8px; border-radius: 6px;">公式万能通用</span>
+            <div style="font-size: 21px; font-weight: 900; color: var(--green-dark);">✅ 变量通用建模（通用自动化神器）</div>
+            <span style="background: #DCFCE7; color: #166534; font-size: 16px; font-weight: bold; padding: 3px 8px; border-radius: 6px;">公式万单通用</span>
           </div>
           <div class="code-window" style="box-shadow: none;">
-            <div class="code-body" id="model-code-body" style="font-size: 20px; padding: 12px 16px; line-height: 1.5;">
-              <div class="code-line"><span class="line-num">1</span><span class="syntax-var">price</span> <span class="syntax-op">=</span> <span class="syntax-num" id="live-price-val">12</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#64748B;"># 当前单价</span></div>
-              <div class="code-line"><span class="line-num">2</span><span class="syntax-var">count</span> <span class="syntax-op">=</span> <span class="syntax-num" id="live-count-val">4</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#64748B;"># 当前数量</span></div>
-              <div class="code-line"><span class="line-num">3</span><span class="syntax-var">total</span> <span class="syntax-op">=</span> <span class="syntax-var">price</span> <span class="syntax-op">*</span> <span class="syntax-var">count</span> &nbsp;<span style="color:#10B981; font-weight:bold;"># 通用计算公式！</span></div>
-              <div class="code-line"><span class="line-num">4</span><span class="syntax-fn">print</span><span class="syntax-punct">(</span><span class="syntax-var">total</span><span class="syntax-punct">)</span></div>
-            </div>
-            <div class="console-window" style="border-radius: 0; min-height: 48px; padding: 6px 14px; font-size: 18px;">
-              <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span style="color:#94A3B8; font-size: 16px;">&gt;_ 终端输出：</span>
-                <span id="live-total-out" style="color:#34D399; font-size:22px; font-weight:bold;">48</span>
-              </div>
+            <div class="code-body" style="font-size: 21px; padding: 14px 18px; line-height: 1.6;">
+              <div class="code-line"><span class="line-num">1</span><span class="syntax-var">price</span> <span class="syntax-op">=</span> <span class="syntax-num">12</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#64748B;"># 当前顾客单价（随时可换）</span></div>
+              <div class="code-line"><span class="line-num">2</span><span class="syntax-var">count</span> <span class="syntax-op">=</span> <span class="syntax-num">4</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#64748B;"># 当前顾客数量（随时可换）</span></div>
+              <div class="code-line"><span class="line-num">3</span><span class="syntax-var">total</span> <span class="syntax-op">=</span> <span class="syntax-var">price</span> <span class="syntax-op">*</span> <span class="syntax-var">count</span> &nbsp;<span style="color:#10B981; font-weight:bold;"># 通用收银公式！一字不改</span></div>
+              <div class="code-line"><span class="line-num">4</span><span class="syntax-fn">print</span><span class="syntax-punct">(</span><span class="syntax-var">total</span><span class="syntax-punct">)</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#34D399; font-weight:bold;"># 自动算出正确总价</span></div>
             </div>
           </div>
-          <div id="model-tip" style="font-size: 16px; color: var(--green-dark); background: #DCFCE7; padding: 8px 12px; border-radius: 8px; line-height: 1.5;">
-            ✨ <strong>变量威力：</strong>公式 <code>price * count</code> <strong>一字未改</strong>！换上新顾客的数据，变量自动代入计算出正确总价！
+          <div style="font-size: 16px; color: var(--green-dark); background: #DCFCE7; padding: 10px 14px; border-radius: 8px; line-height: 1.5;">
+            ✨ <strong>通用威力：</strong>来买草稿本？换入 <code>price = 8; count = 6</code>；来买彩笔？换入 <code>price = 15; count = 10</code>！核心公式 <code>total = price * count</code> <strong>一字不用改</strong>，万单通用！
           </div>
         </div>
       </div>
 
-      <div class="concept-box green step" style="margin-top: 12px; text-align: center; justify-content: center; font-size: 20px; padding: 12px 20px;">
-        🌟 核心认知跃迁：<strong>数字是具体写死的数据，变量是通用的计算插座！用变量构建表达式，程序才拥有解决万千问题的通用能力！</strong>
+      <div class="concept-box green step" style="margin-top: 14px; text-align: center; justify-content: center; font-size: 20px; padding: 12px 20px;">
+        🌟 核心认知跃迁：<strong>数字是具体写死的数据，变量是通用的计算模具！让变量参与表达式，程序才拥有解决万千问题的通用自动化能力！</strong>
       </div>
     </section>
 
@@ -1245,6 +1245,12 @@
     const activeSlide = document.querySelector('.slide.active');
     if (!activeSlide) return;
 
+    // Slide 13: advance single-step code execution directly with clicker / Space
+    if (currentSlide === 13 && evalStep < 6) {
+      stepEvalSim();
+      return;
+    }
+
     const nextHiddenStep = activeSlide.querySelector('.step:not(.revealed)');
     if (nextHiddenStep) {
       nextHiddenStep.classList.add('revealed');
@@ -1348,53 +1354,7 @@
   }
 
   // ================= Slide 09: Divide Sandbox =================
-  function updateDivideSandbox() {
-    const aInput = document.getElementById('sandbox-a').value.trim();
-    const bInput = document.getElementById('sandbox-b').value.trim();
-
-    if (aInput === '' || bInput === '') return;
-
-    const a = parseInt(aInput, 10);
-    const b = parseInt(bInput, 10);
-
-    document.getElementById('sb-code-a').textContent = isNaN(a) ? 0 : a;
-    document.getElementById('sb-code-b').textContent = isNaN(b) ? 0 : b;
-
-    const termOut = document.getElementById('sandbox-term-out');
-    const explain = document.getElementById('sandbox-explain');
-
-    if (isNaN(a) || isNaN(b)) {
-      termOut.innerHTML = '<span style="color:#EF4444;">ValueError: invalid input</span>';
-      explain.innerHTML = '⚠️ 请输入有效的非负整数！';
-      return;
-    }
-
-    // Accurately handle b === 0 ZeroDivisionError
-    if (b === 0) {
-      termOut.innerHTML = '<span style="color:#EF4444; font-size:16px;">ZeroDivisionError: division by zero</span>';
-      explain.innerHTML = '⚠️ <strong>ZeroDivisionError</strong>：除数不能为 0！在 Python 中除以 0 会直接触发错误终止程序。';
-      return;
-    }
-
-    // Accurate Python float display without artificial truncation (toFixed):
-    // In Python: integer division like 8/2 gives 4.0; non-integers like 19/4 gives 4.75; 1/3 gives 0.3333333333333333
-    const rawDiv = a / b;
-    let divStr = String(rawDiv);
-    if (Number.isInteger(rawDiv)) {
-      divStr = rawDiv + '.0';
-    }
-
-    const floorRes = Math.floor(a / b);
-    const modRes = a % b;
-
-    termOut.innerHTML = `${divStr}<br/>${floorRes}<br/>${modRes}`;
-    if (typeof gsap !== 'undefined') {
-      gsap.fromTo(termOut, { opacity: 0.5, y: 4 }, { opacity: 1, y: 0, duration: 0.3 });
-    }
-
-    explain.innerHTML = `📦 解释：${a} 个物品，每 ${b} 个装一盒，最多能完整装满 <strong>${floorRes}</strong> 盒（整除 //），还剩下 <strong>${modRes}</strong> 个零头（取余 %）！<br/><span style="font-size:16px; color:#78716C; font-weight:normal;">（注：网页终端为拟真预览，真实数值以本地 Python 环境输出为准）</span>`;
-    triggerCelebration({ particleCount: 25, spread: 45, origin: { y: 0.65 } });
-  }
+  
 
   // ================= Slide 13: Eval Stepper Simulator =================
   let evalStep = 1;
@@ -1600,53 +1560,7 @@
     }
   }
 
-  function switchShopCustomer(id) {
-    const custs = {
-      1: { name: "顾客A (钢笔)", price: 12, count: 4, total: 48 },
-      2: { name: "顾客B (草稿本)", price: 8, count: 6, total: 48 },
-      3: { name: "顾客C (水彩笔)", price: 15, count: 10, total: 150 }
-    };
-    
-    [1, 2, 3].forEach(n => {
-      const btn = document.getElementById(`cust-btn-${n}`);
-      if (btn) {
-        if (n === id) {
-          btn.classList.add('btn-primary');
-          btn.classList.remove('btn-secondary');
-        } else {
-          btn.classList.remove('btn-primary');
-          btn.classList.add('btn-secondary');
-        }
-      }
-    });
-
-    const c = custs[id];
-    document.getElementById('live-price-val').textContent = c.price;
-    document.getElementById('live-count-val').textContent = c.count;
-    document.getElementById('live-total-out').textContent = c.total;
-
-    const hardBadge = document.getElementById('hardcode-status-badge');
-    const hardTip = document.getElementById('hardcode-tip');
-    if (id === 1) {
-      hardBadge.textContent = "只能算顾客A";
-      hardBadge.style.background = "#FEE2E2";
-      hardBadge.style.color = "#991B1B";
-      hardTip.innerHTML = "⚠️ <strong>致命缺陷：</strong>当顾客换成买草稿本的小红时，代码不会自动变化！必须停下程序手动修改数字，收银台直接崩溃！";
-    } else if (id === 2) {
-      hardBadge.textContent = "代码已失控";
-      hardBadge.style.background = "#FEF3C7";
-      hardBadge.style.color = "#92400E";
-      hardTip.innerHTML = "⚠️ <strong>隐蔽陷阱：</strong>虽然 8×6 碰巧也是 48，但代码里死写的 12 和 4 根本不是草稿本的单价与数量！";
-    } else {
-      hardBadge.textContent = "严重账目错误！";
-      hardBadge.style.background = "#EF4444";
-      hardBadge.style.color = "#FFF";
-      hardTip.innerHTML = "🚨 <strong>大祸临头：</strong>水彩笔应收 150 元！但写死的代码依然算成 48 元！少收了 102 元，老板要开除你了！";
-    }
-
-    const modelTip = document.getElementById('model-tip');
-    modelTip.innerHTML = `✨ <strong>变量威力：</strong>公式 <code>price * count</code> <strong>一字未改</strong>！Python 自动读取 <code>${c.price} * ${c.count}</code> 瞬间算出 <strong>${c.total}</strong> 元！`;
-  }
+  
 
 </script>
 
