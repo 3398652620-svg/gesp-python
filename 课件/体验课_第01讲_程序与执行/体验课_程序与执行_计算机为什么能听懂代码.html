@@ -490,6 +490,67 @@
       color: var(--ink-main);
       font-weight: bold;
     }
+
+    /* Robot Stage & Track */
+    .robot-stage {
+      background: #F8FAFC;
+      border: 2px dashed #CBD5E1;
+      border-radius: var(--radius-lg);
+      padding: 24px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 18px;
+      position: relative;
+    }
+
+    .robot-track {
+      display: flex;
+      gap: 16px;
+      width: 100%;
+      justify-content: center;
+      padding: 20px 0 10px 0;
+      position: relative;
+    }
+
+    .track-cell {
+      width: 80px;
+      height: 80px;
+      background: #FFFFFF;
+      border: 2px solid #CBD5E1;
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      color: #64748B;
+      font-size: 20px;
+      position: relative;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.04);
+    }
+
+    .track-cell.target {
+      border-color: var(--green-main);
+      background: var(--green-soft);
+      color: var(--green-dark);
+      box-shadow: 0 0 14px rgba(16, 185, 129, 0.25);
+    }
+
+    .robot-avatar {
+      font-size: 46px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 64px;
+      height: 64px;
+      filter: drop-shadow(0 6px 10px rgba(0,0,0,0.22));
+      position: absolute;
+      top: 24px;
+      left: 0;
+      z-index: 10;
+      pointer-events: none;
+    }
+
   </style>
 </head>
 <body>
@@ -594,46 +655,73 @@
 
     <!-- ================= 03 指令对比：小派机器人 ================= -->
     <section class="slide" data-slide="3">
-      <div class="slide-tag tag-purple">指令实验</div>
+      <div class="slide-tag tag-purple">指令实验 · 动画演示</div>
       <h2 class="slide-title">实验：给机器人小派下达指令 🤖</h2>
       
-      <div style="max-width: 960px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; gap: 16px;">
-        <!-- Track visual -->
-        <div class="card" style="padding: 16px 20px; background: #FFF; align-items: center;">
-          <div style="font-size: 18px; font-weight: 800; color: var(--ink-muted); margin-bottom: 6px;">小派的专属跑道</div>
-          <div class="robot-track-display">
-            <div class="track-cell">起点 🤖</div>
-            <div class="track-cell">格 1</div>
-            <div class="track-cell">格 2</div>
-            <div class="track-cell target">格 3 🚩</div>
-            <div class="track-cell">格 4</div>
+      <div class="card-grid-2" style="align-items: stretch; gap: 24px;">
+        <!-- Left: Interactive Robot Track Stage -->
+        <div class="robot-stage">
+          <div style="width: 100%; display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-size: 19px; font-weight: 900; color: var(--ink-main);">小派的专属跑道</div>
+            <button class="btn btn-secondary no-advance" style="padding: 6px 16px; font-size: 16px;" onclick="resetRobot()">
+              🔄 重置起点
+            </button>
+          </div>
+          
+          <div class="robot-track" id="robot-track-box">
+            <div class="track-cell" id="cell-0">起点</div>
+            <div class="track-cell" id="cell-1">1</div>
+            <div class="track-cell" id="cell-2">2</div>
+            <div class="track-cell target" id="cell-3">3 🚩</div>
+            <div class="track-cell" id="cell-4">4</div>
+            <div class="track-cell" id="cell-5">5</div>
+
+            <!-- Animated Robot Avatar -->
+            <div id="robot" class="robot-avatar">🤖</div>
+          </div>
+
+          <!-- Status Bar -->
+          <div id="robot-status" style="font-size: 20px; font-weight: bold; color: var(--ink-main); min-height: 32px; text-align: center; width: 100%; padding: 8px 14px; background: #FFF; border-radius: 10px; border: 1px solid #E2E8F0;">
+            等待老师下达指令...
+          </div>
+
+          <div style="font-size: 16px; color: var(--ink-muted); text-align: center;">
+            💡 提示：可点击右侧按钮演示，也可直接按【空格键】步进演示
           </div>
         </div>
 
-        <!-- Two Command Comparisons -->
-        <div class="card-grid-2" style="gap: 20px;">
-          <!-- Vague Command -->
-          <div class="card step" style="padding: 20px; gap: 10px; background: #FFF5F5; border-color: #FCA5A5;">
-            <div style="font-size: 21px; font-weight: 900; color: #DC2626;">❌ 模糊指令：“往前走一点”</div>
-            <div style="font-size: 18px; color: #991B1B; line-height: 1.6;">
-              小派状态：头顶冒出 <code>❓❓❓</code>，在起点原地转圈！<br/>
-              <strong>扎心发问：</strong>“一点”到底是多远？1厘米还是10米？人脑能脑补，但机器人完全不知道！
+        <!-- Right: Demonstration Action Cards -->
+        <div class="card" style="justify-content: space-between; gap: 16px; background: #FFF; padding: 24px;">
+          <div>
+            <div style="font-size: 20px; font-weight: 900; color: var(--ink-main); margin-bottom: 12px;">
+              老师下达指令演示：
+            </div>
+
+            <!-- Demo 1: Ambiguous Command -->
+            <div class="card card-hover no-advance" id="card-demo-vague" style="cursor: pointer; padding: 18px 20px; background: #FFF5F5; border: 2px solid #FCA5A5; margin-bottom: 14px;" onclick="runVagueCmd()">
+              <div style="display: flex; align-items: center; justify-content: space-between;">
+                <span style="font-size: 20px; font-weight: 900; color: #DC2626;">❓ 演示 1：模糊指令</span>
+                <span class="key-badge" style="font-size: 16px; color: #DC2626; border-color: #FCA5A5;">点击或按第1次空格</span>
+              </div>
+              <div style="font-size: 19px; font-weight: bold; color: #991B1B; margin: 6px 0;">“小派，往前走一点！”</div>
+              <div style="font-size: 16px; color: #B91C1C;">没有说出走几步，小派会怎么做？点击看小派反应！</div>
+            </div>
+
+            <!-- Demo 2: Explicit Command -->
+            <div class="card card-hover no-advance" id="card-demo-explicit" style="cursor: pointer; padding: 18px 20px; background: #F0FDF4; border: 2px solid #86EFAC;" onclick="runExplicitCmd()">
+              <div style="display: flex; align-items: center; justify-content: space-between;">
+                <span style="font-size: 20px; font-weight: 900; color: #166534;">🎯 演示 2：明确指令</span>
+                <span class="key-badge" style="font-size: 16px; color: #166534; border-color: #86EFAC;">点击或按第2次空格</span>
+              </div>
+              <div style="font-size: 19px; font-weight: bold; color: #166534; margin: 6px 0;">“小派，正前方迈 3 步！”</div>
+              <div style="font-size: 16px; color: #15803D;">方向确定、步数精准！看小派能否一步不差命中金色旗帜！</div>
             </div>
           </div>
 
-          <!-- Explicit Command -->
-          <div class="card step" style="padding: 20px; gap: 10px; background: #F0FDF4; border-color: #86EFAC;">
-            <div style="font-size: 21px; font-weight: 900; color: #166534;">✅ 明确指令：“正前方迈 3 步”</div>
-            <div style="font-size: 18px; color: #166534; line-height: 1.6;">
-              小派状态：哒！哒！哒！三步精准踩中金色旗帜 🚩！<br/>
-              <strong>科学真相：</strong>方向清晰、动作确定、步数精准，计算机分毫不差严格执行！
-            </div>
+          <!-- Golden Rule Conclusion Box -->
+          <div id="robot-experiment-conclusion" style="display: none; font-size: 18px; line-height: 1.6; color: var(--green-dark); background: var(--green-soft); padding: 14px 18px; border-radius: 12px; border: 2px solid var(--green-main);">
+            ✅ <strong>实验结论：</strong>普通程序不会自动知道程序员没写清楚的规则！指令必须<strong>精准、具体、毫无歧义</strong>，计算机才能一步不差地完成任务！
           </div>
-        </div>
-
-        <!-- Concept Box -->
-        <div class="concept-box step" style="font-size: 20px; justify-content: center; text-align: center; padding: 14px 22px;">
-          💡 核心法则：<strong>普通程序不会自动知道程序员没写清楚的规则，必须给出毫无歧义的明确指令！</strong>
         </div>
       </div>
     </section>
@@ -1259,6 +1347,180 @@
 </div>
 
 <script>
+
+  // ================= Web Audio API Synthesis =================
+  let audioCtx = null;
+  let isMuted = false;
+
+  function initAudio() {
+    if (!audioCtx) {
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (AudioContext) audioCtx = new AudioContext();
+    }
+    if (audioCtx && audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+  }
+
+  function playTone(freq, type, duration, delay = 0) {
+    if (isMuted) return;
+    initAudio();
+    if (!audioCtx) return;
+
+    setTimeout(() => {
+      try {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {
+        console.warn('Audio play error:', e);
+      }
+    }, delay * 1000);
+  }
+
+  function playStepSound() {
+    playTone(523.25, 'triangle', 0.12);
+  }
+
+  function playSuccessSound() {
+    playTone(523.25, 'sine', 0.1, 0);
+    playTone(659.25, 'sine', 0.1, 0.08);
+    playTone(783.99, 'sine', 0.18, 0.16);
+  }
+
+  function playWrongSound() {
+    playTone(280, 'sawtooth', 0.14, 0);
+    playTone(220, 'sawtooth', 0.2, 0.1);
+  }
+
+  function playFanfareSound() {
+    playTone(523.25, 'triangle', 0.12, 0);
+    playTone(659.25, 'triangle', 0.12, 0.1);
+    playTone(783.99, 'triangle', 0.12, 0.2);
+    playTone(1046.50, 'triangle', 0.35, 0.3);
+  }
+
+  function toggleMute() {
+    isMuted = !isMuted;
+    const btn = document.getElementById('btn-sound-toggle');
+    if (btn) {
+      btn.textContent = isMuted ? '🔇' : '🔊';
+      btn.title = isMuted ? '取消静音' : '静音';
+    }
+  }
+
+  // ================= Slide 03: Robot Animation Demonstration =================
+  let robotDemoStep = 0; // 0: initial, 1: vague shown, 2: explicit shown
+  const robotEl = document.getElementById('robot');
+  const robotStatus = document.getElementById('robot-status');
+
+  function getCellCenterOffset(cellId) {
+    const track = document.getElementById('robot-track-box');
+    const cell = document.getElementById(cellId);
+    if (!track || !cell) return 0;
+    const trackRect = track.getBoundingClientRect();
+    const cellRect = cell.getBoundingClientRect();
+    return (cellRect.left + cellRect.width / 2) - trackRect.left - 32;
+  }
+
+  function alignRobotToCell(cellId) {
+    const rEl = document.getElementById('robot');
+    if (!rEl) return;
+    const targetX = getCellCenterOffset(cellId);
+    if (typeof gsap !== 'undefined') {
+      gsap.set(rEl, { x: targetX, y: 0, rotation: 0 });
+    } else {
+      rEl.style.transform = `translate(${targetX}px, 0)`;
+    }
+  }
+
+  function resetRobot() {
+    alignRobotToCell('cell-0');
+    const rStatus = document.getElementById('robot-status');
+    if (rStatus) {
+      rStatus.innerHTML = '等待老师下达指令...';
+    }
+    const conc = document.getElementById('robot-experiment-conclusion');
+    if (conc) conc.style.display = 'none';
+    robotDemoStep = 0;
+  }
+
+  function runVagueCmd() {
+    initAudio();
+    playWrongSound();
+    const rEl = document.getElementById('robot');
+    const rStatus = document.getElementById('robot-status');
+    if (rStatus) {
+      rStatus.innerHTML = '<span style="color:#DC2626; font-size: 20px;">❓ “一点是几步？往哪走？” 小派在原地困惑打转直冒问号！</span>';
+    }
+    if (typeof gsap !== 'undefined' && rEl) {
+      gsap.timeline()
+        .to(rEl, { rotation: -22, duration: 0.12 })
+        .to(rEl, { rotation: 25, duration: 0.15 })
+        .to(rEl, { rotation: -18, duration: 0.12 })
+        .to(rEl, { rotation: 0, duration: 0.1 });
+    }
+    robotDemoStep = 1;
+  }
+
+  function runExplicitCmd() {
+    initAudio();
+    playSuccessSound();
+    alignRobotToCell('cell-0');
+    const rEl = document.getElementById('robot');
+    const rStatus = document.getElementById('robot-status');
+    if (rStatus) {
+      rStatus.innerHTML = '<span style="color:var(--green-dark); font-size: 20px;">🚀 收到明确指令：正前方迈 3 步！执行中...</span>';
+    }
+
+    if (typeof gsap !== 'undefined' && rEl) {
+      const tl = gsap.timeline({
+        onComplete: () => {
+          if (rStatus) {
+            rStatus.innerHTML = '🎉 <strong style="color:var(--green-dark);">精准命中第 3 格金色旗帜！指令明确，完美达成！</strong>';
+          }
+          playFanfareSound();
+          triggerCelebration({ particleCount: 45, spread: 60, origin: { y: 0.55 } });
+          const conc = document.getElementById('robot-experiment-conclusion');
+          if (conc) {
+            conc.style.display = 'block';
+            gsap.fromTo(conc, { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.35 });
+          }
+          robotDemoStep = 2;
+        }
+      });
+
+      [1, 2, 3].forEach((step) => {
+        const targetX = getCellCenterOffset('cell-' + step);
+        tl.to(rEl, {
+          x: targetX,
+          y: -28,
+          duration: 0.22,
+          ease: "power1.out",
+          onStart: () => playStepSound()
+        })
+        .to(rEl, {
+          y: 0,
+          duration: 0.18,
+          ease: "bounce.out"
+        });
+      });
+    } else {
+      alignRobotToCell('cell-3');
+      if (rStatus) {
+        rStatus.innerHTML = '🎉 <strong>精准命中第 3 格金色旗帜！指令明确，完美达成！</strong>';
+      }
+      robotDemoStep = 2;
+    }
+  }
+
   let currentSlide = 1;
   const totalSlides = 17;
   const slides = document.querySelectorAll('.slide');
@@ -1279,6 +1541,18 @@
   function advanceStep() {
     const activeSlide = document.querySelector('.slide.active');
     if (!activeSlide) return;
+
+    // Slide 3 Robot Animation Stepping
+    if (currentSlide === 3) {
+      if (robotDemoStep === 0) {
+        runVagueCmd();
+        return;
+      } else if (robotDemoStep === 1) {
+        runExplicitCmd();
+        return;
+      }
+      // If robotDemoStep === 2, advance to Slide 4
+    }
 
     const nextHiddenStep = activeSlide.querySelector('.step:not(.revealed)');
     if (nextHiddenStep) {
@@ -1346,6 +1620,12 @@
     slideCounter.textContent = `${String(currentSlide).padStart(2, '0')} / ${totalSlides}`;
     progressFill.style.width = `${(currentSlide / totalSlides) * 100}%`;
 
+    if (currentSlide === 3) {
+      setTimeout(() => {
+        resetRobot();
+      }, 60);
+    }
+
     // Slide specific celebration
     if (currentSlide === 17) {
       triggerCelebration({ particleCount: 100, spread: 80, origin: { y: 0.5 } });
@@ -1386,6 +1666,12 @@
   document.getElementById('btn-prev').addEventListener('click', (e) => { e.stopPropagation(); prevStep(); });
   document.getElementById('btn-next').addEventListener('click', (e) => { e.stopPropagation(); advanceStep(); });
   document.getElementById('btn-fullscreen').addEventListener('click', (e) => { e.stopPropagation(); toggleFullscreen(); });
+
+  window.addEventListener('resize', () => {
+    if (currentSlide === 3) {
+      alignRobotToCell(robotDemoStep === 2 ? 'cell-3' : 'cell-0');
+    }
+  });
 
   // Initialize first slide
   goToSlide(1);
