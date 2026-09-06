@@ -551,6 +551,77 @@
       pointer-events: none;
     }
 
+
+    /* Classroom Rhythm Time Badge */
+    .slide-time-badge {
+      background: #F8FAFC;
+      color: #475569;
+      font-size: 16px;
+      font-weight: 700;
+      padding: 5px 14px;
+      border-radius: var(--radius-pill);
+      border: 1px solid #CBD5E1;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+
+    /* Classroom Timer Widget */
+    .timer-box {
+      background: #FFFFFF;
+      border: 2px solid var(--green-main);
+      border-radius: var(--radius-md);
+      padding: 12px 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 3px 10px rgba(16, 185, 129, 0.12);
+    }
+
+    .timer-display {
+      font-family: 'JetBrains Mono', Consolas, monospace;
+      font-size: 32px;
+      font-weight: 900;
+      color: var(--green-dark);
+      letter-spacing: 2px;
+    }
+
+    .timer-btn-group {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .timer-btn {
+      padding: 6px 14px;
+      font-size: 16px;
+      font-weight: 700;
+      border-radius: 8px;
+      border: 1px solid #CBD5E1;
+      background: #F8FAFC;
+      color: var(--ink-main);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .timer-btn:hover {
+      background: #E2E8F0;
+    }
+
+    .timer-btn.start {
+      background: var(--green-main);
+      color: #FFF;
+      border-color: var(--green-dark);
+    }
+
+    .timer-btn.start:hover {
+      background: var(--green-dark);
+    }
+
   </style>
 </head>
 <body>
@@ -586,7 +657,7 @@
     <!-- ================= 01 封面 ================= -->
     <section class="slide active" data-slide="1">
       <div style="display: flex; flex-direction: column; align-items: center; text-align: center; max-width: 960px; margin: 0 auto; gap: 18px;">
-        <div class="slide-tag tag-orange" style="font-size: 18px; padding: 6px 20px;">马上动手跑 Python · 体验课</div>
+        <div style="display: flex; gap: 12px; align-items: center;"><span class="slide-tag tag-orange" style="font-size: 18px; padding: 6px 20px;">马上动手跑 Python · 体验课</span><span class="slide-time-badge">⏱️ 全课 80 分钟实操探索</span></div>
         <h1 style="font-size: 46px; font-weight: 900; line-height: 1.25; color: var(--ink-main);">
           程序与执行：<br/>
           <span style="color: var(--orange-main);">计算机为什么能“听懂”代码？🤖</span>
@@ -623,7 +694,7 @@
 
     <!-- ================= 02 启发冲突：电脑会读心术吗？ ================= -->
     <section class="slide" data-slide="2">
-      <div class="slide-tag tag-orange">思考与启发</div>
+      <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 8px;"><div class="slide-tag tag-orange">思考与启发</div><div class="slide-time-badge">⏱️ 环节建议：3 分钟 | 启发式全班讨论</div></div>
       <h2 class="slide-title">电脑会“读心术”吗？🤔</h2>
       
       <div class="card-grid-2">
@@ -655,7 +726,7 @@
 
     <!-- ================= 03 指令对比：小派机器人 ================= -->
     <section class="slide" data-slide="3">
-      <div class="slide-tag tag-purple">指令实验 · 动画演示</div>
+      <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 8px;"><div class="slide-tag tag-purple">指令实验 · 动画演示</div><div class="slide-time-badge">⏱️ 环节建议：3 分钟 | 机器人跑道实验与冲突揭晓</div></div>
       <h2 class="slide-title">实验：给机器人小派下达指令 🤖</h2>
       
       <div class="card-grid-2" style="align-items: stretch; gap: 24px;">
@@ -728,7 +799,7 @@
 
     <!-- ================= 04 核心认知 01：人机沟通差异 ================= -->
     <section class="slide" data-slide="4">
-      <div class="slide-tag tag-green">核心认知</div>
+      <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 8px;"><div class="slide-tag tag-green">核心认知 01</div><div class="slide-time-badge">⏱️ 环节建议：2 分钟 | 确立“毫无歧义明确指令”法则</div></div>
       <h2 class="slide-title">计算机只听毫无歧义的明确指令！💡</h2>
       
       <div class="card-grid-2">
@@ -803,7 +874,7 @@
 
     <!-- ================= 06 马上动手跑 Python ================= -->
     <section class="slide" data-slide="6">
-      <div class="slide-tag tag-green">马上动手跑 Python ⚡</div>
+      <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 8px;"><div class="slide-tag tag-green">马上动手跑 Python ⚡</div><div class="slide-time-badge">⏱️ 环节建议：7 分钟（示范2m + 学生真机实操3m + 成果点亮2m）</div></div>
       <h2 class="slide-title">马上动手跑 Python：看、猜、改、跑！🏃</h2>
       
       <div class="card-grid-2" style="gap: 24px;">
@@ -831,30 +902,39 @@
           </div>
         </div>
 
-        <!-- Right: Real Python Machine Run Guide -->
-        <div class="card step" style="padding: 22px; background: #F0FDF4; border-color: var(--green-main); gap: 12px; justify-content: center;">
+        <!-- Right: Real Python Machine Run Guide + Live Timer -->
+        <div class="card step" style="padding: 22px; background: #F0FDF4; border-color: var(--green-main); gap: 12px; justify-content: space-between;">
           <div style="display: flex; align-items: center; justify-content: space-between;">
             <span style="font-size: 22px; font-weight: 900; color: var(--green-dark);">🚀 真实 Python 真机首秀！</span>
-            <span style="background: var(--green-main); color: #FFF; font-size: 16px; font-weight: bold; padding: 3px 12px; border-radius: 20px;">真机任务</span>
+            <span style="background: var(--green-main); color: #FFF; font-size: 16px; font-weight: bold; padding: 3px 12px; border-radius: 20px;">真机实操</span>
           </div>
 
-          <div style="font-size: 18px; color: var(--ink-main); line-height: 1.7;">
-            老师课前已经在你的电脑上打开了代码文件：<br/>
-            <code style="font-family: monospace; background: #FFF; padding: 3px 8px; border-radius: 6px; color: var(--purple-main); font-weight: bold; font-size: 20px;">first.py</code>
-          </div>
-
-          <div style="background: #FFF; padding: 14px 18px; border-radius: 12px; border: 1px solid #86EFAC;">
-            <div style="font-size: 18px; font-weight: 800; color: var(--green-dark); margin-bottom: 6px;">👉 极速 4 步完成真机首秀：</div>
-            <div style="font-size: 17px; color: var(--ink-main); line-height: 1.7;">
-              1. <strong>看：</strong>核对屏幕上已打开的两行代码；<br/>
-              2. <strong>改：</strong>把第 2 行引号内的文字改成<strong>你自己的名字</strong>；<br/>
+          <div style="background: #FFF; padding: 12px 16px; border-radius: 12px; border: 1px solid #86EFAC;">
+            <div style="font-size: 18px; font-weight: 800; color: var(--green-dark); margin-bottom: 4px;">👉 极速 4 步真机实操：</div>
+            <div style="font-size: 17px; color: var(--ink-main); line-height: 1.65;">
+              1. <strong>看：</strong>查看课前打开的 <code>first.py</code>；<br/>
+              2. <strong>改：</strong>把第 2 行双引号内文字改成<strong>你自己的名字</strong>；<br/>
               3. <strong>跑：</strong>点击顶部的绿色 <strong>Run 按钮</strong>（或按 F5）；<br/>
-              4. <strong>验：</strong>黑底终端瞬间弹出，亲眼见证属于你的 Python 结果！
+              4. <strong>验：</strong>观察黑色终端窗口，见证你的名字打印出来！
             </div>
           </div>
 
-          <div style="font-size: 17px; font-weight: bold; color: var(--green-dark); background: #DCFCE7; padding: 10px 14px; border-radius: 10px; text-align: center;">
-            🎉 在开课前 10 分钟，每个人都亲手跑通了人生第一段 Python 程序！
+          <!-- Classroom Live Timer Widget -->
+          <div class="timer-box no-advance" id="timer-box-s6">
+            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+              <span style="font-size: 17px; font-weight: 800; color: #166534;">⏱️ 真机实操计时器：</span>
+              <span class="timer-display" id="timer-disp-s6">03:00</span>
+            </div>
+            <div class="timer-btn-group">
+              <button class="timer-btn start" onclick="startTimer('s6', 180)">▶️ 开始 3 分钟倒计时</button>
+              <button class="timer-btn" onclick="pauseTimer('s6')">⏸️ 暂停</button>
+              <button class="timer-btn" onclick="resetTimer('s6', 180)">🔄 重置</button>
+            </div>
+            <div id="timer-status-s6" style="font-size: 16px; min-height: 20px; text-align: center;"></div>
+          </div>
+
+          <div style="font-size: 16px; color: #166534; background: #DCFCE7; padding: 8px 12px; border-radius: 8px; text-align: center;">
+            👀 <strong>教师巡视要点：</strong>核对引号是否保留；看到黑底终端弹出立即鼓励！
           </div>
         </div>
       </div>
@@ -1100,7 +1180,7 @@
 
     <!-- ================= 12 程序名片 ================= -->
     <section class="slide" data-slide="12">
-      <div class="slide-tag tag-green">实战成果</div>
+      <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 8px;"><div class="slide-tag tag-green">实战大成果 📇</div><div class="slide-time-badge">⏱️ 环节建议：15 分钟（示范结构3m + 真机创作8m + 名片发布会4m）</div></div>
       <h2 class="slide-title">我的第一张 Python 程序名片 📇</h2>
       
       <div class="card-grid-2" style="gap: 24px;">
@@ -1126,21 +1206,42 @@
           </div>
         </div>
 
-        <!-- Right: Real Python Guide -->
-        <div class="card step" style="padding: 22px; background: var(--green-soft); border-color: var(--green-main); justify-content: center; gap: 12px;">
-          <div style="font-size: 22px; font-weight: 900; color: var(--green-dark);">🚀 切换到真实 Python 环境实战！</div>
+        <!-- Right: Real Python Guide + Live 8-Min Timer + Showcase -->
+        <div class="card step" style="padding: 22px; background: var(--green-soft); border-color: var(--green-main); justify-content: space-between; gap: 12px;">
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <span style="font-size: 22px; font-weight: 900; color: var(--green-dark);">🚀 真实 Python 名片大实战！</span>
+            <span style="background: var(--green-main); color: #FFF; font-size: 16px; font-weight: bold; padding: 3px 12px; border-radius: 20px;">核心实操</span>
+          </div>
           
-          <div style="background: #FFF; padding: 14px 18px; border-radius: 12px; border: 1px solid #86EFAC;">
-            <div style="font-size: 18px; color: var(--ink-main); line-height: 1.7;">
-              1. 切换到老师课前预置并打开好的 <strong style="color:var(--orange-dark); font-size: 20px;">my_card.py</strong>；<br/>
-              2. 亲手修改双引号内的<strong>姓名</strong>与<strong>爱好</strong>；<br/>
-              3. <strong>先在心里预测输出</strong>，再点击顶部的 <strong>Run 运行</strong>；<br/>
-              4. 观察黑色终端中是否精准打印出了你的第一张程序名片！
+          <div style="background: #FFF; padding: 12px 16px; border-radius: 12px; border: 1px solid #86EFAC;">
+            <div style="font-size: 17px; color: var(--ink-main); line-height: 1.65;">
+              1. 切换到学生机已打开的 <strong style="color:var(--orange-dark); font-size: 19px;">my_card.py</strong>；<br/>
+              2. 修改第1行引号内的<strong>姓名</strong>与第2行引号内的<strong>爱好</strong>；<br/>
+              3. <strong>先在心里预测推演</strong>，再点击 <strong>Run 运行</strong>（F5）；<br/>
+              4. 观察真实黑色终端中打印出的个人专属名片！
             </div>
           </div>
 
-          <div style="font-size: 17px; color: var(--blue-dark); background: var(--blue-soft); padding: 12px 16px; border-radius: 10px; line-height: 1.6;">
-            🌟 <strong>动作快的同学进阶挑战：</strong>在真实代码中，模仿增加第 4 行，写出属于你的个性梦想宣言！
+          <!-- Classroom Live Timer Widget -->
+          <div class="timer-box no-advance" id="timer-box-s12">
+            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+              <span style="font-size: 17px; font-weight: 800; color: #166534;">⏱️ 名片创作倒计时：</span>
+              <span class="timer-display" id="timer-disp-s12">08:00</span>
+            </div>
+            <div class="timer-btn-group">
+              <button class="timer-btn start" onclick="startTimer('s12', 480)">▶️ 开始 8 分钟创作倒计时</button>
+              <button class="timer-btn" onclick="pauseTimer('s12')">⏸️ 暂停</button>
+              <button class="timer-btn" onclick="resetTimer('s12', 480)">🔄 重置</button>
+            </div>
+            <div id="timer-status-s12" style="font-size: 16px; min-height: 20px; text-align: center;"></div>
+          </div>
+
+          <div style="font-size: 16px; color: var(--blue-dark); background: var(--blue-soft); padding: 10px 14px; border-radius: 8px; line-height: 1.5;">
+            🌟 <strong>进阶极客挑战：</strong>动作快的小程序员，模仿增加第 4 行，写出属于你的<strong>个性座右铭</strong>！
+          </div>
+
+          <div class="step" style="font-size: 17px; font-weight: bold; color: #9A3412; background: #FFEDD5; border: 1.5px solid #FDBA74; padding: 10px 14px; border-radius: 10px; text-align: center;">
+            🎤 <strong>【名片发布会】：</strong>请 2～3 位小程序员起立，向全班自豪朗读你的终端名片！
           </div>
         </div>
       </div>
@@ -1233,48 +1334,78 @@
 
     <!-- ================= 15 能力大挑战 ================= -->
     <section class="slide" data-slide="15">
-      <div class="slide-tag tag-green">能力大挑战</div>
+      <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 8px;">
+        <div class="slide-tag tag-green">能力大挑战 🏆</div>
+        <div class="slide-time-badge">⏱️ 环节建议：10 分钟（集体推演3m + 陷阱辩论3m + 真机终极冲刺4m）</div>
+      </div>
       <h2 class="slide-title">体验课三关能力大挑战 🏆</h2>
       
-      <div class="card-grid-2" style="align-items: stretch;">
+      <div class="card-grid-2" style="align-items: stretch; gap: 24px;">
+        <!-- Left: Level 1 & Level 2 & Level 3 -->
         <div class="card" style="gap: 14px; padding: 22px; justify-content: space-between; background:#FFF;">
           <!-- Level 1 -->
-          <div class="step">
-            <div style="font-size: 18px; font-weight: 900; color: var(--orange-dark); margin-bottom: 6px;">
-              【第一关：看懂顺序】代码为 <code>print("A")</code>、<code>print("B")</code>、<code>print("C")</code>，输出顺序是？
+          <div class="step" style="background: #F8FAFC; padding: 14px; border-radius: 10px; border-left: 4px solid var(--orange-main);">
+            <div style="font-size: 19px; font-weight: 900; color: var(--orange-dark); margin-bottom: 4px;">
+              【第一关：看懂顺序】全班集体大预测！
             </div>
-            <div style="padding: 10px 14px; background: #ECFDF5; border: 1.5px solid var(--green-main); border-radius: 8px; font-size: 17px; font-weight: bold; color: var(--green-dark);">
-              ✅ 正确答案：先 A ➔ 后 B ➔ 最后 C（从上到下依次执行）
+            <div style="font-size: 17px; color: var(--ink-main); line-height: 1.6;">
+              代码：<code>print("A")</code> ➔ <code>print("B")</code> ➔ <code>print("C")</code><br/>
+              <span style="color: var(--orange-dark); font-weight: bold;">📢 老师请全班齐声回答输出顺序！</span>
+            </div>
+            <div class="step" style="margin-top: 8px; padding: 8px 12px; background: #ECFDF5; border: 1.5px solid var(--green-main); border-radius: 8px; font-size: 17px; font-weight: bold; color: var(--green-dark);">
+              ✅ 验证揭晓：A ➔ B ➔ C（自上而下逐行执行，毫不犹豫！）
             </div>
           </div>
 
           <!-- Level 2 -->
-          <div class="step">
-            <div style="font-size: 18px; font-weight: 900; color: var(--blue-night); margin-bottom: 6px;">
-              【第二关：预测变化】调换顺序为 <code>print("B")</code>、<code>print("A")</code>、<code>print("C")</code>，输出是？
+          <div class="step" style="background: #F8FAFC; padding: 14px; border-radius: 10px; border-left: 4px solid var(--blue-night);">
+            <div style="font-size: 19px; font-weight: 900; color: var(--blue-dark); margin-bottom: 4px;">
+              【第二关：预测变化】小心掉进电脑“纠错”陷阱！
             </div>
-            <div style="padding: 10px 14px; background: #EFF6FF; border: 1.5px solid var(--blue-night); border-radius: 8px; font-size: 17px; font-weight: bold; color: var(--blue-dark);">
-              ✅ 正确答案：先 B ➔ 后 A ➔ 最后 C（电脑绝不替你自作聪明）
+            <div style="font-size: 17px; color: var(--ink-main); line-height: 1.6;">
+              代码：<code>print("B")</code> ➔ <code>print("A")</code> ➔ <code>print("C")</code><br/>
+              <span style="color: var(--blue-dark); font-weight: bold;">📢 追问：电脑会觉得B在前面不合理，自动换成A吗？</span>
+            </div>
+            <div class="step" style="margin-top: 8px; padding: 8px 12px; background: #EFF6FF; border: 1.5px solid var(--blue-night); border-radius: 8px; font-size: 17px; font-weight: bold; color: var(--blue-dark);">
+              ✅ 验证揭晓：B ➔ A ➔ C（计算机绝不自作聪明，完全依你而行！）
             </div>
           </div>
 
           <!-- Level 3 -->
-          <div class="step">
-            <div style="font-size: 18px; font-weight: 900; color: var(--green-dark); margin-bottom: 6px;">
-              【第三关：真机实战】亲手在真实 Python 中修改并运行名片代码！
+          <div class="step" style="background: #F8FAFC; padding: 14px; border-radius: 10px; border-left: 4px solid var(--green-main);">
+            <div style="font-size: 19px; font-weight: 900; color: var(--green-dark); margin-bottom: 4px;">
+              【第三关：真机终极改写】用 Python 表达真正的自己！
             </div>
-            <div style="padding: 10px 14px; background: #F0FDF4; border: 1.5px solid var(--green-main); border-radius: 8px; font-size: 17px; font-weight: bold; color: var(--green-dark);">
-              ✅ 通关达成：在本地真实黑底终端中成功看到自己的程序输出！
+            <div style="font-size: 17px; color: var(--ink-main); line-height: 1.6;">
+              在电脑上将预置的 <code>"我喜欢苹果"</code>、<code>"我喜欢足球"</code><br/>
+              亲手改成<strong>两句你真正最喜欢的事物</strong>并点击运行！
             </div>
           </div>
         </div>
 
-        <!-- Award Display -->
-        <div class="card step" style="text-align: center; justify-content: center; align-items: center; padding: 28px; background:#FFF;">
-          <div style="font-size: 64px; margin-bottom: 10px;">⭐️⭐️⭐️</div>
-          <div style="font-size: 24px; font-weight: 900; color: var(--orange-dark); line-height: 1.5;">
-            恭喜顺利通关三项大挑战！<br/>
-            达成体验课核心能力目标！🏅
+        <!-- Right: Level 3 Live Sprint Timer & Trophy Award -->
+        <div class="card" style="justify-content: space-between; padding: 22px; background:#FFF; gap: 14px;">
+          <!-- Level 3 Countdown Timer -->
+          <div class="timer-box no-advance" id="timer-box-s15">
+            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+              <span style="font-size: 18px; font-weight: 800; color: #166534;">⏱️ 第三关真机冲刺倒计时：</span>
+              <span class="timer-display" id="timer-disp-s15">03:00</span>
+            </div>
+            <div class="timer-btn-group">
+              <button class="timer-btn start" onclick="startTimer('s15', 180)">▶️ 开始 3 分钟冲刺</button>
+              <button class="timer-btn" onclick="pauseTimer('s15')">⏸️ 暂停</button>
+              <button class="timer-btn" onclick="resetTimer('s15', 180)">🔄 重置</button>
+            </div>
+            <div id="timer-status-s15" style="font-size: 16px; min-height: 20px; text-align: center;"></div>
+          </div>
+
+          <!-- Trophy Card Step -->
+          <div class="card step" style="text-align: center; justify-content: center; align-items: center; padding: 20px; background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%); border: 2px solid #F59E0B;">
+            <div style="font-size: 54px; margin-bottom: 6px;">⭐️⭐️⭐️</div>
+            <div style="font-size: 22px; font-weight: 900; color: #B45309; line-height: 1.4;">
+              全班顺利通关三项大挑战！🏆<br/>
+              <span style="font-size: 18px; color: #78350F; font-weight: normal;">每一位同学都掌握了程序员核心的“预测-修改-验证”思维！</span>
+            </div>
           </div>
         </div>
       </div>
@@ -1528,6 +1659,87 @@
       }
       robotDemoStep = 2;
     }
+  }
+
+
+  // ================= Classroom Live Timer =================
+  const timerStates = {};
+
+  function initTimer(id, defaultSec) {
+    if (!timerStates[id]) {
+      timerStates[id] = {
+        total: defaultSec,
+        remain: defaultSec,
+        timerId: null,
+        isRunning: false
+      };
+    }
+    updateTimerDisplay(id);
+  }
+
+  function formatTime(sec) {
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+  }
+
+  function updateTimerDisplay(id) {
+    const el = document.getElementById('timer-disp-' + id);
+    if (!el) return;
+    const t = timerStates[id];
+    el.textContent = formatTime(t.remain);
+    if (t.remain <= 30 && t.remain > 0) {
+      el.style.color = '#EF4444';
+    } else {
+      el.style.color = 'var(--green-dark)';
+    }
+  }
+
+  function startTimer(id, defaultSec) {
+    initAudio();
+    if (!timerStates[id]) initTimer(id, defaultSec);
+    const t = timerStates[id];
+    if (t.isRunning) return;
+
+    if (t.remain <= 0) t.remain = t.total;
+    t.isRunning = true;
+    updateTimerDisplay(id);
+
+    t.timerId = setInterval(() => {
+      t.remain--;
+      updateTimerDisplay(id);
+      if (t.remain <= 0) {
+        clearInterval(t.timerId);
+        t.isRunning = false;
+        playFanfareSound();
+        triggerCelebration({ particleCount: 60, spread: 70 });
+        const el = document.getElementById('timer-status-' + id);
+        if (el) {
+          el.innerHTML = '⏰ <strong style="color:#DC2626;">实操时间到！请双手离开键盘，目光回到大屏幕！</strong>';
+        }
+      }
+    }, 1000);
+  }
+
+  function pauseTimer(id) {
+    const t = timerStates[id];
+    if (!t || !t.isRunning) return;
+    clearInterval(t.timerId);
+    t.isRunning = false;
+  }
+
+  function resetTimer(id, defaultSec) {
+    const t = timerStates[id];
+    if (t && t.timerId) clearInterval(t.timerId);
+    timerStates[id] = {
+      total: defaultSec,
+      remain: defaultSec,
+      timerId: null,
+      isRunning: false
+    };
+    updateTimerDisplay(id);
+    const el = document.getElementById('timer-status-' + id);
+    if (el) el.innerHTML = '';
   }
 
   let currentSlide = 1;
