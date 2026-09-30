@@ -22,9 +22,10 @@ CONTENT = "GESP_Python一级_全套32讲互动课件与教案"
 ALLOWED_ASSETS = {".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg", ".css", ".js", ".woff", ".woff2"}
 
 
-def run(args, cwd=None, capture=False):
+def run(args, cwd=None, capture=False, extra_env=None):
     # Hooks inherit GIT_DIR/INDEX_FILE; never let those redirect website operations.
     env = {k: v for k, v in os.environ.items() if not k.startswith("GIT_")}
+    env.update(extra_env or {})
     result = subprocess.run([str(a) for a in args], cwd=cwd, env=env, check=True,
                             stdout=subprocess.PIPE if capture else None,
                             encoding="utf-8", errors="replace")
@@ -214,6 +215,12 @@ def main():
                 # Fast-forward only; preserve unrelated in-progress development.
                 run(["git", "fetch", "origin", "main"], local_site)
                 run(["git", "merge", "--ff-only", target], local_site)
+                local_database = Path(config["local_database"])
+                if not local_database.is_file():
+                    raise ValueError("Configured local website database is missing; refusing to create an empty replacement")
+                run([config["local_python"], "-m", "tools.sync_curriculum"], local_site / "backend",
+                    extra_env={"DATABASE_URL": "sqlite:///" + local_database.as_posix(),
+                               "COURSEWARE_ROOT": str(local_site / CONTENT)})
             state = {"website_revision": target, "source_revision": release["source_revision"], "status": "published"}
             (git_dir / "course-publisher-state.json").write_text(json.dumps(state, indent=2), encoding="utf-8")
             print("Course publication completed: local website, GitHub and live site updated.")
