@@ -125,6 +125,15 @@ def snapshot(source, destination):
         if Path(document).suffix.lower() != ".md":
             raise ValueError("A course document must be Markdown")
         copy(document, "01_课程设计")
+    index = ["# 当前课程发布", "", "课程设计文档位于 [01_课程设计](01_课程设计/README.md)。正式课次如下：", "",
+             "| 课次 | 内容 | 课件 | 教案 |", "|---|---|---|---|"]
+    for stage in data["stages"]:
+        for lesson in stage["lessons"]:
+            slide = f"[打开](03_互动课件/{lesson['slide']})" if lesson.get("slide") else "待完成"
+            plan = f"[查看](02_课次研发/{lesson['plan']})" if lesson.get("plan") else "待完成"
+            index.append(f"| {lesson['number']:02d} | {lesson['title']} | {slide} | {plan} |")
+    (destination / "README.md").write_text("\n".join(index) + "\n", encoding="utf-8")
+    files["README.md"] = hashlib.sha256((destination / "README.md").read_bytes()).hexdigest()
     data["files"] = dict(sorted(files.items()))
     data["source_revision"] = run(["git", "rev-parse", "HEAD"], source, True)
     # Source docs are published in their own folder, while slide paths stay relative.
@@ -187,7 +196,9 @@ def main():
             for name in tracked.splitlines():
                 path = cache / name
                 relative = path.relative_to(content).as_posix()
-                if relative not in published:
+                # Reference libraries are not owned by the publication snapshot.
+                managed_path = relative.startswith(("01_课程设计/", "02_课次研发/", "03_互动课件/"))
+                if managed_path and relative not in published:
                     path.resolve().relative_to(content.resolve())
                     path.unlink(missing_ok=True)
             shutil.copytree(staged, content, dirs_exist_ok=True)
