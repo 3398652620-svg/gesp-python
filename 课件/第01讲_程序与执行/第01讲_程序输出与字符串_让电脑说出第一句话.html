@@ -1,0 +1,1227 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第01讲 程序、输出与字符串：让电脑说出第一句话</title>
+  <!-- GSAP Animation Engine with Fallback -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <!-- Canvas Confetti for Celebrations with Fallback -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+  <style>
+    :root {
+      --bg-paper: #FFF7ED;
+      --bg-card: #FFFFFF;
+      --ink-main: #1C1917;
+      --ink-muted: #78716C;
+      --orange-main: #F97316;
+      --orange-dark: #C2410C;
+      --orange-soft: #FFEDD5;
+      --green-main: #10B981;
+      --green-dark: #047857;
+      --green-soft: #D1FAE5;
+      --yellow-sun: #FBBF24;
+      --yellow-dark: #B45309;
+      --yellow-soft: #FEF3C7;
+      --blue-night: #4F46E5;
+      --blue-dark: #3730A3;
+      --blue-soft: #EEF2FF;
+      --purple-main: #9333EA;
+      --purple-soft: #F3E8FF;
+      --red-main: #EF4444;
+      --red-dark: #991B1B;
+      --red-soft: #FEE2E2;
+      --code-board: #0F172A;
+      --code-text: #E2E8F0;
+      --radius-lg: 24px;
+      --radius-md: 16px;
+      --radius-pill: 999px;
+      --shadow-soft: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.03);
+      --shadow-card: 0 20px 25px -5px rgba(249, 115, 22, 0.08), 0 8px 10px -6px rgba(249, 115, 22, 0.04);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background-color: var(--bg-paper);
+      color: var(--ink-main);
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #stage-container {
+      width: 100vw;
+      height: 100vh;
+      max-width: 177.78vh;
+      max-height: 56.25vw;
+      position: relative;
+      background: var(--bg-paper);
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 0 50px rgba(0,0,0,0.08);
+      overflow: hidden;
+      cursor: default;
+    }
+
+    header {
+      height: 64px;
+      padding: 0 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 2px solid rgba(0,0,0,0.04);
+      background: rgba(255, 247, 237, 0.95);
+      backdrop-filter: blur(10px);
+      z-index: 100;
+      flex-shrink: 0;
+    }
+
+    .brand-tag {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--orange-main);
+      background: var(--orange-soft);
+      padding: 6px 16px;
+      border-radius: var(--radius-pill);
+    }
+
+    .lesson-title-nav {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--ink-main);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .nav-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .slide-counter {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--ink-muted);
+      background: var(--bg-card);
+      padding: 6px 14px;
+      border-radius: var(--radius-pill);
+      box-shadow: var(--shadow-soft);
+      border: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .btn-nav-icon {
+      background: var(--bg-card);
+      border: 1px solid rgba(0,0,0,0.08);
+      color: var(--ink-main);
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: bold;
+      transition: all 0.2s;
+    }
+
+    .btn-nav-icon:hover {
+      background: var(--orange-main);
+      color: #fff;
+      border-color: var(--orange-main);
+      transform: scale(1.08);
+    }
+
+    .progress-bar-container {
+      height: 4px;
+      width: 100%;
+      background: rgba(0,0,0,0.05);
+      position: absolute;
+      top: 64px;
+      left: 0;
+      z-index: 101;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 6.25%;
+      background: linear-gradient(90deg, var(--orange-main), var(--yellow-sun));
+      transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    main {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+    }
+
+    .slide {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      padding: 24px 44px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 0.35s ease, transform 0.35s ease;
+      overflow-y: auto;
+    }
+
+    .slide.active {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transform: translateX(0);
+    }
+
+    .slide.prev {
+      transform: translateX(-40px);
+    }
+
+    .slide.next {
+      transform: translateX(40px);
+    }
+
+    /* Step-Reveal Progressive System */
+    .step {
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+      pointer-events: none;
+    }
+
+    .step.revealed {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    .slide-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 16px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 6px 18px;
+      border-radius: var(--radius-pill);
+      margin-bottom: 12px;
+      width: fit-content;
+    }
+
+    .tag-orange { background: var(--orange-soft); color: var(--orange-dark); }
+    .tag-green { background: var(--green-soft); color: var(--green-dark); }
+    .tag-blue { background: var(--blue-soft); color: var(--blue-dark); }
+    .tag-purple { background: var(--purple-soft); color: var(--purple-main); }
+    .tag-red { background: var(--red-soft); color: var(--red-dark); }
+
+    .slide-title {
+      font-size: 36px;
+      font-weight: 900;
+      color: var(--ink-main);
+      margin-bottom: 16px;
+      line-height: 1.25;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .card-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 28px;
+      width: 100%;
+      height: calc(100% - 90px);
+      align-items: center;
+    }
+
+    .card-grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 20px;
+      width: 100%;
+    }
+
+    .card-grid-4 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      gap: 16px;
+      width: 100%;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      padding: 22px 26px;
+      box-shadow: var(--shadow-card);
+      border: 1px solid rgba(0,0,0,0.05);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .card-hover:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 20px 25px -5px rgba(249, 115, 22, 0.12);
+      transition: all 0.25s ease;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 14px 28px;
+      border-radius: var(--radius-pill);
+      font-size: 18px;
+      font-weight: 800;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      text-decoration: none;
+      outline: none;
+    }
+
+    .btn:active { transform: scale(0.96); }
+    .btn-primary { background: var(--orange-main); color: #FFF; box-shadow: 0 8px 18px rgba(249, 115, 22, 0.3); }
+    .btn-primary:hover { background: var(--orange-dark); transform: translateY(-2px); }
+    .btn-green { background: var(--green-main); color: #FFF; box-shadow: 0 8px 18px rgba(16, 185, 129, 0.3); }
+    .btn-green:hover { background: var(--green-dark); transform: translateY(-2px); }
+    .btn-blue { background: var(--blue-night); color: #FFF; box-shadow: 0 8px 18px rgba(79, 70, 229, 0.3); }
+    .btn-blue:hover { background: var(--blue-dark); transform: translateY(-2px); }
+    .btn-secondary { background: var(--bg-card); color: var(--ink-main); border: 2px solid rgba(0,0,0,0.1); }
+    .btn-secondary:hover { background: #FAFAFA; border-color: var(--orange-main); color: var(--orange-main); }
+
+    /* Code Window */
+    .code-window {
+      background: var(--code-board);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: 0 16px 36px rgba(15, 23, 42, 0.25);
+      border: 1px solid rgba(255,255,255,0.1);
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+    }
+
+    .code-header {
+      background: #1E293B;
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .code-body {
+      padding: 20px;
+      font-family: "Consolas", "Courier New", monospace;
+      font-size: 22px;
+      line-height: 1.75;
+      color: var(--code-text);
+      flex: 1;
+      overflow: auto;
+    }
+
+    .code-line {
+      display: flex;
+      align-items: center;
+      padding: 4px 10px;
+      border-radius: 8px;
+      transition: background 0.2s, border 0.2s;
+    }
+
+    .code-line.active-line {
+      background: rgba(249, 115, 22, 0.25);
+      border-left: 4px solid var(--orange-main);
+    }
+
+    .line-num {
+      width: 32px;
+      color: #64748B;
+      user-select: none;
+      font-size: 18px;
+    }
+
+    .syntax-fn { color: #38BDF8; font-weight: bold; }
+    .syntax-var { color: #F472B6; font-weight: bold; }
+    .syntax-str { color: #34D399; }
+    .syntax-num { color: #F59E0B; font-weight: bold; }
+    .syntax-op { color: #F87171; font-weight: bold; }
+    .syntax-punct { color: #F8FAFC; }
+    .syntax-err { color: #EF4444; font-weight: bold; }
+
+    /* Simulated Real Terminal Window */
+    .console-window {
+      background: #020617;
+      border-radius: var(--radius-lg);
+      padding: 14px 20px;
+      font-family: "Consolas", monospace;
+      font-size: 21px;
+      color: #38BDF8;
+      border: 1px solid #1E293B;
+      min-height: 90px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      box-shadow: 0 8px 24px rgba(2, 6, 23, 0.4);
+    }
+
+    .concept-box {
+      background: linear-gradient(135deg, #FFF7ED 0%, #FFEDD5 100%);
+      border: 2px solid var(--orange-main);
+      border-radius: var(--radius-lg);
+      padding: 18px 26px;
+      font-size: 21px;
+      font-weight: 700;
+      color: var(--orange-dark);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .concept-box.green {
+      background: linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%);
+      border-color: var(--green-main);
+      color: var(--green-dark);
+    }
+
+    .concept-box.blue {
+      background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);
+      border-color: var(--blue-night);
+      color: var(--blue-dark);
+    }
+
+    .concept-box.purple {
+      background: linear-gradient(135deg, #FAF5FF 0%, #F3E8FF 100%);
+      border-color: var(--purple-main);
+      color: #6B21A8;
+    }
+
+    .concept-box.red {
+      background: linear-gradient(135deg, #FEF2F2 0%, #FEE2E2 100%);
+      border-color: var(--red-main);
+      color: var(--red-dark);
+    }
+
+    /* Interactive Table */
+    .trace-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #FFF;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      box-shadow: var(--shadow-soft);
+      font-size: 16px;
+    }
+
+    .trace-table th {
+      background: #F1F5F9;
+      color: #334155;
+      font-weight: 800;
+      padding: 10px 14px;
+      text-align: center;
+      border-bottom: 2px solid #E2E8F0;
+      font-size: 18px;
+    }
+
+    .trace-table td {
+      padding: 10px 14px;
+      text-align: center;
+      border-bottom: 1px solid #F1F5F9;
+      font-family: Consolas, monospace;
+      font-size: 18px;
+      color: #0F172A;
+      transition: background 0.3s;
+    }
+
+    .trace-table tr.active-row td {
+      background: #FEF3C7;
+      font-weight: bold;
+    }
+
+    footer {
+      height: 60px;
+      padding: 0 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(255, 247, 237, 0.95);
+      border-top: 2px solid rgba(0,0,0,0.04);
+      z-index: 100;
+      flex-shrink: 0;
+    }
+
+    .shortcut-hint {
+      font-size: 15px;
+      color: var(--ink-muted);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .key-badge {
+      background: var(--bg-card);
+      border: 1px solid #D6D3D1;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-family: monospace;
+      font-size: 13px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+
+    /* Quote-Pair Detective Interactive */
+    .opt-btn {
+      font-family: Consolas, monospace;
+      font-size: 23px;
+      font-weight: 800;
+      padding: 16px 26px;
+      border-radius: 14px;
+      border: 3px solid rgba(0,0,0,0.1);
+      background: #FFF;
+      cursor: pointer;
+      transition: all 0.2s;
+      color: var(--ink-main);
+    }
+
+    .opt-btn:hover { transform: translateY(-2px); border-color: var(--orange-main); }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-8px); }
+      40% { transform: translateX(8px); }
+      60% { transform: translateX(-6px); }
+      80% { transform: translateX(6px); }
+    }
+    .shake-anim { animation: shake 0.45s ease; }
+  </style>
+</head>
+<body>
+
+<div id="stage-container">
+  <!-- Header Navigation -->
+  <header>
+    <div class="brand-tag">
+      <span>🐍</span>
+      <span>GESP Python 启航</span>
+    </div>
+    <div class="lesson-title-nav">
+      <span>第01讲</span>
+      <span style="color:var(--ink-muted);">|</span>
+      <span>程序、输出与字符串：让电脑说出第一句话</span>
+    </div>
+    <div class="nav-controls">
+      <div class="slide-counter" id="slide-counter">01 / 16</div>
+      <button class="btn-nav-icon" id="btn-prev" title="上一步 / 上一幕 (←)">❮</button>
+      <button class="btn-nav-icon" id="btn-next" title="下一步 / 下一幕 (→/空格/点击空白)">❯</button>
+      <button class="btn-nav-icon" id="btn-fullscreen" title="全屏切换 (F)">⛶</button>
+    </div>
+  </header>
+
+  <!-- Top Progress Bar -->
+  <div class="progress-bar-container">
+    <div class="progress-bar-fill" id="progress-fill"></div>
+  </div>
+
+  <!-- Slides Viewport -->
+  <main id="slides-viewport">
+
+    <!-- ================= 01 封面 ================= -->
+    <section class="slide active" data-slide="1">
+      <div style="text-align: center; max-width: 1000px; margin: 0 auto;">
+        <div class="slide-tag tag-orange step revealed" style="margin: 0 auto 18px;">第一阶段 · 程序、数据与状态</div>
+        <h1 class="step revealed" style="font-size: 46px; font-weight: 900; line-height: 1.25; margin-bottom: 20px; color: var(--ink-main);">
+          程序、输出与字符串<br/>
+          <span style="color: var(--orange-main);">让电脑说出第一句话 🗣️</span>
+        </h1>
+        <p class="step revealed" style="font-size: 23px; color: var(--ink-muted); margin-bottom: 30px;">
+          从今天开始，你不再是"照着抄"，而是<span style="color:var(--orange-dark); font-weight:800;">看懂它、拆开它、自己写出来</span>！
+        </p>
+        <div class="step revealed" style="display: flex; justify-content: center; gap: 18px; flex-wrap: wrap; margin-bottom: 30px;">
+          <span style="background:#FFF; border:2px solid var(--orange-soft); color:var(--orange-dark); font-size:19px; font-weight:800; padding:10px 22px; border-radius:999px;">① 拆开 print</span>
+          <span style="background:#FFF; border:2px solid var(--green-soft); color:var(--green-dark); font-size:19px; font-weight:800; padding:10px 22px; border-radius:999px;">② 认识引号</span>
+          <span style="background:#FFF; border:2px solid var(--purple-soft); color:#6B21A8; font-size:19px; font-weight:800; padding:10px 22px; border-radius:999px;">③ 数字 vs 文字</span>
+          <span style="background:#FFF; border:2px solid var(--blue-soft); color:var(--blue-dark); font-size:19px; font-weight:800; padding:10px 22px; border-radius:999px;">④ 自己建文件</span>
+        </div>
+        <div class="step revealed" style="display: flex; justify-content: center;">
+          <button class="btn btn-primary" style="font-size: 22px; padding: 16px 40px;" onclick="goToSlide(2)">开启第01讲探索 🚀 (或按空格键)</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 02 全员起点：不管上没上过，今天都从这儿开始 ================= -->
+    <section class="slide" data-slide="2">
+      <div class="slide-tag tag-blue">全员起点</div>
+      <h2 class="slide-title">今天，我们第一次真正"看懂"这行字 🔍</h2>
+      <div class="card-grid-2">
+        <div class="card card-hover step" style="justify-content: center; padding: 26px; gap: 14px; background:#EFF6FF; border-color:#93C5FD;">
+          <div style="font-size: 25px; font-weight: 900; color: var(--blue-night);">👋 先互相认识一下</div>
+          <div style="font-size: 19px; color: var(--ink-main); line-height: 1.8;">
+            有的同学<strong>上次来过</strong>，已经让电脑说出过自己的名字；<br/>
+            有的同学<strong>今天是第一次来</strong>，完全没关系。<br/><br/>
+            不管你是哪一种，<strong>今天我们要做一件新事情</strong>——
+          </div>
+        </div>
+
+        <div class="concept-box orange step" style="flex-direction: column; justify-content: center; text-align: center; padding: 26px; gap: 14px;">
+          <div style="font-family: Consolas, monospace; font-size: 26px; background:#0F172A; color:#34D399; padding:14px 18px; border-radius:14px; font-weight:bold;">
+            print("你好")
+          </div>
+          <div style="font-size: 21px; color: var(--orange-dark); line-height: 1.7;">
+            这行小字，我们<strong>今天要把它彻底拆开</strong>——<br/>
+            看清它<strong>每一块零件</strong>是干什么的。<br/><br/>
+            <strong>学完之后，你能从一张白纸开始，自己写出它！</strong>
+          </div>
+        </div>
+      </div>
+      <div class="card step no-advance" style="margin-top:14px; padding:12px 20px; background:#FFFBEB; border-color:#FCD34D; text-align:center; font-size:19px; color:#92400E; font-weight:700;">
+        🎯 今天的目标：不是"跑一遍"，而是<strong>看懂、说清楚、自己写出来</strong>。
+      </div>
+    </section>
+
+    <!-- ================= 03 拆解 print：动作 + 内容 ================= -->
+    <section class="slide" data-slide="3">
+      <div class="slide-tag tag-orange">核心认知 ①</div>
+      <h2 class="slide-title">第一次正式认识它：print 分成"动作" + "内容" 🔧</h2>
+      <div style="max-width: 1040px; margin: 0 auto; width: 100%; display:flex; flex-direction:column; gap:16px;">
+        <div class="card step" style="padding: 20px; text-align: center; background:#FFF;">
+          <div style="font-size: 44px; font-family: Consolas, monospace; font-weight: 900; display: flex; justify-content: center; align-items: center; gap: 6px; flex-wrap: wrap;">
+            <span style="background:#DBEAFE; color:#1E40AF; padding:8px 22px; border-radius:14px; border:3px solid #93C5FD;">print</span>
+            <span style="color:#64748B;">(</span>
+            <span style="background:#DCFCE7; color:#166534; padding:8px 22px; border-radius:14px; border:3px solid #86EFAC;">"你好"</span>
+            <span style="color:#64748B;">)</span>
+          </div>
+        </div>
+
+        <div class="card-grid-2" style="height:auto; gap:20px;">
+          <div class="card step" style="padding: 22px; gap: 10px; background:#EFF6FF; border-color:#93C5FD;">
+            <div style="font-size: 23px; font-weight: 900; color: #1E40AF;">🗣️ 前半截：print = "说出来"</div>
+            <div style="font-size: 19px; line-height: 1.7; color: var(--ink-main);">
+              它是一个<strong>动作</strong>，意思是"我要说话了"。<br/>
+              它告诉电脑：<strong>把后面的东西显示到屏幕上。</strong>
+            </div>
+          </div>
+          <div class="card step" style="padding: 22px; gap: 10px; background:#F0FDF4; border-color:#86EFAC;">
+            <div style="font-size: 23px; font-weight: 900; color: #166534;">📦 后半截：( ) 里的 = "要说的内容"</div>
+            <div style="font-size: 19px; line-height: 1.7; color: var(--ink-main);">
+              括号就像一张<strong>嘴巴</strong>，你把想说的话塞进去。<br/>
+              <code style="background:#FFF; padding:2px 8px; border-radius:6px;">"你好"</code> 就是要说出来的那句话。
+            </div>
+          </div>
+        </div>
+
+        <div class="concept-box step" style="justify-content: center; text-align: center; font-size: 22px;">
+          💡 整行连起来读：<strong>说出来 —— 你好。</strong>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 04 预测与验证 ================= -->
+    <section class="slide" data-slide="4">
+      <div class="slide-tag tag-purple">先预测 · 再运行</div>
+      <h2 class="slide-title">换一句话，结果会变吗？先想三秒再揭晓 🎯</h2>
+      <div class="card-grid-2">
+        <div class="card step" style="padding: 24px; gap: 16px; justify-content: center;">
+          <div style="font-size: 21px; font-weight: 900; color: var(--purple-main);">🧠 请你在心里预测：屏幕上会出现什么？</div>
+          <div class="code-window">
+            <div class="code-header">
+              <span style="color:#94A3B8; font-family:Consolas,monospace; font-size:16px;">demo_01.py</span>
+              <span style="color:#475569; font-size:14px;">Python 3</span>
+            </div>
+            <div class="code-body" style="font-size: 24px;">
+              <span class="syntax-fn">print</span><span class="syntax-punct">(</span><span class="syntax-str">"我是小明"</span><span class="syntax-punct">)</span>
+            </div>
+          </div>
+          <div style="font-size: 19px; color: var(--ink-muted); line-height:1.6;">
+            注意：这次括号里的<strong>内容换了</strong>，动作没换。结果会不会也跟着换？
+          </div>
+        </div>
+
+        <div class="card step no-advance" style="padding: 24px; gap: 16px; justify-content: center; background:#F8FAFC;">
+          <div style="font-size: 21px; font-weight: 900; color: var(--green-dark);">✅ 揭晓答案：真的换了！</div>
+          <div class="console-window" style="font-size: 24px;">
+            <span style="color:#34D399;">我是小明</span>
+          </div>
+          <div style="font-size: 19px; color: var(--ink-main); line-height:1.65;">
+            你<strong>猜对了吗？</strong> 如果你能预测出结果，说明你已经<strong>看懂这行代码的结构</strong>了——这就是程序员的思维方式！
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 05 文字为什么要引号 ================= -->
+    <section class="slide" data-slide="5">
+      <div class="slide-tag tag-red">核心认知 ②</div>
+      <h2 class="slide-title">不加引号会怎样？我们亲自试一次 ⚡</h2>
+      <div style="max-width: 1040px; margin: 0 auto; width: 100%; display:flex; flex-direction:column; gap:16px;">
+        <div class="card-grid-2" style="height:auto; gap:20px;">
+          <div class="card step" style="padding: 20px; gap: 12px; background:#F0FDF4; border-color:#86EFAC;">
+            <div style="font-size: 21px; font-weight: 900; color: #166534;">✅ 加了引号</div>
+            <div style="font-family:Consolas,monospace; font-size: 23px; background:#0F172A; color:#34D399; padding:12px 16px; border-radius:10px; font-weight:bold;">print("你好")</div>
+            <div style="font-family:Consolas,monospace; font-size: 20px; color:#16A34A;">➔ 你好</div>
+            <div style="font-size: 18px; color: var(--ink-main);">电脑乖乖把文字显示出来。</div>
+          </div>
+          <div class="card step" style="padding: 20px; gap: 12px; background:#FEF2F2; border-color:#FCA5A5;">
+            <div style="font-size: 21px; font-weight: 900; color: #991B1B;">❌ 没加引号</div>
+            <div style="font-family:Consolas,monospace; font-size: 23px; background:#0F172A; color:#F87171; padding:12px 16px; border-radius:10px; font-weight:bold;">print(你好)</div>
+            <div style="font-family:Consolas,monospace; font-size: 19px; color:#DC2626;">➔ 报错！(红字一片)</div>
+            <div style="font-size: 18px; color: var(--ink-main);">电脑"急了"：这是啥东西？我找不到它！</div>
+          </div>
+        </div>
+
+        <div class="concept-box red step" style="font-size: 21px; line-height:1.65;">
+          <span style="font-size:30px;">🤖</span>
+          <div>
+            <strong>因为电脑不会"猜"！</strong> 你不加引号写 <code>你好</code>，电脑会以为这是<strong>某个东西的名字</strong>，
+            它翻遍整个程序也没找到"你好"是什么，只能报错。<br/>
+            加上引号 <code>"你好"</code>，才等于告诉它：<strong>"这里面是一段文字，直接显示出来就行。"</strong>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 06 引号外套 + 成对 ================= -->
+    <section class="slide" data-slide="6">
+      <div class="slide-tag tag-green">核心认知 ②·续</div>
+      <h2 class="slide-title">文字要穿"引号外套"，而且必须穿成对 🧥</h2>
+      <div class="card-grid-3">
+        <div class="card step" style="text-align: center; padding: 22px; gap: 12px; background:#F0FDF4; border-color:#86EFAC;">
+          <div style="font-size: 42px;">👕</div>
+          <div style="font-size: 22px; font-weight: 900; color: #166534;">双引号外套</div>
+          <div style="font-family:Consolas,monospace; font-size: 22px; background:#FFF; padding:10px; border-radius:10px; font-weight:bold;">print("你好")</div>
+          <div style="font-size: 18px; color: var(--ink-main);">前后都是 <strong>"</strong></div>
+        </div>
+        <div class="card step" style="text-align: center; padding: 22px; gap: 12px; background:#F0FDF4; border-color:#86EFAC;">
+          <div style="font-size: 42px;">👔</div>
+          <div style="font-size: 22px; font-weight: 900; color: #166534;">单引号外套</div>
+          <div style="font-family:Consolas,monospace; font-size: 22px; background:#FFF; padding:10px; border-radius:10px; font-weight:bold;">print('你好')</div>
+          <div style="font-size: 18px; color: var(--ink-main);">前后都是 <strong>'</strong></div>
+        </div>
+        <div class="card step" style="text-align: center; padding: 22px; gap: 12px; background:#FEF2F2; border-color:#FCA5A5;">
+          <div style="font-size: 42px;">🚫</div>
+          <div style="font-size: 22px; font-weight: 900; color: #991B1B;">穿错外套</div>
+          <div style="font-family:Consolas,monospace; font-size: 22px; background:#FFF; padding:10px; border-radius:10px; font-weight:bold; color:#DC2626;">print("你好')</div>
+          <div style="font-size: 18px; color: var(--ink-main);">左边 <strong>"</strong> 右边 <strong>'</strong> —— 不成对！</div>
+        </div>
+      </div>
+      <div class="concept-box green step" style="margin-top: 16px; justify-content: center; text-align: center; font-size: 22px;">
+        🌟 记住：<strong>引号要成对！</strong> 就像穿鞋子——一只在左、一只在右，<strong>两只必须是一双</strong>。
+      </div>
+    </section>
+
+    <!-- ================= 07 引号配对找错小侦探（互动） ================= -->
+    <section class="slide" data-slide="7">
+      <div class="slide-tag tag-purple">课堂互动 · 小侦探</div>
+      <h2 class="slide-title">🔍 引号配对小侦探：哪几行能正常运行？</h2>
+      <div style="max-width: 1040px; margin: 0 auto; width: 100%; display:flex; flex-direction:column; gap:16px;">
+        <div class="card step no-advance" style="padding: 14px 20px; background:#FFFBEB; border-color:#FCD34D; font-size:19px; color:#92400E; font-weight:700; text-align:center; display:flex; align-items:center; justify-content:center; gap:16px; flex-wrap:wrap;">
+          <span>一共有 <strong>两行</strong>是对的，把它们都点出来吧！</span>
+          <button class="btn btn-secondary no-advance" style="padding:6px 16px; font-size:15px;" onclick="resetQ7()">🔄 再来一轮</button>
+        </div>
+        <div class="card-grid-2" style="height:auto; gap:16px;">
+          <button class="opt-btn no-advance" id="q7-a" onclick="checkQ7('a', true)">print("Python")</button>
+          <button class="opt-btn no-advance" id="q7-b" onclick="checkQ7('b', false)">print(Python)</button>
+          <button class="opt-btn no-advance" id="q7-c" onclick="checkQ7('c', true)">print('深圳')</button>
+          <button class="opt-btn no-advance" id="q7-d" onclick="checkQ7('d', false)">print("深圳')</button>
+        </div>
+        <div id="q7-feedback" class="concept-box blue no-advance always-revealed" style="justify-content:center; text-align:center; font-size:20px; min-height:70px;">
+          🔎 点击上面四行代码，找出能正常运行的那两行吧！
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 08 数字 vs 文字（认知冲突） ================= -->
+    <section class="slide" data-slide="8">
+      <div class="slide-tag tag-orange">核心认知 ③ · 认知冲突</div>
+      <h2 class="slide-title">看起来一模一样，它们真的一样吗？👀</h2>
+      <div style="max-width: 1040px; margin: 0 auto; width: 100%; display:flex; flex-direction:column; gap:16px;">
+        <div class="card-grid-2" style="height:auto; gap:20px;">
+          <div class="card step" style="padding: 22px; gap: 12px; text-align:center;">
+            <div style="font-family:Consolas,monospace; font-size: 26px; font-weight: 900; color:#0F172A;">print(10)</div>
+            <div class="console-window" style="justify-content:center; align-items:center;">
+              <span style="color:#FBBF24; font-size:34px; font-weight:bold;">10</span>
+            </div>
+          </div>
+          <div class="card step" style="padding: 22px; gap: 12px; text-align:center; background:#F8FAFC;">
+            <div style="font-family:Consolas,monospace; font-size: 26px; font-weight: 900; color:#0F172A;">print("10")</div>
+            <div class="console-window" style="justify-content:center; align-items:center;">
+              <span style="color:#34D399; font-size:34px; font-weight:bold;">10</span>
+            </div>
+          </div>
+        </div>
+        <div class="concept-box step purple" style="justify-content:center; text-align:center; font-size:23px;">
+          🤔 屏幕上显示的都是 <strong>10</strong>，看起来一模一样……<br/>
+          <strong style="font-size:26px;">可是，它们真的一样吗？</strong>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 09 数字与文字的本质区别 ================= -->
+    <section class="slide" data-slide="9">
+      <div class="slide-tag tag-purple">核心认知 ③ · 揭秘</div>
+      <h2 class="slide-title">答案是：眼睛看一样，电脑看不一样！💥</h2>
+      <div class="card-grid-2">
+        <div class="card step" style="padding: 26px; gap: 12px; background:#FFFBEB; border-color:#FCD34D;">
+          <div style="font-size: 42px;">🪙</div>
+          <div style="font-size: 24px; font-weight: 900; color: var(--yellow-dark);">print(10) ➔ 真正的数字</div>
+          <div style="font-size: 20px; color: var(--ink-main); line-height:1.7;">
+            它是<strong>真钱的 10 块</strong>，<strong>可以拿去算数</strong>！<br/>
+            （下一次课我们就会让它参与计算）
+          </div>
+        </div>
+        <div class="card step" style="padding: 26px; gap: 12px; background:#F3E8FF; border-color:#D8B4FE;">
+          <div style="font-size: 42px;">🎫</div>
+          <div style="font-size: 24px; font-weight: 900; color: #6B21A8;">print("10") ➔ 长得像数字的文字</div>
+          <div style="font-size: 20px; color: var(--ink-main); line-height:1.7;">
+            它是<strong>玩具纸币</strong>，只是一串<strong>"长得像 10 的字符"</strong>，<strong>不能拿来算数</strong>。
+          </div>
+        </div>
+      </div>
+      <div class="concept-box orange step" style="margin-top: 16px; justify-content:center; text-align:center; font-size:21px;">
+        🎯 今天只需要记住一件事：<strong>它们不一样！</strong> 到底哪里不一样，等我们学运算的时候，秘密就会揭开。
+      </div>
+    </section>
+
+    <!-- ================= 10 符号陷阱：中文引号 ================= -->
+    <section class="slide" data-slide="10">
+      <div class="slide-tag tag-red">核心认知 ④ · 编程最大的坑</div>
+      <h2 class="slide-title">明明"看起来一样"，为什么它报错了？⚠️</h2>
+      <div style="max-width: 1060px; margin: 0 auto; width: 100%; display:flex; flex-direction:column; gap:14px;">
+        <div class="card-grid-2" style="height:auto; gap:18px;">
+          <div class="card step" style="padding: 18px; gap: 10px; background:#F0FDF4; border-color:#86EFAC;">
+            <div style="font-size: 20px; font-weight: 900; color: #166534;">✅ 英文引号（电脑认识的）</div>
+            <div style="font-family:Consolas,monospace; font-size: 24px; background:#0F172A; color:#34D399; padding:12px 16px; border-radius:10px; font-weight:bold;">print("你好")</div>
+            <div style="font-size: 17px; color: var(--ink-main);">细细的、直直的，从键盘"英文状态"打出来。</div>
+          </div>
+          <div class="card step" style="padding: 18px; gap: 10px; background:#FEF2F2; border-color:#FCA5A5;">
+            <div style="font-size: 20px; font-weight: 900; color: #991B1B;">❌ 中文引号（电脑不认识的）</div>
+            <div style="font-family:Consolas,monospace; font-size: 24px; background:#0F172A; color:#F87171; padding:12px 16px; border-radius:10px; font-weight:bold;">print（“你好”）</div>
+            <div style="font-size: 17px; color: var(--ink-main);">粗粗的、弯弯的，从"中文状态"打出来 → <strong>报错！</strong></div>
+          </div>
+        </div>
+        <div class="card step" style="padding: 14px 20px; background:#F8FAFC; gap:8px;">
+          <div style="display:flex; justify-content:space-between; font-size:17px; color:#334155; font-weight:700;">
+            <span>放大对比：</span>
+            <span>中文 <code style="font-size:22px; color:#DC2626;">（ ） “ ”</code>　|　英文 <code style="font-size:22px; color:#16A34A;">( ) " "</code></span>
+          </div>
+          <div style="font-size:17px; color:var(--ink-muted); line-height:1.6;">
+            它们长得像"双胞胎"，但电脑<strong>只认英文的那一个</strong>。这就是编程里最容易踩、也最不值得踩的坑。
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 11 切换英文输入法（肌肉记忆） ================= -->
+    <section class="slide" data-slide="11">
+      <div class="slide-tag tag-green">习惯养成</div>
+      <h2 class="slide-title">写代码前的第一个动作：切换到英文输入法 ⌨️</h2>
+      <div style="max-width: 1040px; margin: 0 auto; width: 100%; display:flex; flex-direction:column; gap:16px;">
+        <div class="card-grid-3" style="height:auto;">
+          <div class="card step" style="text-align:center; padding:22px; gap:10px;">
+            <div style="font-size: 40px;">1️⃣</div>
+            <div style="font-size: 20px; font-weight: 900;">看屏幕右下角</div>
+            <div style="font-size: 18px; color: var(--ink-main);">找到输入法的小图标：显示 <strong>"中"</strong> 就是中文状态。</div>
+          </div>
+          <div class="card step" style="text-align:center; padding:22px; gap:10px; background:#FFFBEB; border-color:#FCD34D;">
+            <div style="font-size: 40px;">2️⃣</div>
+            <div style="font-size: 20px; font-weight: 900;">按一下 Shift 键</div>
+            <div style="font-size: 18px; color: var(--ink-main);">或者按 <span class="key-badge">Shift</span> 把图标切到 <strong>"英"</strong>。</div>
+          </div>
+          <div class="card step" style="text-align:center; padding:22px; gap:10px; background:#F0FDF4; border-color:#86EFAC;">
+            <div style="font-size: 40px;">3️⃣</div>
+            <div style="font-size: 20px; font-weight: 900;">再开始打代码</div>
+            <div style="font-size: 18px; color: var(--ink-main);">就像给电脑调到它听得懂的频道，<strong>写代码先切英文</strong>。</div>
+          </div>
+        </div>
+        <div class="concept-box green step" style="justify-content:center; text-align:center; font-size:22px;">
+          🎽 口诀：<strong>写代码，切英文；打中文，再切回。</strong> 养成这个习惯，报错会少一大半！
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 12 三条 print 的顺序预测 ================= -->
+    <section class="slide" data-slide="12">
+      <div class="slide-tag tag-blue">核心认知 ⑤</div>
+      <h2 class="slide-title">三行代码，谁先出现？先预测，再运行 🔮</h2>
+      <div class="card-grid-2">
+        <div class="card step" style="padding: 22px; gap: 12px; justify-content:center;">
+          <div style="font-size: 20px; font-weight:900; color: var(--blue-night);">🧠 在心里排出它们的顺序：</div>
+          <div class="code-window">
+            <div class="code-header"><span style="color:#94A3B8; font-family:Consolas,monospace; font-size:16px;">order_01.py</span></div>
+            <div class="code-body" style="font-size: 22px;">
+              <div class="code-line"><span class="line-num">1</span><span class="syntax-fn">print</span><span class="syntax-punct">(</span><span class="syntax-str">"准备"</span><span class="syntax-punct">)</span></div>
+              <div class="code-line"><span class="line-num">2</span><span class="syntax-fn">print</span><span class="syntax-punct">(</span><span class="syntax-str">"开始"</span><span class="syntax-punct">)</span></div>
+              <div class="code-line"><span class="line-num">3</span><span class="syntax-fn">print</span><span class="syntax-punct">(</span><span class="syntax-str">"完成"</span><span class="syntax-punct">)</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="card step no-advance" style="padding: 22px; gap: 12px; justify-content:center; background:#F8FAFC;">
+          <div style="font-size: 20px; font-weight:900; color: var(--green-dark);">✅ 运行结果：</div>
+          <div class="console-window" style="font-size:23px;">
+            <span style="color:#34D399;">准备</span>
+            <span style="color:#34D399;">开始</span>
+            <span style="color:#34D399;">完成</span>
+          </div>
+          <div style="font-size:18px; color:var(--ink-main); line-height:1.6;">
+            和你想的一样吗？电脑<strong>从上往下，一行一行</strong>执行。
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 13 变式：顺序能自己调吗 ================= -->
+    <section class="slide" data-slide="13">
+      <div class="slide-tag tag-purple">变式挑战</div>
+      <h2 class="slide-title">如果调换顺序，电脑会"自动帮你排回来"吗？🔀</h2>
+      <div class="card-grid-2">
+        <div class="card step" style="padding: 22px; gap: 12px; justify-content:center;">
+          <div style="font-size: 20px; font-weight:900; color: var(--purple-main);">把前两行换一下位置：</div>
+          <div class="code-window">
+            <div class="code-header"><span style="color:#94A3B8; font-family:Consolas,monospace; font-size:16px;">order_02.py</span></div>
+            <div class="code-body" style="font-size: 22px;">
+              <div class="code-line"><span class="line-num">1</span><span class="syntax-fn">print</span><span class="syntax-punct">(</span><span class="syntax-str">"完成"</span><span class="syntax-punct">)</span></div>
+              <div class="code-line"><span class="line-num">2</span><span class="syntax-fn">print</span><span class="syntax-punct">(</span><span class="syntax-str">"准备"</span><span class="syntax-punct">)</span></div>
+              <div class="code-line"><span class="line-num">3</span><span class="syntax-fn">print</span><span class="syntax-punct">(</span><span class="syntax-str">"开始"</span><span class="syntax-punct">)</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="card step no-advance" style="padding: 22px; gap: 12px; justify-content:center; background:#F8FAFC;">
+          <div style="font-size: 20px; font-weight:900; color: var(--green-dark);">✅ 运行结果：</div>
+          <div class="console-window" style="font-size:23px;">
+            <span style="color:#34D399;">完成</span>
+            <span style="color:#34D399;">准备</span>
+            <span style="color:#34D399;">开始</span>
+          </div>
+          <div style="font-size:18px; color:var(--ink-main); line-height:1.6;">
+            <strong>电脑不会觉得"不合理"而帮你调整！</strong> 它只会老老实实按你写的顺序走。
+          </div>
+        </div>
+      </div>
+      <div class="concept-box step blue" style="margin-top:14px; justify-content:center; text-align:center; font-size:21px;">
+        🧠 这又一次证明：<strong>电脑不会猜你的意思，你写什么顺序，它就跑什么顺序。</strong>
+      </div>
+    </section>
+
+    <!-- ================= 14 独立实战：新建文件 ================= -->
+    <section class="slide" data-slide="14">
+      <div class="slide-tag tag-orange">核心操作 · 独立完成</div>
+      <h2 class="slide-title">现在，你也要有自己的文件了！🆕</h2>
+      <div class="card-grid-4" style="align-items:stretch;">
+        <div class="card step" style="padding:20px; gap:10px; text-align:center;">
+          <div style="font-size: 38px;">1️⃣</div>
+          <div style="font-size: 20px; font-weight:900; color:var(--orange-dark);">新建</div>
+          <div style="font-size:17px; color:var(--ink-main); line-height:1.6;">菜单 <code>File</code> → <code>New File</code><br/>（得到一个空白窗口）</div>
+        </div>
+        <div class="card step" style="padding:20px; gap:10px; text-align:center;">
+          <div style="font-size: 38px;">2️⃣</div>
+          <div style="font-size: 20px; font-weight:900; color:var(--orange-dark);">保存</div>
+          <div style="font-size:17px; color:var(--ink-main); line-height:1.6;">菜单 <code>File</code> → <code>Save</code><br/>文件名：<code>my_card_01</code></div>
+        </div>
+        <div class="card step" style="padding:20px; gap:10px; text-align:center;">
+          <div style="font-size: 38px;">3️⃣</div>
+          <div style="font-size: 20px; font-weight:900; color:var(--orange-dark);">写代码</div>
+          <div style="font-size:17px; color:var(--ink-main); line-height:1.6;">照着屏幕<br/>一行一行敲进去</div>
+        </div>
+        <div class="card step" style="padding:20px; gap:10px; text-align:center; background:#F0FDF4; border-color:#86EFAC;">
+          <div style="font-size: 38px;">4️⃣</div>
+          <div style="font-size: 20px; font-weight:900; color:var(--green-dark);">运行</div>
+          <div style="font-size:17px; color:var(--ink-main); line-height:1.6;">点 <code>Run</code><br/>看你的程序"说话"！</div>
+        </div>
+      </div>
+      <div class="concept-box red step" style="margin-top:16px; justify-content:center; text-align:center; font-size:20px;">
+        ⚠️ 敲代码前，别忘了：<strong>切换英文输入法！</strong>
+      </div>
+    </section>
+
+    <!-- ================= 15 独立实战：升级版信息卡 ================= -->
+    <section class="slide" data-slide="15">
+      <div class="slide-tag tag-green">独立实战 · 我的信息卡</div>
+      <h2 class="slide-title">动手！用多行 print 搭一张属于自己的卡片 🎴</h2>
+      <div style="max-width: 1060px; margin: 0 auto; width: 100%; display:flex; flex-direction:column; gap:14px;">
+        <div class="card step no-advance" style="padding: 12px 18px; background:#F3E8FF; border-color:#D8B4FE; font-size:18px; color:#6B21A8; line-height:1.6;">
+          🆙 <strong>这次不是一句话，而是一张完整的卡片：</strong>要用<strong>多行 print 搭建一个"卡片框架"</strong>——有上下边框、有标题、有信息行，还有一行<strong>不带引号的数字</strong>。
+        </div>
+        <div class="card-grid-2" style="height:auto; gap:20px;">
+          <div class="code-window step">
+            <div class="code-header">
+              <span style="color:#94A3B8; font-family:Consolas,monospace; font-size:16px;">my_card_01.py</span>
+              <span style="color:#475569; font-size:13px;">自己动手敲一遍</span>
+            </div>
+            <div class="code-body" style="font-size: 19px; line-height:1.85;">
+              <div class="code-line"><span class="line-num">1</span><span class="syntax-fn">print</span><span class="syntax-punct">(</span><span class="syntax-str">"=========="</span><span class="syntax-punct">)</span></div>
+              <div class="code-line"><span class="line-num">2</span><span class="syntax-fn">print</span><span class="syntax-punct">(</span><span class="syntax-str">"我的信息卡"</span><span class="syntax-punct">)</span></div>
+              <div class="code-line"><span class="line-num">3</span><span class="syntax-fn">print</span><span class="syntax-punct">(</span><span class="syntax-str">"姓名：小明"</span><span class="syntax-punct">)</span></div>
+              <div class="code-line"><span class="line-num">4</span><span class="syntax-fn">print</span><span class="syntax-punct">(</span><span class="syntax-str">"爱好：机器人"</span><span class="syntax-punct">)</span></div>
+              <div class="code-line"><span class="line-num">5</span><span class="syntax-fn">print</span><span class="syntax-punct">(</span><span class="syntax-num">10</span><span class="syntax-punct">)</span></div>
+              <div class="code-line"><span class="line-num">6</span><span class="syntax-fn">print</span><span class="syntax-punct">(</span><span class="syntax-str">"=========="</span><span class="syntax-punct">)</span></div>
+            </div>
+          </div>
+          <div class="card step no-advance" style="padding: 20px; gap: 12px; justify-content:center; background:#F8FAFC;">
+            <div style="font-size: 20px; font-weight:900; color: var(--green-dark);">🎯 先预测：屏幕上会出现什么？</div>
+            <div class="console-window" style="font-size:20px; gap:4px;">
+              <span style="color:#34D399;">==========</span>
+              <span style="color:#34D399;">我的信息卡</span>
+              <span style="color:#34D399;">姓名：小明</span>
+              <span style="color:#34D399;">爱好：机器人</span>
+              <span style="color:#FBBF24;">10</span>
+              <span style="color:#34D399;">==========</span>
+            </div>
+            <div style="font-size:17px; color:var(--ink-muted); line-height:1.6;">
+              第 5 行 <code>print(10)</code> 没有引号，你发现了吗？<br/>
+              它和上面几行有什么不一样？
+            </div>
+          </div>
+        </div>
+        <div class="card step no-advance" style="padding: 12px 18px; background:#FFFBEB; border-color:#FCD34D; text-align:center; font-size:18px; color:#92400E; font-weight:700;">
+          ✍️ 换成你自己的姓名、爱好，再把第 5 行改成你的年龄。写完后举手，老师来看看你的卡片！
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 16 能力收束与下节预告 ================= -->
+    <section class="slide" data-slide="16">
+      <div class="slide-tag tag-orange">圆满收束</div>
+      <h2 class="slide-title">恭喜你！完成第01讲全部目标 🎉</h2>
+      <div class="card-grid-2">
+        <div class="card step" style="justify-content: center; gap: 14px; background: var(--orange-soft); border-color: var(--orange-main); padding: 26px;">
+          <div style="font-size: 24px; font-weight: 900; color: var(--orange-dark);">🎖️ 本讲能力收束：</div>
+          <div style="font-size: 19px; color: var(--ink-main); line-height: 1.75;">
+            ✅ <code>print()</code> 是让程序说话的指令（动作 + 内容）<br/>
+            ✅ 文字必须穿<strong>成对引号</strong>外套<br/>
+            ✅ <code>10</code> 和 <code>"10"</code> 看起来一样，其实不一样<br/>
+            ✅ 电脑严格按<strong>你写的顺序</strong>执行<br/>
+            ✅ 会<strong>新建 → 写 → 保存 → 运行</strong>，并切英文输入法
+          </div>
+        </div>
+        <div class="card step" style="justify-content: center; gap: 14px; background: var(--blue-soft); border-color: var(--blue-night); padding: 26px;">
+          <div style="font-size: 24px; font-weight: 900; color: var(--blue-night);">🔮 下一讲悬念：</div>
+          <div style="font-size: 19px; color: var(--ink-main); line-height: 1.75;">
+            "小明"这个名字，如果我们后面要用 <strong>10 次</strong>，<br/>
+            难道每次都要重新打一遍吗？<br/>
+            程序能不能把数据<strong>记住</strong>、需要时再拿出来用？<br/><br/>
+            <strong>第02讲《变量与赋值：让程序记住数据》见！</strong>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex; justify-content:center; margin-top:16px;" class="step no-advance">
+        <button class="btn btn-green" style="font-size:20px; padding:14px 34px;" onclick="triggerCelebration({particleCount:90, spread:80, origin:{y:0.6}})">🎊 给自己一点掌声！</button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer Navigation -->
+  <footer>
+    <div class="shortcut-hint">
+      <span>💡 操作提示：</span>
+      <span>点击空白 / <span class="key-badge">空格</span> / <span class="key-badge">→</span> 逐步展示与前进</span>
+      <span><span class="key-badge">←</span> 回退</span>
+      <span><span class="key-badge">F</span> 全屏</span>
+    </div>
+    <div style="display: flex; gap: 12px;">
+      <button class="btn btn-secondary" style="padding: 8px 18px; font-size: 15px;" onclick="prevStep()">❮ 上一页</button>
+      <button class="btn btn-primary" style="padding: 8px 24px; font-size: 15px;" onclick="advanceStep()">下一步 ❯</button>
+    </div>
+  </footer>
+</div>
+
+<script>
+  let currentSlide = 1;
+  // ★ 从 DOM 自动计数 —— 增删幕次后无需手改
+const totalSlides = document.querySelectorAll('.slide').length;
+  const slides = document.querySelectorAll('.slide');
+  const slideCounter = document.getElementById('slide-counter');
+  const progressFill = document.getElementById('progress-fill');
+
+  function triggerCelebration(opts = { particleCount: 50, spread: 70, origin: { y: 0.65 } }) {
+    if (typeof confetti === 'function') {
+      try { confetti(opts); } catch(e) {}
+    }
+  }
+
+  // Core Progressive Step-by-Step Reveal System
+  function advanceStep() {
+    const activeSlide = document.querySelector('.slide.active');
+    if (!activeSlide) return;
+
+    const nextHiddenStep = activeSlide.querySelector('.step:not(.revealed)');
+    if (nextHiddenStep) {
+      nextHiddenStep.classList.add('revealed');
+      if (typeof gsap !== 'undefined') {
+        gsap.fromTo(nextHiddenStep,
+          { opacity: 0, y: 16, scale: 0.98 },
+          { opacity: 1, y: 0, scale: 1, duration: 0.35, ease: "power2.out" }
+        );
+      }
+    } else {
+      if (currentSlide < totalSlides) {
+        goToSlide(currentSlide + 1);
+      }
+    }
+  }
+
+  function prevStep() {
+    // ★ 回退 = 一次退一整页（像 PPT）。不要在这里逐个收回 step。
+    if (currentSlide > 1) goToSlide(currentSlide - 1);
+  }
+
+  function goToSlide(newIndex) {
+    if (newIndex < 1 || newIndex > totalSlides) return;
+
+
+    slides.forEach((s, idx) => {
+      s.classList.remove('active', 'prev', 'next');
+      const allSteps = s.querySelectorAll('.step');
+
+      if (idx + 1 === newIndex) {
+        s.classList.add('active');
+        // ★ 不论前进还是后退，进入某页一律回到「开头状态」：
+        //   只显示第 1 个 step（和 always-revealed），其余收起
+        allSteps.forEach((st, sIdx) => {
+          if (sIdx === 0 || st.classList.contains('always-revealed')) {
+            st.classList.add('revealed');
+          } else {
+            st.classList.remove('revealed');
+          }
+        });
+      } else if (idx + 1 < newIndex) {
+        s.classList.add('prev');
+        allSteps.forEach(st => st.classList.add('revealed'));
+      } else {
+        s.classList.add('next');
+        allSteps.forEach(st => st.classList.remove('revealed'));
+      }
+    });
+
+    currentSlide = newIndex;
+    slideCounter.textContent = `${String(currentSlide).padStart(2, '0')} / ${totalSlides}`;
+    progressFill.style.width = `${(currentSlide / totalSlides) * 100}%`;
+  }
+
+  // Global click listener with interactive component filter
+  document.getElementById('stage-container').addEventListener('click', (e) => {
+    if (e.target.closest('button, input, textarea, select, .drag-chip, .drop-zone, .option-card, .opt-btn, header, footer, .no-advance, table, .console-window, .code-window')) {
+      return;
+    }
+    advanceStep();
+  });
+
+  // Keyboard navigation
+  window.addEventListener('keydown', (e) => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown' || e.key === 'Enter') {
+      e.preventDefault();
+      advanceStep();
+    } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+      e.preventDefault();
+      prevStep();
+    } else if (e.key === 'f' || e.key === 'F') {
+      toggleFullscreen();
+    }
+  });
+
+  document.getElementById('btn-prev').addEventListener('click', (e) => { e.stopPropagation(); prevStep(); });
+  document.getElementById('btn-next').addEventListener('click', (e) => { e.stopPropagation(); advanceStep(); });
+  document.getElementById('btn-fullscreen').addEventListener('click', (e) => { e.stopPropagation(); toggleFullscreen(); });
+
+  function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(() => {});
+    } else {
+      document.exitFullscreen().catch(() => {});
+    }
+  }
+
+  // ================= Slide 07: Quote-Pair Detective =================
+  // 四个选项各自的状态：true = 已答对（绿色），false = 未作答，'wrong' = 答错（红色）
+  let q7State = { a: 'idle', b: 'idle', c: 'idle', d: 'idle' };
+  let q7Celebrated = false; // 只有"4 个全部答对"才庆祝一次，避免误点也放烟花
+
+  const q7Answers = {
+    a: '✅ 正确！双引号成对，文字外套穿好了。',
+    b: '❌ 没有引号！程序会把 Python 当成"某个东西的名字"，翻遍全程序也找不到 → 报错。',
+    c: '✅ 正确！单引号同样可以，只要前后成对。',
+    d: '❌ 引号不成对！左边是双引号 " ，右边是单引号 \' —— 一只鞋是运动鞋、一只是拖鞋。'
+  };
+
+  function checkQ7(key, isCorrect) {
+    const btn = document.getElementById('q7-' + key);
+    const fb = document.getElementById('q7-feedback');
+
+    btn.classList.remove('shake-anim');
+    void btn.offsetWidth;
+    btn.classList.add('shake-anim');
+
+    if (isCorrect) {
+      btn.style.borderColor = 'var(--green-main)';
+      btn.style.background = 'var(--green-soft)';
+      btn.style.color = 'var(--green-dark)';
+      q7State[key] = 'right';
+      fb.innerHTML = q7Answers[key];
+      fb.style.borderColor = 'var(--green-main)';
+    } else {
+      // 答错：只变红 + 给出解释，绝不放烟花
+      btn.style.borderColor = 'var(--red-main)';
+      btn.style.background = 'var(--red-soft)';
+      btn.style.color = 'var(--red-dark)';
+      if (q7State[key] !== 'right') q7State[key] = 'wrong';
+      fb.innerHTML = q7Answers[key];
+      fb.style.borderColor = 'var(--red-main)';
+      return; // 答错直接结束，不进入通关判断
+    }
+
+    // 只有两个正确项 a、c 都答对时，才算通关
+    if (q7State.a === 'right' && q7State.c === 'right') {
+      fb.innerHTML = '🎉 太棒了！你找到了<b>两行能正常运行的代码</b>，也看穿了两个坑：没引号、引号不成对。';
+      fb.style.borderColor = 'var(--green-main)';
+      if (!q7Celebrated) {
+        q7Celebrated = true;
+        triggerCelebration({ particleCount: 60, spread: 70, origin: { y: 0.6 } });
+      }
+    }
+  }
+
+  function resetQ7() {
+    q7State = { a: 'idle', b: 'idle', c: 'idle', d: 'idle' };
+    q7Celebrated = false;
+    ['a', 'b', 'c', 'd'].forEach(k => {
+      const b = document.getElementById('q7-' + k);
+      if (!b) return;
+      b.style.borderColor = 'rgba(0,0,0,0.1)';
+      b.style.background = '#FFF';
+      b.style.color = 'var(--ink-main)';
+      b.classList.remove('shake-anim');
+    });
+    const fb = document.getElementById('q7-feedback');
+    fb.innerHTML = '🔎 点击上面四行代码，找出能正常运行的那两行吧！';
+    fb.style.borderColor = 'var(--blue-night)';
+  }
+</script>
+
+</body>
+</html>

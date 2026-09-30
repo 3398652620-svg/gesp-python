@@ -1,0 +1,5 @@
+#!/bin/sh
+# Completed main-branch course commits publish the website and live navigation.
+branch=$(git branch --show-current)
+[ "$branch" = "main" ] || exit 0
+python tools/publish_course.py

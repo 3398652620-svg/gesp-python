@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "track": "python",
+  "course_title": "GESP Python 一级与基础拓展 · 新班",
+  "stages": [
+    {
+      "key": "python-program-data-state",
+      "title": "第一阶段｜程序、数据与状态",
+      "legacy_stage_no": 1,
+      "lessons": [
+        {
+          "key": "python-program-output",
+          "number": 1,
+          "title": "程序、输出与字符串：让电脑说出第一句话",
+          "status": "published",
+          "legacy_lesson_nos": [
+            1,
+            2
+          ],
+          "slide": "课件/第01讲_程序与执行/第01讲_程序输出与字符串_让电脑说出第一句话.html",
+          "plan": "课件/第01讲_程序与执行/第01讲_程序输出与字符串_教案_新班正式版.md",
+          "spec": "课件/第01讲_程序与执行/第01讲单讲课研规格_新班正式版_V1.md"
+        },
+        {
+          "key": "python-variable-assignment",
+          "number": 2,
+          "title": "变量与赋值：让程序记住数据",
+          "status": "published",
+          "legacy_lesson_nos": [
+            3
+          ],
+          "slide": "课件/第02讲_变量与赋值/第02讲_变量与赋值_让程序记住数据.html",
+          "plan": "课件/第02讲_变量与赋值/第02讲_变量与赋值_教案_新班正式版.md",
+          "spec": "课件/第02讲_变量与赋值/第02讲单讲课研规格_新班正式版_V2.md"
+        },
+        {
+          "key": "python-state-tracing",
+          "number": 3,
+          "title": "变量变化与程序跟踪：状态是怎样变化的",
+          "status": "published",
+          "legacy_lesson_nos": [
+            4
+          ],
+          "slide": "课件/第03讲_变量变化与程序跟踪/第03讲_变量变化与程序跟踪_状态是怎样变化的.html",
+          "plan": "课件/第03讲_变量变化与程序跟踪/第03讲_变量变化与程序跟踪_教案_新班正式版.md",
+          "spec": "课件/第03讲_变量变化与程序跟踪/第03讲单讲课研规格_新班正式版_V1.md"
+        },
+        {
+          "key": "python-arithmetic-expressions",
+          "number": 4,
+          "title": "算术运算与表达式：让数据参与计算",
+          "status": "planned",
+          "legacy_lesson_nos": [
+            5
+          ]
+        }
+      ]
+    }
+  ],
+  "asset_dirs": [
+    "课件/星宝素材"
+  ],
+  "documents": [
+    "README.md",
+    "GESP_Python_一级与基础拓展_38讲课程总纲_V3.2.md",
+    "七阶段知识依赖设计_V1.1.md",
+    "38讲课程课次地图_V1.1.md"
+  ]
+}
